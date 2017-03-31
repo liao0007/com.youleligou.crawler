@@ -2,17 +2,17 @@ package com.youleligou.crawler.modules
 
 import java.security.MessageDigest
 
-import akka.actor.{Actor, ActorRef, ActorSystem}
+import akka.actor.{ActorRef, ActorSystem}
 import akka.stream.ActorMaterializer
-import com.google.inject.{AbstractModule, Inject, Provider, Provides}
+import com.google.inject.name.Named
+import com.google.inject.{AbstractModule, Provider, Provides}
+import com.youleligou.crawler.actors.{CountActor, FetchActor, IndexActor, ParseActor}
 import com.youleligou.crawler.fetchers.{Fetcher, HttpClientFetcher}
 import com.youleligou.crawler.indexers.{ElasticIndexer, Indexer}
 import com.youleligou.crawler.modules.ApplicationModule.Md5Provider
 import net.codingwell.scalaguice.ScalaModule
 import play.api.libs.ws.ahc.StandaloneAhcWSClient
 import redis.RedisClient
-import com.google.inject.name.{Named, Names}
-import com.youleligou.crawler.actors.{CountActor, FetchActor, IndexActor, ParseActor}
 
 trait Hasher {
   def hash(text: String): String
@@ -22,11 +22,13 @@ trait Hasher {
   * Created by liangliao on 31/3/17.
   */
 object ApplicationModule {
+
   class Md5Provider extends Provider[Hasher] {
     override def get(): Hasher = new Hasher {
       def hash(text: String): String = MessageDigest.getInstance("MD5").digest(text.getBytes).toString
     }
   }
+
 }
 
 class ApplicationModule extends AbstractModule with ScalaModule with GuiceAkkaActorRefProvider {

@@ -1,6 +1,6 @@
 package com.youleligou.crawler.parsers
 
-import com.youleligou.crawler.models.{ParseResult, FetchResult}
+import com.youleligou.crawler.models.{FetchResult, ParseResult}
 
 /**
   * Created by young.yang on 2016/8/28.
@@ -11,7 +11,9 @@ trait Parser {
 }
 
 object Parser {
+
   class ParseException(message: String, e: Throwable) extends Exception(message, e) {
     def this(message: String) = this(message, new Exception(message))
   }
+
 }

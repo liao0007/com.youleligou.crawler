@@ -1,18 +1,19 @@
 package com.youleligou.crawler.modules
 
+import javax.inject.Inject
+
 import akka.actor.{Actor, ActorRef, ActorSystem, ExtendedActorSystem, Extension, ExtensionId, ExtensionIdProvider, IndirectActorProducer, Props}
+import com.google.inject.name.Names
 import com.google.inject.{AbstractModule, Injector, Key, Provider}
 import com.typesafe.config.Config
-import net.codingwell.scalaguice.ScalaModule
-import javax.inject.Inject
-import com.google.inject.name.Names
 import com.youleligou.crawler.modules.AkkaModule.ActorSystemProvider
-
+import net.codingwell.scalaguice.ScalaModule
 
 
 class GuiceActorProducer(val injector: Injector, val actorName: String) extends IndirectActorProducer {
   override def actorClass: Class[Actor] = classOf[Actor]
-  override def produce(): Actor         = injector.getBinding(Key.get(classOf[Actor], Names.named(actorName))).getProvider.get()
+
+  override def produce(): Actor = injector.getBinding(Key.get(classOf[Actor], Names.named(actorName))).getProvider.get()
 }
 
 class GuiceAkkaExtensionImpl extends Extension {
@@ -21,6 +22,7 @@ class GuiceAkkaExtensionImpl extends Extension {
   def initialize(injector: Injector) {
     this.injector = injector
   }
+
   def props(actorName: String) = Props(classOf[GuiceActorProducer], injector, actorName)
 }
 
@@ -40,7 +42,8 @@ object GuiceAkkaExtension extends ExtensionId[GuiceAkkaExtensionImpl] with Exten
   * Mix in with Guice Modules that contain providers for top-level actor refs.
   */
 trait GuiceAkkaActorRefProvider {
-  def propsFor(system: ActorSystem, name: String): Props           = GuiceAkkaExtension(system).props(name)
+  def propsFor(system: ActorSystem, name: String): Props = GuiceAkkaExtension(system).props(name)
+
   def provideActorRef(system: ActorSystem, name: String): ActorRef = system.actorOf(propsFor(system, name))
 }
 
@@ -48,11 +51,13 @@ trait GuiceAkkaActorRefProvider {
   * Created by liangliao on 31/3/17.
   */
 object AkkaModule {
+
   class ActorSystemProvider @Inject()(val config: Config) extends Provider[ActorSystem] {
     override def get(): ActorSystem = {
       ActorSystem(config.getString("crawler.appName"), config)
     }
   }
+
 }
 
 /**

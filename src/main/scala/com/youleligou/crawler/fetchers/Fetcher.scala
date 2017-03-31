@@ -1,7 +1,6 @@
 package com.youleligou.crawler.fetchers
 
 import com.youleligou.crawler.models.{FetchResult, UrlInfo}
-import play.api.libs.ws.StandaloneWSRequest
 
 import scala.concurrent.Future
 
@@ -13,10 +12,11 @@ trait Fetcher {
 }
 
 object Fetcher {
-  val Ok       = 200
+  val Ok = 200
   val NotFound = 404
 
   class FetchException(message: String, e: Throwable) extends Exception(message, e) {
     def this(message: String) = this(message, new Exception(message))
   }
+
 }

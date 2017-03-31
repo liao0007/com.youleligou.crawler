@@ -5,8 +5,8 @@ import javax.inject.Inject
 import akka.actor.{Actor, ActorLogging, ActorRef}
 import com.typesafe.config.Config
 import com.youleligou.crawler.actors.CountActor._
-import com.youleligou.crawler.parsers.Parser
 import com.youleligou.crawler.models.{FetchResult, ParseResult}
+import com.youleligou.crawler.parsers.Parser
 
 /**
   * Created by young.yang on 2016/8/28.

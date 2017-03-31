@@ -3,20 +3,19 @@ package com.youleligou.crawler.boot
 import javax.inject.Inject
 
 import akka.actor._
+import akka.pattern.ask
 import akka.routing.RoundRobinPool
+import akka.util.Timeout
 import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
-import com.youleligou.crawler.actors._
-import akka.pattern.ask
-import akka.util.Timeout
 import com.youleligou.crawler.actors.CountActor._
 import com.youleligou.crawler.actors.InjectActor.InitSeed
+import com.youleligou.crawler.actors._
 import com.youleligou.crawler.modules.GuiceAkkaExtension
 
 import scala.collection.JavaConverters._
-import scala.concurrent.duration._
 import scala.concurrent.Await
-import scala.concurrent.duration.Duration
+import scala.concurrent.duration.{Duration, _}
 
 /**
   * Created by dell on 2016/8/29.
@@ -69,6 +68,7 @@ class CrawlerBoot @Inject()(config: Config, system: ActorSystem) extends LazyLog
   }
 
   implicit val tm = Timeout(100, SECONDS)
+
   def printCount(): String = {
     val result = countActor ? PrintCounter
     Await.result(result, timeout).asInstanceOf[String]

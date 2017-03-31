@@ -9,13 +9,13 @@ import com.youleligou.crawler.actors.CountActor._
   */
 class CountActor extends Actor {
 
-  private var fetchCounter         = FetchCounter(0)
-  private var fetchOk              = FetchOk(0)
-  private var fetchError           = FetchError(0)
-  private var injectCounter        = InjectCounter(0)
-  private var parseCounter         = ParseCounter(0)
+  private var fetchCounter = FetchCounter(0)
+  private var fetchOk = FetchOk(0)
+  private var fetchError = FetchError(0)
+  private var injectCounter = InjectCounter(0)
+  private var parseCounter = ParseCounter(0)
   private var parseChildUrlCounter = ParseChildUrlCounter(0)
-  private var indexCounter         = IndexCounter(0)
+  private var indexCounter = IndexCounter(0)
 
   private def printCounter(): String = {
     val buffer = new StringBuilder
@@ -35,15 +35,15 @@ class CountActor extends Actor {
     AllCounter(fetchCounter, fetchOk, fetchError, injectCounter, parseCounter, parseChildUrlCounter, indexCounter)
 
   override def receive: Receive = {
-    case counter: FetchCounter       => fetchCounter = FetchCounter(fetchCounter.num + counter.num)
-    case count: FetchOk              => fetchOk = FetchOk(count.num + fetchOk.num)
-    case count: FetchError           => fetchError = FetchError(count.num + fetchError.num)
-    case count: InjectCounter        => injectCounter = InjectCounter(count.num + injectCounter.num)
-    case count: ParseCounter         => parseCounter = ParseCounter(count.num + parseCounter.num)
+    case counter: FetchCounter => fetchCounter = FetchCounter(fetchCounter.num + counter.num)
+    case count: FetchOk => fetchOk = FetchOk(count.num + fetchOk.num)
+    case count: FetchError => fetchError = FetchError(count.num + fetchError.num)
+    case count: InjectCounter => injectCounter = InjectCounter(count.num + injectCounter.num)
+    case count: ParseCounter => parseCounter = ParseCounter(count.num + parseCounter.num)
     case count: ParseChildUrlCounter => parseChildUrlCounter = ParseChildUrlCounter(count.num + parseChildUrlCounter.num)
-    case count: IndexCounter         => indexCounter = IndexCounter(count.num + indexCounter.num)
-    case PrintCounter                => sender() ! printCounter()
-    case GetAllCounter               => sender() ! getAllCounter
+    case count: IndexCounter => indexCounter = IndexCounter(count.num + indexCounter.num)
+    case PrintCounter => sender() ! printCounter()
+    case GetAllCounter => sender() ! getAllCounter
   }
 }
 
@@ -51,15 +51,25 @@ object CountActor extends NamedActor {
   override final val name = "CountActor"
 
   sealed trait Counter
-  case class FetchCounter(num: Int)         extends Counter
-  case class FetchOk(num: Int)              extends Counter
-  case class FetchError(num: Int)           extends Counter
-  case class InjectCounter(num: Int)        extends Counter
-  case class ParseCounter(num: Int)         extends Counter
+
+  case class FetchCounter(num: Int) extends Counter
+
+  case class FetchOk(num: Int) extends Counter
+
+  case class FetchError(num: Int) extends Counter
+
+  case class InjectCounter(num: Int) extends Counter
+
+  case class ParseCounter(num: Int) extends Counter
+
   case class ParseChildUrlCounter(num: Int) extends Counter
-  case class IndexCounter(num: Int)         extends Counter
-  case object PrintCounter                  extends Counter
-  case object GetAllCounter                 extends Counter
+
+  case class IndexCounter(num: Int) extends Counter
+
+  case object PrintCounter extends Counter
+
+  case object GetAllCounter extends Counter
+
   case class AllCounter(fetchCounter: FetchCounter,
                         fetchOk: FetchOk,
                         fetchError: FetchError,
@@ -67,5 +77,6 @@ object CountActor extends NamedActor {
                         parseCounter: ParseCounter,
                         parseChildUrlCounter: ParseChildUrlCounter,
                         indexCounter: IndexCounter)
-      extends Counter
+    extends Counter
+
 }

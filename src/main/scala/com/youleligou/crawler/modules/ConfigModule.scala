@@ -9,9 +9,11 @@ import net.codingwell.scalaguice.ScalaModule
   * Created by liangliao on 31/3/17.
   */
 object ConfigModule {
+
   class ConfigProvider extends Provider[Config] {
     override def get(): Config = ConfigFactory.load()
   }
+
 }
 
 /**

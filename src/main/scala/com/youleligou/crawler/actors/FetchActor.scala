@@ -2,7 +2,7 @@ package com.youleligou.crawler.actors
 
 import javax.inject.Inject
 
-import akka.actor.{Actor, ActorLogging, ActorRef, Props}
+import akka.actor.{Actor, ActorLogging, ActorRef}
 import com.typesafe.config.Config
 import com.youleligou.crawler.actors.CountActor._
 import com.youleligou.crawler.fetchers.Fetcher

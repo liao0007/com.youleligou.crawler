@@ -18,7 +18,9 @@ trait Indexer {
 }
 
 object Indexer {
+
   class IndexException(message: String, e: Throwable) extends Exception(message, e) {
     def this(message: String) = this(message, new Exception(message))
   }
+
 }

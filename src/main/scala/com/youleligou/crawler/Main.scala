@@ -13,7 +13,9 @@ object Main extends App {
     new AkkaModule(),
     new ApplicationModule()
   )
+
   import net.codingwell.scalaguice.InjectorExtensions._
+
   val crawlerBoot = injector.instance[CrawlerBoot]
   crawlerBoot.start()
 }
