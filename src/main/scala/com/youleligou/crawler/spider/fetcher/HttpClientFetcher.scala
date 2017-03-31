@@ -4,7 +4,7 @@ import javax.inject.Inject
 
 import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
-import com.youleligou.crawler.exception.FetchException
+import com.youleligou.crawler.spider.fetcher.Fetcher.FetchException
 import com.youleligou.models.UrlInfo
 import com.youleligou.models.UrlInfo.GenerateType
 import com.youleligou.modules.Hasher
@@ -19,7 +19,7 @@ import scala.concurrent.Future
   * 采用HttpClient实现的爬取器
   */
 class HttpClientFetcher @Inject()(config: Config, standaloneAhcWSClient: StandaloneAhcWSClient, redisClient: RedisClient, hasher: Hasher)
-    extends LazyLogging {
+    extends Fetcher with LazyLogging {
   def fetch(urlInfo: UrlInfo): Future[Option[StandaloneWSRequest#Response]] = {
     val md5 = hasher.hash(urlInfo.url)
     redisClient.get(md5) flatMap {
@@ -34,7 +34,7 @@ class HttpClientFetcher @Inject()(config: Config, standaloneAhcWSClient: Standal
               .map { response =>
                 logger.info(
                   "fetch url " + urlInfo + ", cost time -" + (System.currentTimeMillis() - start) + " content length -" + response.body.length)
-                if (response.status == HttpClientFetcher.Ok) {
+                if (response.status == Fetcher.Ok) {
                   Option(response)
                 } else {
                   throw new FetchException("fetch error code is -" + response.status + ",error url is " + urlInfo)
@@ -48,9 +48,4 @@ class HttpClientFetcher @Inject()(config: Config, standaloneAhcWSClient: Standal
         Future.successful(None)
     }
   }
-}
-
-object HttpClientFetcher {
-  val Ok       = 200
-  val NotFound = 404
 }

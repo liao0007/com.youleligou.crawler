@@ -1,8 +1,6 @@
-package com.youleligou.crawler.spider.indexer.support
+package com.youleligou.crawler.spider.indexer
 
 import com.typesafe.scalalogging.LazyLogging
-import com.youleligou.crawler.entity.HttpPage
-import com.youleligou.crawler.spider.indexer.Indexer
 import com.youleligou.models.HttpPage
 
 /**

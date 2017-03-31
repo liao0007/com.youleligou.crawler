@@ -12,7 +12,7 @@ import com.youleligou.models.UrlInfo
   * Created by young.yang on 2016/8/28.
   * 网页抓取任务,采用Actor实现
   */
-class FetchActor @Inject()(config: Config, httpClientFetcher: HttpClientFetcher)(parserActor: ActorRef) extends Actor with ActorLogging {
+class FetchActor @Inject()(config: Config, fetcher: Fetcher)(parserActor: ActorRef) extends Actor with ActorLogging {
   private val countActor =
     context.system.actorSelection("akka://" + config.getString("crawler.appName") + "/user/" + config.getString("crawler.counter.name"))
 
@@ -20,7 +20,7 @@ class FetchActor @Inject()(config: Config, httpClientFetcher: HttpClientFetcher)
     //处理抓取任务
     case page: UrlInfo =>
       countActor ! FetchCounter(1)
-      httpClientFetcher.fetch(page) map {
+      fetcher.fetch(page) map {
         case Some(httpResult) =>
           parserActor ! httpResult
           log.info("FetcherTask send parserTask a httpResult [" + httpResult + "]")

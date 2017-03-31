@@ -6,6 +6,7 @@ import javax.inject.Inject
 import akka.actor.ActorSystem
 import com.google.common.hash.Hasher
 import com.google.inject.{AbstractModule, Provider}
+import com.youleligou.crawler.spider.fetcher.{Fetcher, HttpClientFetcher}
 import com.youleligou.modules.ApplicationModule.{Md5Provider, WsClientProvider}
 import net.codingwell.scalaguice.ScalaModule
 import play.api.libs.ws.StandaloneWSClient
@@ -38,5 +39,7 @@ class ApplicationModule extends AbstractModule with ScalaModule {
     bind[StandaloneWSClient].toProvider[WsClientProvider].asEagerSingleton()
     bind[RedisClient].toProvider[RedisClient].asEagerSingleton()
     bind[Hasher].toProvider[Md5Provider].asEagerSingleton()
+
+    bind[Fetcher].to[HttpClientFetcher]
   }
 }

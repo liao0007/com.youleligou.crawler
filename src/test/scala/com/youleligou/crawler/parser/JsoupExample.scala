@@ -2,7 +2,7 @@ package com.youleligou.crawler.parser
 
 import com.youleligou.crawler.entity.UrlInfo
 import com.youleligou.crawler.spider.fetcher.HttpClientFetcher
-import com.youleligou.crawler.spider.parser.support.JsoupParser
+import com.youleligou.crawler.spider.parser.JsoupParser
 import com.youleligou.models.{SeedType, UrlInfo}
 
 /**

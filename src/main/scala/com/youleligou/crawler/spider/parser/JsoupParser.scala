@@ -1,8 +1,7 @@
-package com.youleligou.crawler.spider.parser.support
+package com.youleligou.crawler.spider.parser
 
-import com.youleligou.crawler.entity.{GenerateType, HttpPage, UrlInfo}
-import com.youleligou.crawler.spider.parser.Parser
-import com.youleligou.models.{GenerateType, HttpPage, HttpResult, UrlInfo}
+import com.youleligou.models.UrlInfo.GenerateType
+import com.youleligou.models.{HttpPage, HttpResult, UrlInfo}
 
 import scala.collection.mutable.ListBuffer
 
@@ -10,10 +9,9 @@ import scala.collection.mutable.ListBuffer
   * Created by young.yang on 2016/8/31.
   * Jsoup解析器
   */
-private[crawler] class JsoupParser extends Parser {
+class JsoupParser extends Parser {
 
   private val KEYWORDS = "keywords"
-
   private val DESCRIPTION = "description"
 
   /**
@@ -40,7 +38,7 @@ private[crawler] class JsoupParser extends Parser {
     val list = new ListBuffer[UrlInfo]()
     for (i <- 0 until urls.size()) {
       val element = urls.get(i)
-      val url = element.attr("href")
+      val url     = element.attr("href")
       if (url.startsWith("http"))
         list.append(UrlInfo(url, "", GenerateType, deep + 1))
     }
@@ -56,7 +54,7 @@ private[crawler] class JsoupParser extends Parser {
   override def parse(html: HttpResult): HttpPage = {
     val htmlPage = new HttpPage
     val document = Jsoup.parse(html.content)
-    val meta = document.select("meta")
+    val meta     = document.select("meta")
     htmlPage.setTitle(document.title())
     htmlPage.setContent(document.text())
     // htmlPage.setHtml(html.content)

@@ -19,9 +19,8 @@ trait Indexer {
   def index(page: HttpPage): Unit
 }
 
-/**
-  * ES中所有名称和类型
-  */
-object IndexerConstants {
-
+object Indexer {
+  class IndexException(message: String, e: Throwable) extends Exception(message, e) {
+    def this(message: String) = this(message, new Exception(message))
+  }
 }
