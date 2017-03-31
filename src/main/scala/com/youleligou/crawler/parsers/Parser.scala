@@ -11,9 +11,7 @@ trait Parser {
 }
 
 object Parser {
-
   class ParseException(message: String, e: Throwable) extends Exception(message, e) {
     def this(message: String) = this(message, new Exception(message))
   }
-
 }

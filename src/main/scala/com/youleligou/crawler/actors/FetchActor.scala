@@ -3,6 +3,7 @@ package com.youleligou.crawler.actors
 import javax.inject.Inject
 
 import akka.actor.{Actor, ActorLogging, ActorRef}
+import com.google.inject.name.Named
 import com.typesafe.config.Config
 import com.youleligou.crawler.actors.CountActor._
 import com.youleligou.crawler.fetchers.Fetcher
@@ -14,7 +15,7 @@ import scala.concurrent.ExecutionContext.Implicits._
   * Created by young.yang on 2016/8/28.
   * 网页抓取任务,采用Actor实现
   */
-class FetchActor @Inject()(config: Config, fetcher: Fetcher, parserActor: ActorRef) extends Actor with ActorLogging {
+class FetchActor @Inject()(config: Config, fetcher: Fetcher, @Named(ParseActor.name) parserActor: ActorRef) extends Actor with ActorLogging {
   private val countActor =
     context.system.actorSelection("akka://" + config.getString("crawler.appName") + "/user/" + config.getString("crawler.counter.name"))
 

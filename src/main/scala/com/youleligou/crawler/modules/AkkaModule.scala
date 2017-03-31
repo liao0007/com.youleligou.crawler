@@ -12,7 +12,6 @@ import net.codingwell.scalaguice.ScalaModule
 
 class GuiceActorProducer(val injector: Injector, val actorName: String) extends IndirectActorProducer {
   override def actorClass: Class[Actor] = classOf[Actor]
-
   override def produce(): Actor = injector.getBinding(Key.get(classOf[Actor], Names.named(actorName))).getProvider.get()
 }
 
