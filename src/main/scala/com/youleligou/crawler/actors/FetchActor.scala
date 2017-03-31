@@ -8,6 +8,8 @@ import com.youleligou.crawler.actors.CountActor._
 import com.youleligou.crawler.fetchers.Fetcher
 import com.youleligou.crawler.models.UrlInfo
 
+import scala.concurrent.ExecutionContext.Implicits._
+
 /**
   * Created by young.yang on 2016/8/28.
   * 网页抓取任务,采用Actor实现

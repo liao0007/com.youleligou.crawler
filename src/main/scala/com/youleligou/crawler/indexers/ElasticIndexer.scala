@@ -7,14 +7,14 @@ import com.youleligou.crawler.models.ParseResult
   * Created by dell on 2016/8/29.
   * ES索引器
   */
-private[crawler] class ElasticIndexer extends Indexer with LazyLogging {
+class ElasticIndexer extends Indexer with LazyLogging {
   /**
-    * 索引网页信息
+    * 文档索引
     *
-    * @param htmlpage
+    * @param page
     * @return
     */
-  override def index(htmlpage: ParseResult): Unit = {
+  override def index(page: ParseResult): Unit = {
 
   }
 }

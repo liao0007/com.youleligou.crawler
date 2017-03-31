@@ -1,15 +1,14 @@
 package com.youleligou.crawler.modules
 
 import java.security.MessageDigest
-import javax.inject.Inject
 
 import akka.actor.ActorSystem
-import com.google.inject.{AbstractModule, Provider}
-import com.youleligou.crawler.boot.CrawlerBoot
+import akka.stream.ActorMaterializer
+import com.google.inject.{AbstractModule, Provider, Provides}
 import com.youleligou.crawler.fetchers.{Fetcher, HttpClientFetcher}
-import com.youleligou.crawler.modules.ApplicationModule.{Md5Provider, WsClientProvider}
+import com.youleligou.crawler.indexers.{ElasticIndexer, Indexer}
+import com.youleligou.crawler.modules.ApplicationModule.Md5Provider
 import net.codingwell.scalaguice.ScalaModule
-import play.api.libs.ws.StandaloneWSClient
 import play.api.libs.ws.ahc.StandaloneAhcWSClient
 import redis.RedisClient
 
@@ -21,12 +20,6 @@ trait Hasher {
   * Created by liangliao on 31/3/17.
   */
 object ApplicationModule {
-  class CacheProvider @Inject()(implicit system: ActorSystem) extends Provider[RedisClient] {
-    override def get(): RedisClient = RedisClient()
-  }
-  class WsClientProvider extends Provider[StandaloneWSClient] {
-    override def get(): StandaloneWSClient = StandaloneAhcWSClient()
-  }
   class Md5Provider extends Provider[Hasher] {
     override def get(): Hasher = new Hasher {
       def hash(text: String): String = MessageDigest.getInstance("MD5").digest(text.getBytes).toString
@@ -35,11 +28,20 @@ object ApplicationModule {
 }
 
 class ApplicationModule extends AbstractModule with ScalaModule {
-  override def configure() {
-    bind[StandaloneWSClient].toProvider[WsClientProvider].asEagerSingleton()
-    bind[RedisClient].toProvider[RedisClient].asEagerSingleton()
-    bind[Hasher].toProvider[Md5Provider].asEagerSingleton()
+  @Provides
+  def provideRedisClient(implicit system: ActorSystem): RedisClient = {
+    RedisClient()
+  }
 
+  @Provides
+  def provideStandaloneAhcWSClient(implicit system: ActorSystem) = {
+    implicit val materializer = ActorMaterializer()
+    StandaloneAhcWSClient()
+  }
+
+  override def configure() {
+    bind[Hasher].toProvider[Md5Provider].asEagerSingleton()
     bind[Fetcher].to[HttpClientFetcher]
+    bind[Indexer].to[ElasticIndexer]
   }
 }

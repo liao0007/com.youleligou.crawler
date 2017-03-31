@@ -7,7 +7,7 @@ import com.youleligou.crawler.modules.{AkkaModule, ApplicationModule, ConfigModu
 /**
   * Created by liangliao on 31/3/17.
   */
-object Main {
+object Main extends App {
   val injector = Guice.createInjector(
     new ConfigModule(),
     new AkkaModule(),

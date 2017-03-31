@@ -8,12 +8,14 @@ import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
 import com.youleligou.crawler.actors._
 import akka.pattern.ask
+import akka.util.Timeout
 import com.youleligou.crawler.actors.CountActor._
 import com.youleligou.crawler.actors.InjectActor.InitSeed
 import com.youleligou.crawler.indexers.ElasticIndexer
 import com.youleligou.crawler.parsers.JsoupParser
 
 import scala.collection.JavaConverters._
+import scala.concurrent.duration._
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
@@ -31,7 +33,7 @@ class CrawlerBoot @Inject()(config: Config, system: ActorSystem) extends LazyLog
     */
   def start(): Unit = {
     val indexActor = system.actorOf(
-      RoundRobinPool(config.getInt("crawler.index.parallel")).props(IndexActor.props(new ElasticIndexer)),
+      RoundRobinPool(config.getInt("crawler.index.parallel")).props(IndexActor.props),
       config.getString("crawler.index.name")
     )
     logger.info("created indexActor name -[" + indexActor + "]")
@@ -67,6 +69,7 @@ class CrawlerBoot @Inject()(config: Config, system: ActorSystem) extends LazyLog
     system.terminate()
   }
 
+  implicit val tm = Timeout(100, SECONDS)
   def printCount(): String = {
     val result = countActor ? PrintCounter
     Await.result(result, timeout).asInstanceOf[String]

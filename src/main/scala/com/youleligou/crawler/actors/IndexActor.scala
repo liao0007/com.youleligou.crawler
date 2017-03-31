@@ -12,7 +12,7 @@ import com.youleligou.crawler.models.ParseResult
   * Created by dell on 2016/8/29.
   * 索引任务
   */
-class IndexActor @Inject()(config: Config)(indexer: Indexer) extends Actor {
+class IndexActor @Inject()(config: Config, indexer: Indexer) extends Actor {
   private val countActor =
     context.system.actorSelection("akka://" + config.getString("crawler.appName") + "/user/" + config.getString("crawler.counter.name"))
   context.system.actorSelection("")
@@ -25,5 +25,5 @@ class IndexActor @Inject()(config: Config)(indexer: Indexer) extends Actor {
 }
 
 object IndexActor {
-  def props(indexer: Indexer) = Props(classOf[IndexActor], indexer)
+  def props: Props = Props(classOf[IndexActor])
 }

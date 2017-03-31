@@ -12,6 +12,7 @@ import play.api.libs.ws.ahc.StandaloneAhcWSClient
 import redis.RedisClient
 
 import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits._
 
 /**
   * Created by young.yang on 2016/8/28.

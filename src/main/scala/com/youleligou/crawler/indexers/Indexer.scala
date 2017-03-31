@@ -1,7 +1,5 @@
 package com.youleligou.crawler.indexers
 
-import com.youleligou.crawler.config.{CrawlerConfig, CrawlerConfigContants}
-import com.youleligou.crawler.entity.HttpPage
 import com.youleligou.crawler.models.ParseResult
 
 /**
