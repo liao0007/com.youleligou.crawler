@@ -1,13 +1,13 @@
-package com.youleligou.crawler.spider.parser
+package com.youleligou.crawler.parsers
 
-import com.youleligou.models.{HttpPage, HttpResult}
+import com.youleligou.crawler.models.{ParseResult, FetchResult}
 
 /**
   * Created by young.yang on 2016/8/28.
   * html页面解析接口
   */
 trait Parser {
-  def parse(html: HttpResult): HttpPage
+  def parse(fetchResult: FetchResult): ParseResult
 }
 
 object Parser {

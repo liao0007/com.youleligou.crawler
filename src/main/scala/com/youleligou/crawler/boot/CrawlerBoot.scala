@@ -6,13 +6,12 @@ import akka.actor._
 import akka.routing.RoundRobinPool
 import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
-import com.youleligou.crawler.spider.actors._
+import com.youleligou.crawler.actors._
 import akka.pattern.ask
-import com.youleligou.crawler.spider.actors.CountActor._
-import com.youleligou.crawler.spider.actors.InjectActor.InitSeed
-import com.youleligou.crawler.spider.fetcher.HttpClientFetcher
-import com.youleligou.crawler.spider.indexer.ElasticIndexer
-import com.youleligou.crawler.spider.parser.JsoupParser
+import com.youleligou.crawler.actors.CountActor._
+import com.youleligou.crawler.actors.InjectActor.InitSeed
+import com.youleligou.crawler.indexers.ElasticIndexer
+import com.youleligou.crawler.parsers.JsoupParser
 
 import scala.collection.JavaConverters._
 import scala.concurrent.Await
@@ -76,12 +75,5 @@ class CrawlerBoot @Inject()(config: Config, system: ActorSystem) extends LazyLog
   def getCounter: AllCounter = {
     val result = countActor ? GetAllCounter
     Await.result(result, timeout).asInstanceOf[AllCounter]
-  }
-
-  def main(args: Array[String]) {
-    //   Thread.sleep(3000)
-    //    println(CrawlerBoot.printCount())
-    //    println(CrawlerBoot.getCounter())
-    // CrawlerBoot.stop()
   }
 }

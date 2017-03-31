@@ -1,16 +1,19 @@
 package com.youleligou.crawler
 
 import com.google.inject.Guice
-import com.youleligou.modules.{AkkaModule, ApplicationModule, ConfigModule}
+import com.youleligou.crawler.boot.CrawlerBoot
+import com.youleligou.crawler.modules.{AkkaModule, ApplicationModule, ConfigModule}
 
 /**
   * Created by liangliao on 31/3/17.
   */
 object Main {
-  Guice.createInjector(
+  val injector = Guice.createInjector(
     new ConfigModule(),
     new AkkaModule(),
-    new ApplicationModule
+    new ApplicationModule()
   )
-
+  import net.codingwell.scalaguice.InjectorExtensions._
+  val crawlerBoot = injector.instance[CrawlerBoot]
+  crawlerBoot.start()
 }

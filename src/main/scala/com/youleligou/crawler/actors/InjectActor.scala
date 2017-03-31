@@ -1,13 +1,13 @@
-package com.youleligou.crawler.spider.actors
+package com.youleligou.crawler.actors
 
 import javax.inject.Inject
 
 import akka.actor.{Actor, ActorLogging, ActorRef, Props}
 import com.typesafe.config.Config
-import com.youleligou.crawler.spider.actors.CountActor._
-import com.youleligou.crawler.spider.actors.InjectActor.InitSeed
-import com.youleligou.models.UrlInfo.SeedType
-import com.youleligou.models._
+import com.youleligou.crawler.actors.CountActor._
+import com.youleligou.crawler.actors.InjectActor.InitSeed
+import com.youleligou.crawler.models.UrlInfo.SeedType
+import com.youleligou.crawler.models._
 
 /**
   * 抓取种子注入任务,将需要抓取的任务注入到该任务中

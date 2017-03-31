@@ -1,9 +1,9 @@
-package com.youleligou.crawler.parser
+package com.youleligou.crawler.parsers
 
 import com.youleligou.crawler.entity.UrlInfo
-import com.youleligou.crawler.spider.fetcher.HttpClientFetcher
-import com.youleligou.crawler.spider.parser.JsoupParser
-import com.youleligou.models.{SeedType, UrlInfo}
+import com.youleligou.crawler.fetchers.HttpClientFetcher
+import com.youleligou.crawler.parsers.JsoupParser
+import com.youleligou.crawler.models.{SeedType, UrlInfo}
 
 /**
  * Created by dell on 2016/9/1.

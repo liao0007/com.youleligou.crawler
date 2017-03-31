@@ -1,4 +1,4 @@
-package com.youleligou.modules
+package com.youleligou.crawler.modules
 
 import akka.actor.ActorSystem
 import com.google.inject.{AbstractModule, Injector, Provider}
@@ -6,7 +6,7 @@ import com.typesafe.config.Config
 import net.codingwell.scalaguice.ScalaModule
 import javax.inject.Inject
 
-import com.youleligou.modules.AkkaModule.ActorSystemProvider
+import com.youleligou.crawler.modules.AkkaModule.ActorSystemProvider
 
 /**
   * Created by liangliao on 31/3/17.

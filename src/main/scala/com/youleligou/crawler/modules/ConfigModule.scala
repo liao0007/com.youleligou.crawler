@@ -1,8 +1,8 @@
-package com.youleligou.modules
+package com.youleligou.crawler.modules
 
 import com.google.inject.{AbstractModule, Provider}
 import com.typesafe.config.{Config, ConfigFactory}
-import com.youleligou.modules.ConfigModule.ConfigProvider
+import com.youleligou.crawler.modules.ConfigModule.ConfigProvider
 import net.codingwell.scalaguice.ScalaModule
 
 /**

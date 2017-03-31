@@ -1,7 +1,7 @@
-package com.youleligou.crawler.spider.actors
+package com.youleligou.crawler.actors
 
 import akka.actor.{Actor, Props}
-import com.youleligou.crawler.spider.actors.CountActor._
+import com.youleligou.crawler.actors.CountActor._
 
 /**
   * Created by young.yang on 2016/9/3.

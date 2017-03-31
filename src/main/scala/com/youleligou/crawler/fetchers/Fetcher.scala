@@ -1,6 +1,6 @@
-package com.youleligou.crawler.spider.fetcher
+package com.youleligou.crawler.fetchers
 
-import com.youleligou.models.UrlInfo
+import com.youleligou.crawler.models.{FetchResult, UrlInfo}
 import play.api.libs.ws.StandaloneWSRequest
 
 import scala.concurrent.Future
@@ -9,7 +9,7 @@ import scala.concurrent.Future
   * Created by liangliao on 31/3/17.
   */
 trait Fetcher {
-  def fetch(urlInfo: UrlInfo): Future[Option[StandaloneWSRequest#Response]]
+  def fetch(urlInfo: UrlInfo): Future[Option[FetchResult]]
 }
 
 object Fetcher {

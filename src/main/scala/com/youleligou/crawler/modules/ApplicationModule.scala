@@ -1,13 +1,13 @@
-package com.youleligou.modules
+package com.youleligou.crawler.modules
 
 import java.security.MessageDigest
 import javax.inject.Inject
 
 import akka.actor.ActorSystem
-import com.google.common.hash.Hasher
 import com.google.inject.{AbstractModule, Provider}
-import com.youleligou.crawler.spider.fetcher.{Fetcher, HttpClientFetcher}
-import com.youleligou.modules.ApplicationModule.{Md5Provider, WsClientProvider}
+import com.youleligou.crawler.boot.CrawlerBoot
+import com.youleligou.crawler.fetchers.{Fetcher, HttpClientFetcher}
+import com.youleligou.crawler.modules.ApplicationModule.{Md5Provider, WsClientProvider}
 import net.codingwell.scalaguice.ScalaModule
 import play.api.libs.ws.StandaloneWSClient
 import play.api.libs.ws.ahc.StandaloneAhcWSClient

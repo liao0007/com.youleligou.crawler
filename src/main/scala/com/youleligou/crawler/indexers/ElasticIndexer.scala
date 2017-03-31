@@ -1,7 +1,7 @@
-package com.youleligou.crawler.spider.indexer
+package com.youleligou.crawler.indexers
 
 import com.typesafe.scalalogging.LazyLogging
-import com.youleligou.models.HttpPage
+import com.youleligou.crawler.models.ParseResult
 
 /**
   * Created by dell on 2016/8/29.
@@ -14,7 +14,7 @@ private[crawler] class ElasticIndexer extends Indexer with LazyLogging {
     * @param htmlpage
     * @return
     */
-  override def index(htmlpage: HttpPage): Unit = {
+  override def index(htmlpage: ParseResult): Unit = {
 
   }
 }

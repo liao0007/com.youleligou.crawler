@@ -1,12 +1,12 @@
-package com.youleligou.crawler.spider.actors
+package com.youleligou.crawler.actors
 
 import javax.inject.Inject
 
 import akka.actor.{Actor, ActorLogging, ActorRef, Props}
 import com.typesafe.config.Config
-import com.youleligou.crawler.spider.actors.CountActor._
-import com.youleligou.crawler.spider.fetcher.{Fetcher, HttpClientFetcher}
-import com.youleligou.models.UrlInfo
+import com.youleligou.crawler.actors.CountActor._
+import com.youleligou.crawler.fetchers.Fetcher
+import com.youleligou.crawler.models.UrlInfo
 
 /**
   * Created by young.yang on 2016/8/28.

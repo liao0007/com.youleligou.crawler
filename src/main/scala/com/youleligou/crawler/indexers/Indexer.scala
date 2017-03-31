@@ -1,8 +1,8 @@
-package com.youleligou.crawler.spider.indexer
+package com.youleligou.crawler.indexers
 
 import com.youleligou.crawler.config.{CrawlerConfig, CrawlerConfigContants}
 import com.youleligou.crawler.entity.HttpPage
-import com.youleligou.models.HttpPage
+import com.youleligou.crawler.models.ParseResult
 
 /**
   * Created by dell on 2016/8/29.
@@ -16,7 +16,7 @@ trait Indexer {
     * @param page
     * @return
     */
-  def index(page: HttpPage): Unit
+  def index(page: ParseResult): Unit
 }
 
 object Indexer {

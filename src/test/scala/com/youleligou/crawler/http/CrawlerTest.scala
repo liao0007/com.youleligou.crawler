@@ -1,8 +1,8 @@
 package com.youleligou.crawler.http
 
 import com.youleligou.crawler.entity.UrlInfo
-import com.youleligou.crawler.spider.fetcher.support.HttpWatch
-import com.youleligou.models.{SeedType, UrlInfo}
+import com.youleligou.crawler.fetchers.support.HttpWatch
+import com.youleligou.crawler.models.{SeedType, UrlInfo}
 
 /**
  * Created by young.yang on 2016/8/28.

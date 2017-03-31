@@ -1,10 +1,10 @@
-package com.youleligou.crawler.indexer
+package com.youleligou.crawler.indexers
 
 import java.net.InetAddress
 
-import com.youleligou.crawler.spider.indexer.IndexerConstants
+import com.youleligou.crawler.indexers.IndexerConstants
 import com.youleligou.crawler.utils.{JsonUtil, MD5Util}
-import com.youleligou.models.PageIndexEntity
+import com.youleligou.crawler.models.PageIndexEntity
 import org.elasticsearch.client.transport.TransportClient
 import org.elasticsearch.common.transport.InetSocketTransportAddress
 

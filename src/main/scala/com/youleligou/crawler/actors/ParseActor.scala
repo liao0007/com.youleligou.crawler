@@ -1,12 +1,12 @@
-package com.youleligou.crawler.spider.actors
+package com.youleligou.crawler.actors
 
 import javax.inject.Inject
 
 import akka.actor.{Actor, ActorLogging, ActorRef, Props}
 import com.typesafe.config.Config
-import com.youleligou.crawler.spider.actors.CountActor._
-import com.youleligou.crawler.spider.parser.Parser
-import com.youleligou.models.{HttpPage, HttpResult}
+import com.youleligou.crawler.actors.CountActor._
+import com.youleligou.crawler.parsers.Parser
+import com.youleligou.crawler.models.{ParseResult, FetchResult}
 
 /**
   * Created by young.yang on 2016/8/28.
@@ -15,24 +15,17 @@ import com.youleligou.models.{HttpPage, HttpResult}
 class ParseActor @Inject()(config: Config)(parser: Parser, indexTask: ActorRef) extends Actor with ActorLogging {
   private val countActor =
     context.system.actorSelection("akka://" + config.getString("crawler.appName") + "/user/" + config.getString("crawler.counter.name"))
-
-  private val fetchDeep = config.getInt("crawler.fetcher.deep")
-
-  private var fetcher: ActorRef = null
+  private val fetchDeep = config.getInt("crawler.fetch.deep")
 
   override def receive: Receive = {
-    case httpResult: HttpResult =>
-      fetcher = sender()
-      val page: HttpPage = parser.parse(httpResult)
+    case fetchResult: FetchResult =>
+      val page: ParseResult = parser.parse(fetchResult)
       indexTask ! page
       countActor ! ParseCounter(1)
       log.info("ParserTask send IndexerTask a index request -[" + page + "]")
-      val childLinks = page.getChildLink
-      if (childLinks._2 < fetchDeep) {
-        fetcher ! childLinks._1
-        countActor ! ParseChildUrlCounter(childLinks._1.size)
-      } else {
-        log.info("fetch deep size now  is -[" + childLinks._2 + "] remove urls size -[" + childLinks._1.size + "]")
+      page.childLink.filter(_.deep < fetchDeep).foreach { urlInfo =>
+        sender() ! urlInfo
+        countActor ! ParseChildUrlCounter(1)
       }
   }
 }
