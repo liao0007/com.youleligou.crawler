@@ -8,18 +8,14 @@ import com.youleligou.crawler.models.UrlInfo.UrlType
   * @param url    url
   * @param parent 父url
   */
-case class UrlInfo(url: String, parent: String, urlType: UrlType, deep: Int) {
+case class UrlInfo(url: String, parent: Option[String], urlType: UrlType, deep: Int) {
   override def toString: String = url + "\n"
 }
 
 object UrlInfo {
-
   sealed trait UrlType
-
   case object SeedType extends UrlType
-
   case object GenerateType extends UrlType
-
 }
 
 

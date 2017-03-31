@@ -14,7 +14,7 @@ import com.youleligou.crawler.models.ParseResult
   */
 class IndexActor @Inject()(config: Config, indexer: Indexer) extends Actor {
   private val countActor =
-    context.system.actorSelection("akka://" + config.getString("crawler.appName") + "/user/" + config.getString("crawler.counter.name"))
+    context.system.actorSelection("akka://" + config.getString("crawler.appName") + "/user/" + CountActor.name)
   context.system.actorSelection("")
 
   override def receive: Receive = {

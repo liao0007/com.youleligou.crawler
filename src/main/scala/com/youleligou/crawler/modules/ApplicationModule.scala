@@ -6,7 +6,8 @@ import akka.actor.{Actor, ActorRef, ActorSystem}
 import akka.stream.ActorMaterializer
 import com.google.inject.name.{Named, Names}
 import com.google.inject.{AbstractModule, Provider, Provides}
-import com.youleligou.crawler.actors.{CountActor, FetchActor, IndexActor, ParseActor}
+import com.typesafe.config.Config
+import com.youleligou.crawler.actors._
 import com.youleligou.crawler.fetchers.{Fetcher, HttpClientFetcher}
 import com.youleligou.crawler.indexers.{ElasticIndexer, Indexer}
 import com.youleligou.crawler.modules.ApplicationModule.Md5Provider
@@ -14,6 +15,8 @@ import com.youleligou.crawler.parsers.{JsoupParser, Parser}
 import net.codingwell.scalaguice.ScalaModule
 import play.api.libs.ws.ahc.StandaloneAhcWSClient
 import redis.RedisClient
+
+import scala.concurrent.duration.FiniteDuration
 
 trait Hasher {
   def hash(text: String): String
@@ -34,8 +37,9 @@ object ApplicationModule {
 
 class ApplicationModule extends AbstractModule with ScalaModule with GuiceAkkaActorRefProvider {
   @Provides
-  def provideRedisClient(implicit system: ActorSystem): RedisClient = {
-    RedisClient()
+  def provideRedisClient(config: Config)(implicit system: ActorSystem): RedisClient = {
+    val redisConfig = config.getConfig("cache.redis")
+    RedisClient(host = redisConfig.getString("host"), port = config.getInt("port"), password = Some(config.getString("password")))
   }
 
   @Provides
@@ -48,8 +52,12 @@ class ApplicationModule extends AbstractModule with ScalaModule with GuiceAkkaAc
     * provide Actors
     */
   @Provides
+  @Named(InjectActor.name)
+  def provideInjectActorRef(system: ActorSystem): ActorRef = provideActorRef(system, InjectActor.name)
+
+  @Provides
   @Named(CountActor.name)
-  def provideAuditCompanionRef(system: ActorSystem): ActorRef = provideActorRef(system, CountActor.name)
+  def provideAuditActorRef(system: ActorSystem): ActorRef = provideActorRef(system, CountActor.name)
 
   @Provides
   @Named(FetchActor.name)
@@ -69,6 +77,7 @@ class ApplicationModule extends AbstractModule with ScalaModule with GuiceAkkaAc
     bind[Indexer].to[ElasticIndexer]
     bind[Parser].to[JsoupParser]
 
+    bind[Actor].annotatedWith(Names.named(InjectActor.name)).to[InjectActor]
     bind[Actor].annotatedWith(Names.named(CountActor.name)).to[CountActor]
     bind[Actor].annotatedWith(Names.named(FetchActor.name)).to[FetchActor]
     bind[Actor].annotatedWith(Names.named(ParseActor.name)).to[ParseActor]

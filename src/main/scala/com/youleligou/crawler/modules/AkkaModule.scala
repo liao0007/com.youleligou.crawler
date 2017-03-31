@@ -9,10 +9,9 @@ import com.typesafe.config.Config
 import com.youleligou.crawler.modules.AkkaModule.ActorSystemProvider
 import net.codingwell.scalaguice.ScalaModule
 
-
 class GuiceActorProducer(val injector: Injector, val actorName: String) extends IndirectActorProducer {
   override def actorClass: Class[Actor] = classOf[Actor]
-  override def produce(): Actor = injector.getBinding(Key.get(classOf[Actor], Names.named(actorName))).getProvider.get()
+  override def produce(): Actor         = injector.getBinding(Key.get(classOf[Actor], Names.named(actorName))).getProvider.get()
 }
 
 class GuiceAkkaExtensionImpl extends Extension {
@@ -51,9 +50,11 @@ trait GuiceAkkaActorRefProvider {
   */
 object AkkaModule {
 
-  class ActorSystemProvider @Inject()(val config: Config) extends Provider[ActorSystem] {
+  class ActorSystemProvider @Inject()(val config: Config, val injector: Injector) extends Provider[ActorSystem] {
     override def get(): ActorSystem = {
-      ActorSystem(config.getString("crawler.appName"), config)
+      val system = ActorSystem(config.getString("crawler.appName"), config)
+      GuiceAkkaExtension(system).initialize(injector)
+      system
     }
   }
 

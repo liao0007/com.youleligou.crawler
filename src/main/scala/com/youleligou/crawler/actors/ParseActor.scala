@@ -15,7 +15,7 @@ import com.youleligou.crawler.parsers.Parser
   */
 class ParseActor @Inject()(config: Config, parser: Parser, @Named(IndexActor.name) indexActor: ActorRef) extends Actor with ActorLogging {
   private val countActor =
-    context.system.actorSelection("akka://" + config.getString("crawler.appName") + "/user/" + config.getString("crawler.counter.name"))
+    context.system.actorSelection("akka://" + config.getString("crawler.appName") + "/user/" + CountActor.name)
   private val fetchDeep = config.getInt("crawler.actor.fetch.deep")
 
   override def receive: Receive = {

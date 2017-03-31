@@ -17,11 +17,12 @@ import scala.concurrent.ExecutionContext.Implicits._
   */
 class FetchActor @Inject()(config: Config, fetcher: Fetcher, @Named(ParseActor.name) parserActor: ActorRef) extends Actor with ActorLogging {
   private val countActor =
-    context.system.actorSelection("akka://" + config.getString("crawler.appName") + "/user/" + config.getString("crawler.counter.name"))
+    context.system.actorSelection("akka://" + config.getString("crawler.appName") + "/user/" + CountActor.name)
 
   override def receive: Receive = {
     //处理抓取任务
     case page: UrlInfo =>
+      log.info("Receiving fetch task: " + page)
       countActor ! FetchCounter(1)
       fetcher.fetch(page) map {
         case Some(httpResult) =>

@@ -9,8 +9,9 @@ import akka.util.Timeout
 import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
 import com.youleligou.crawler.actors.CountActor._
-import com.youleligou.crawler.actors.InjectActor.InitSeed
 import com.youleligou.crawler.actors._
+import com.youleligou.crawler.models.UrlInfo.SeedType
+import com.youleligou.crawler.models.UrlInfo
 import com.youleligou.crawler.modules.GuiceAkkaExtension
 
 import scala.collection.JavaConverters._
@@ -57,7 +58,7 @@ class CrawlerBoot @Inject()(config: Config, system: ActorSystem) extends LazyLog
     system.actorOf(GuiceAkkaExtension(system).props(CountActor.name), CountActor.name)
     logger.info("create countActor name -[" + countActor + "]")
 
-    injectActor ! InitSeed(config.getStringList("crawler.seed").asScala.toList)
+    injectActor ! config.getStringList("crawler.seed").asScala.toList.map(url => UrlInfo(url.trim, None, SeedType, 0))
   }
 
   /**

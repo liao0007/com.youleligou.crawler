@@ -6,8 +6,6 @@ import akka.actor.{Actor, ActorLogging, ActorRef}
 import com.google.inject.name.Named
 import com.typesafe.config.Config
 import com.youleligou.crawler.actors.CountActor._
-import com.youleligou.crawler.actors.InjectActor.InitSeed
-import com.youleligou.crawler.models.UrlInfo.SeedType
 import com.youleligou.crawler.models._
 
 /**
@@ -15,22 +13,12 @@ import com.youleligou.crawler.models._
   */
 class InjectActor @Inject()(config: Config, @Named(FetchActor.name) fetchActor: ActorRef) extends Actor with ActorLogging {
   private val countActor =
-    context.system.actorSelection("akka://" + config.getString("crawler.appName") + "/user/" + config.getString("crawler.counter.name"))
+    context.system.actorSelection("akka://" + config.getString("crawler.appName") + "/user/" + CountActor.name)
 
   override def receive: Receive = {
-    //初始化注入
-    case init: InitSeed =>
-      val seeds = init.seeds.map(_.trim).map(Seed)
-      log.info("init seeds -" + seeds)
-      seeds.foreach(f = seed => {
-        fetchActor ! UrlInfo(seed.url, null, SeedType, 0)
-        countActor ! InjectCounter(1)
-      })
-
-    //子url注入
-    case urls: List[UrlInfo] =>
-      log.info("inject urls -" + urls)
-      urls
+    case urlInfos: List[UrlInfo] =>
+      log.info("inject urls: \n" + urlInfos)
+      urlInfos
         .filter(seed => seed.url.startsWith("http"))
         .foreach(seed => {
           fetchActor ! seed
@@ -40,9 +28,5 @@ class InjectActor @Inject()(config: Config, @Named(FetchActor.name) fetchActor: 
 }
 
 object InjectActor extends NamedActor {
-
   override final val name = "InjectActor"
-
-  case class InitSeed(seeds: List[String])
-
 }

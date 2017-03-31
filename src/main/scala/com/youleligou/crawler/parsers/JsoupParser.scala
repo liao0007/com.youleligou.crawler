@@ -18,7 +18,7 @@ class JsoupParser extends Parser {
     */
   private def parserUrls(parentUrl: String, urls: Elements, deep: Int): List[UrlInfo] = {
     urls.asScala.toList.map(_.attr("href")).withFilter(_.startsWith("http")).map { url =>
-      UrlInfo(url, parentUrl, GenerateType, deep + 1)
+      UrlInfo(url, Some(parentUrl), GenerateType, deep + 1)
     }
   }
 

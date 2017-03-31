@@ -15,6 +15,6 @@ class ElasticIndexer extends Indexer with LazyLogging {
     * @return
     */
   override def index(page: ParseResult): Unit = {
-
+    logger.info("indexing " + page.url)
   }
 }
