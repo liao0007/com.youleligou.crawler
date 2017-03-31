@@ -1,12 +1,48 @@
 package com.youleligou.crawler.modules
 
-import akka.actor.ActorSystem
-import com.google.inject.{AbstractModule, Injector, Provider}
+import akka.actor.{Actor, ActorRef, ActorSystem, ExtendedActorSystem, Extension, ExtensionId, ExtensionIdProvider, IndirectActorProducer, Props}
+import com.google.inject.{AbstractModule, Injector, Key, Provider}
 import com.typesafe.config.Config
 import net.codingwell.scalaguice.ScalaModule
 import javax.inject.Inject
-
+import com.google.inject.name.Names
 import com.youleligou.crawler.modules.AkkaModule.ActorSystemProvider
+
+
+
+class GuiceActorProducer(val injector: Injector, val actorName: String) extends IndirectActorProducer {
+  override def actorClass: Class[Actor] = classOf[Actor]
+  override def produce(): Actor         = injector.getBinding(Key.get(classOf[Actor], Names.named(actorName))).getProvider.get()
+}
+
+class GuiceAkkaExtensionImpl extends Extension {
+  private var injector: Injector = _
+
+  def initialize(injector: Injector) {
+    this.injector = injector
+  }
+  def props(actorName: String) = Props(classOf[GuiceActorProducer], injector, actorName)
+}
+
+object GuiceAkkaExtension extends ExtensionId[GuiceAkkaExtensionImpl] with ExtensionIdProvider {
+
+  /** Register ourselves with the ExtensionIdProvider */
+  override def lookup() = GuiceAkkaExtension
+
+  /** Called by Akka in order to create an instance of the extension. */
+  override def createExtension(system: ExtendedActorSystem) = new GuiceAkkaExtensionImpl
+
+  /** Java API: Retrieve the extension for the given system. */
+  override def get(system: ActorSystem): GuiceAkkaExtensionImpl = super.get(system)
+}
+
+/**
+  * Mix in with Guice Modules that contain providers for top-level actor refs.
+  */
+trait GuiceAkkaActorRefProvider {
+  def propsFor(system: ActorSystem, name: String): Props           = GuiceAkkaExtension(system).props(name)
+  def provideActorRef(system: ActorSystem, name: String): ActorRef = system.actorOf(propsFor(system, name))
+}
 
 /**
   * Created by liangliao on 31/3/17.

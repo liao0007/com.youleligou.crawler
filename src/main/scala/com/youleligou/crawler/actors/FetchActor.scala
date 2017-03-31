@@ -14,7 +14,7 @@ import scala.concurrent.ExecutionContext.Implicits._
   * Created by young.yang on 2016/8/28.
   * 网页抓取任务,采用Actor实现
   */
-class FetchActor @Inject()(config: Config, fetcher: Fetcher)(parserActor: ActorRef) extends Actor with ActorLogging {
+class FetchActor @Inject()(config: Config, fetcher: Fetcher, parserActor: ActorRef) extends Actor with ActorLogging {
   private val countActor =
     context.system.actorSelection("akka://" + config.getString("crawler.appName") + "/user/" + config.getString("crawler.counter.name"))
 
@@ -35,6 +35,8 @@ class FetchActor @Inject()(config: Config, fetcher: Fetcher)(parserActor: ActorR
   }
 }
 
-object FetchActor {
-  def props(parseActor: ActorRef) = Props(classOf[FetchActor], parseActor)
+object FetchActor extends NamedActor {
+
+  override final val name = "FetchActor"
+
 }

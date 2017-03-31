@@ -2,7 +2,7 @@ package com.youleligou.crawler.actors
 
 import javax.inject.Inject
 
-import akka.actor.{Actor, Props}
+import akka.actor.Actor
 import com.typesafe.config.Config
 import com.youleligou.crawler.actors.CountActor.IndexCounter
 import com.youleligou.crawler.indexers.Indexer
@@ -24,6 +24,8 @@ class IndexActor @Inject()(config: Config, indexer: Indexer) extends Actor {
   }
 }
 
-object IndexActor {
-  def props: Props = Props(classOf[IndexActor])
+object IndexActor extends NamedActor {
+
+  override final val name = "IndexActor"
+
 }

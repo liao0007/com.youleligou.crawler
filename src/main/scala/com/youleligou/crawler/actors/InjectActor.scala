@@ -12,7 +12,7 @@ import com.youleligou.crawler.models._
 /**
   * 抓取种子注入任务,将需要抓取的任务注入到该任务中
   */
-class InjectActor @Inject()(config: Config)(fetchActor: ActorRef) extends Actor with ActorLogging {
+class InjectActor @Inject()(config: Config, fetchActor: ActorRef) extends Actor with ActorLogging {
   private val countActor =
     context.system.actorSelection("akka://" + config.getString("crawler.appName") + "/user/" + config.getString("crawler.counter.name"))
 
@@ -38,8 +38,9 @@ class InjectActor @Inject()(config: Config)(fetchActor: ActorRef) extends Actor 
   }
 }
 
-object InjectActor {
-  def props(fetchActor: ActorRef) = Props(classOf[InjectActor], fetchActor)
+object InjectActor extends NamedActor {
+
+  override final val name = "InjectActor"
 
   case class InitSeed(seeds: List[String])
 }

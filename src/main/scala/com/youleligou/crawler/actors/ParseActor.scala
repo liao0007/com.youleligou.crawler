@@ -2,20 +2,20 @@ package com.youleligou.crawler.actors
 
 import javax.inject.Inject
 
-import akka.actor.{Actor, ActorLogging, ActorRef, Props}
+import akka.actor.{Actor, ActorLogging, ActorRef}
 import com.typesafe.config.Config
 import com.youleligou.crawler.actors.CountActor._
 import com.youleligou.crawler.parsers.Parser
-import com.youleligou.crawler.models.{ParseResult, FetchResult}
+import com.youleligou.crawler.models.{FetchResult, ParseResult}
 
 /**
   * Created by young.yang on 2016/8/28.
   * 解析任务
   */
-class ParseActor @Inject()(config: Config)(parser: Parser, indexTask: ActorRef) extends Actor with ActorLogging {
+class ParseActor @Inject()(config: Config, parser: Parser, indexTask: ActorRef) extends Actor with ActorLogging {
   private val countActor =
     context.system.actorSelection("akka://" + config.getString("crawler.appName") + "/user/" + config.getString("crawler.counter.name"))
-  private val fetchDeep = config.getInt("crawler.fetch.deep")
+  private val fetchDeep = config.getInt("crawler.actor.fetch.deep")
 
   override def receive: Receive = {
     case fetchResult: FetchResult =>
@@ -30,6 +30,8 @@ class ParseActor @Inject()(config: Config)(parser: Parser, indexTask: ActorRef) 
   }
 }
 
-object ParseActor {
-  def props(parser: Parser, indexerActor: ActorRef) = Props(classOf[ParseActor], parser, indexerActor)
+object ParseActor extends NamedActor {
+
+  override final val name = "ParseActor"
+
 }

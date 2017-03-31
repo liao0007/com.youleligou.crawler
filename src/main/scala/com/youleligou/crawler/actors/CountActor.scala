@@ -1,6 +1,6 @@
 package com.youleligou.crawler.actors
 
-import akka.actor.{Actor, Props}
+import akka.actor.Actor
 import com.youleligou.crawler.actors.CountActor._
 
 /**
@@ -47,8 +47,8 @@ class CountActor extends Actor {
   }
 }
 
-object CountActor {
-  def props = Props(classOf[CountActor])
+object CountActor extends NamedActor {
+  override final val name = "CountActor"
 
   sealed trait Counter
   case class FetchCounter(num: Int)         extends Counter

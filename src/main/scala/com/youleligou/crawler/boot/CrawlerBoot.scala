@@ -11,8 +11,7 @@ import akka.pattern.ask
 import akka.util.Timeout
 import com.youleligou.crawler.actors.CountActor._
 import com.youleligou.crawler.actors.InjectActor.InitSeed
-import com.youleligou.crawler.indexers.ElasticIndexer
-import com.youleligou.crawler.parsers.JsoupParser
+import com.youleligou.crawler.modules.GuiceAkkaExtension
 
 import scala.collection.JavaConverters._
 import scala.concurrent.duration._
@@ -33,30 +32,30 @@ class CrawlerBoot @Inject()(config: Config, system: ActorSystem) extends LazyLog
     */
   def start(): Unit = {
     val indexActor = system.actorOf(
-      RoundRobinPool(config.getInt("crawler.index.parallel")).props(IndexActor.props),
-      config.getString("crawler.index.name")
+      RoundRobinPool(config.getInt("crawler.actor.index.parallel")).props(GuiceAkkaExtension(system).props(IndexActor.name)),
+      IndexActor.name
     )
     logger.info("created indexActor name -[" + indexActor + "]")
 
     val parseActor = system.actorOf(
-      RoundRobinPool(config.getInt("crawler.parse.parallel")).props(ParseActor.props(new JsoupParser, indexActor)),
-      config.getString("crawler.parse.name")
+      RoundRobinPool(config.getInt("crawler.actor.parse.parallel")).props(GuiceAkkaExtension(system).props(ParseActor.name)),
+      ParseActor.name
     )
     logger.info("create parseActor name -[" + parseActor + "]")
 
     val fetchActor = system.actorOf(
-      RoundRobinPool(config.getInt("crawler.fetch.parallel")).props(FetchActor.props(parseActor)),
-      config.getString("crawler.fetch.name")
+      RoundRobinPool(config.getInt("crawler.actor.fetch.parallel")).props(GuiceAkkaExtension(system).props(FetchActor.name)),
+      FetchActor.name
     )
     logger.info("create fetchActor name -[" + fetchActor + "]")
 
     val injectActor = system.actorOf(
-      RoundRobinPool(config.getInt("crawler.inject.parallel")).props(InjectActor.props(fetchActor)),
-      config.getString("crawler.inject.name")
+      RoundRobinPool(config.getInt("crawler.actor.inject.parallel")).props(GuiceAkkaExtension(system).props(InjectActor.name)),
+      InjectActor.name
     )
     logger.info("create injectActor name -[" + injectActor + "]")
 
-    system.actorOf(Props[CountActor], config.getString("crawler.counter.name"))
+    system.actorOf(GuiceAkkaExtension(system).props(CountActor.name), CountActor.name)
     logger.info("create countActor name -[" + countActor + "]")
 
     injectActor ! InitSeed(config.getStringList("crawler.seed").asScala.toList)
