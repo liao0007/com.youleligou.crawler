@@ -7,6 +7,7 @@ import com.typesafe.config.Config
 import com.youleligou.crawler.actor.CountActor._
 import com.youleligou.crawler.model.UrlInfo
 import com.youleligou.crawler.service.fetch.FetchService
+import com.youleligou.crawler.service.fetch.FetchService.FetchException
 
 import scala.concurrent.ExecutionContext.Implicits._
 import scala.util.{Failure, Success}
@@ -32,8 +33,14 @@ class FetchActor @Inject()(config: Config,
           log.debug("fetch success: " + urlInfo.url)
           parserActor ! fetchResult
           countActor ! FetchOk(1)
-        case Failure(_) =>
-          log.debug("fetch failed: " + urlInfo.url)
+        case Failure(FetchException(statusCode, message)) =>
+          statusCode match {
+            case FetchService.Timeout =>
+              log.debug("fetch timeout, re-fetch: " + urlInfo.url)
+              self ! urlInfo
+            case _ =>
+              log.debug("fetch failed: " + message)
+          }
           countActor ! FetchError(1)
       }
   }

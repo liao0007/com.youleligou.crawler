@@ -14,9 +14,8 @@ trait FetchService {
 object FetchService {
   val Ok = 200
   val NotFound = 404
+  val Timeout = 504
 
-  class FetchException(message: String, e: Throwable) extends Exception(message, e) {
-    def this(message: String) = this(message, new Exception(message))
-  }
+  case class FetchException(statusCode: Int, message: String) extends Exception
 
 }

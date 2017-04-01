@@ -20,6 +20,7 @@ class HttpClientFetchService @Inject()(config: Config, standaloneAhcWSClient: St
     val start = System.currentTimeMillis()
     standaloneAhcWSClient
       .url(urlInfo.url)
+      .withHeaders("User-Agent" -> config.getString("crawler.actor.fetch.userAgent"))
       .withProxyServer(
         DefaultWSProxyServer(host = config.getString("crawler.actor.fetch.proxy.host"), port = config.getInt("crawler.actor.fetch.proxy.port")))
       .get()
@@ -30,7 +31,7 @@ class HttpClientFetchService @Inject()(config: Config, standaloneAhcWSClient: St
         if (response.status == FetchService.Ok) {
           FetchResult(response.status, response.body, response.statusText, urlInfo.url, urlInfo.deep)
         } else {
-          throw new FetchException("error code is -" + response.status + ", url: " + urlInfo.url)
+          throw FetchException(response.status, response.statusText + " " + urlInfo.url)
         }
       }
 
