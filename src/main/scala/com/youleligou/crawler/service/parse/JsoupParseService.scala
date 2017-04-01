@@ -32,7 +32,7 @@ class JsoupParseService extends ParseService {
     val document = Jsoup.parse(fetchResult.content)
     ParseResult(
       url = fetchResult.url,
-      title = document.title(),
+      title = Some(document.title()),
       content = document.text(),
       publishTime = System.currentTimeMillis(),
       updateTime = System.currentTimeMillis(),

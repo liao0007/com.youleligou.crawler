@@ -42,6 +42,7 @@ class FetchActor @Inject()(config: Config,
               log.debug("fetch failed: " + message)
           }
           countActor ! FetchError(1)
+        case _ =>
       }
   }
 }

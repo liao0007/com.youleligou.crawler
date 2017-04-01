@@ -5,7 +5,7 @@ package com.youleligou.crawler.model
   */
 case class ParseResult(
                         url: String,
-                        title: String,
+                        title: Option[String] = None,
                         content: String,
                         publishTime: Long,
                         updateTime: Long,

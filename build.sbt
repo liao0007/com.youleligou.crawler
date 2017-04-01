@@ -10,14 +10,6 @@ updateOptions := updateOptions.value.withCachedResolution(true)
 
 val akkaVersion = "2.4.17"
 
-val httpClientVersion = "4.4.1"
-
-val commons_ioVersion = "2.4"
-
-val commons_langVersion = "3.4"
-
-val jacksonVersion = "1.9.13"
-
 val jsoupVersion = "1.8.3"
 
 scalacOptions := Seq("-unchecked", "-deprecation", "-encoding", "utf8")
@@ -42,13 +34,12 @@ libraryDependencies ++= Seq(
 //  redis
   "com.github.etaty" %% "rediscala" % "1.8.0",
 //  akka
-  "com.typesafe.akka"         %% "akka-actor"        % akkaVersion,
-  "org.apache.httpcomponents" % "httpclient"         % httpClientVersion,
-  "org.apache.httpcomponents" % "httpmime"           % httpClientVersion,
-  "org.apache.httpcomponents" % "httpcore"           % httpClientVersion,
-  "commons-io"                % "commons-io"         % commons_ioVersion,
-  "org.apache.commons"        % "commons-lang3"      % commons_langVersion,
-  "org.codehaus.jackson"      % "jackson-core-asl"   % jacksonVersion,
-  "org.codehaus.jackson"      % "jackson-mapper-asl" % jacksonVersion,
-  "org.jsoup"                 % "jsoup"              % jsoupVersion
+  "com.typesafe.akka" %% "akka-actor" % akkaVersion,
+  //  parser
+  "org.jsoup" % "jsoup" % jsoupVersion,
+  "com.typesafe.play" %% "play-json" % "2.6.0-M1",
+  // -- database --
+  "com.typesafe.slick" %% "slick" % "3.2.0",
+  "com.typesafe.slick" %% "slick-hikaricp" % "3.2.0",
+  "mysql" % "mysql-connector-java" % "5.1.40"
 )
