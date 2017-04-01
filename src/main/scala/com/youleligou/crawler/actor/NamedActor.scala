@@ -5,4 +5,6 @@ package com.youleligou.crawler.actor
   */
 trait NamedActor {
   def name: String
+
+  def poolName: String
 }

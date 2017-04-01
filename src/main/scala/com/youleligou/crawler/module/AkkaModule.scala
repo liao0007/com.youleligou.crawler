@@ -1,9 +1,11 @@
 package com.youleligou.crawler.module
 
 import akka.actor.{Actor, ActorRef, ActorSystem, ExtendedActorSystem, Extension, ExtensionId, ExtensionIdProvider, IndirectActorProducer, Props}
+import akka.routing.{Pool, RoundRobinPool}
 import com.google.inject.name.Names
 import com.google.inject._
 import com.typesafe.config.Config
+import com.youleligou.crawler.actor.{IndexActor, NamedActor}
 import net.codingwell.scalaguice.ScalaModule
 
 class GuiceActorProducer(injector: Injector, actorName: String) extends IndirectActorProducer {
@@ -17,7 +19,8 @@ class GuiceAkkaExtensionImpl extends Extension {
   def initialize(injector: Injector): Unit = {
     this.injector = injector
   }
-  def props(actorName: String) = Props(classOf[GuiceActorProducer], injector, actorName)
+
+  def props(actorName: String): Props = Props(classOf[GuiceActorProducer], injector, actorName)
 }
 
 object GuiceAkkaExtension extends ExtensionId[GuiceAkkaExtensionImpl] with ExtensionIdProvider {
@@ -36,9 +39,12 @@ object GuiceAkkaExtension extends ExtensionId[GuiceAkkaExtensionImpl] with Exten
   * Mix in with Guice Modules that contain providers for top-level actor refs.
   */
 trait GuiceAkkaActorRefProvider {
-  def propsFor(system: ActorSystem, name: String): Props = GuiceAkkaExtension(system).props(name)
+  def propsFor(system: ActorSystem, namedActor: NamedActor): Props = GuiceAkkaExtension(system).props(namedActor.name)
 
-  def provideActorRef(system: ActorSystem, name: String): ActorRef = system.actorOf(propsFor(system, name))
+  def provideActorRef(system: ActorSystem, actor: NamedActor): ActorRef = system.actorOf(propsFor(system, actor))
+
+  def provideActorPoolRef(system: ActorSystem, actor: NamedActor, pool: Pool): ActorRef =
+    system.actorOf(pool.props(GuiceAkkaExtension(system).props(actor.name)), actor.poolName)
 }
 
 /**

@@ -33,6 +33,8 @@ libraryDependencies ++= Seq(
   "com.typesafe" % "config" % "1.3.1",
 //  logging
   "com.typesafe.scala-logging" %% "scala-logging" % "3.5.0",
+  "com.typesafe.akka" %% "akka-slf4j" % "2.5.0-RC1",
+  "ch.qos.logback" % "logback-classic" % "1.1.7",
 //  web client
   "com.typesafe.play" %% "play-ahc-ws-standalone" % "1.0.0-M6",
 //  guice

@@ -12,11 +12,13 @@ import com.youleligou.crawler.service.parse.ParseService
   * Created by young.yang on 2016/8/28.
   * 解析任务
   */
-class ParseActor @Inject()(config: Config, parseService: ParseService, @Named(IndexActor.name) indexActor: ActorRef)
+class ParseActor @Inject()(config: Config,
+                           parseService: ParseService,
+                           @Named(IndexActor.poolName) indexActor: ActorRef,
+                           @Named(CountActor.poolName) countActor: ActorRef)
   extends Actor
     with ActorLogging {
-  private val countActor =
-    context.system.actorSelection("akka://" + config.getString("crawler.appName") + "/user/" + CountActor.name)
+
   private val fetchDeep = config.getInt("crawler.actor.fetch.deep")
 
   override def receive: Receive = {
@@ -33,7 +35,6 @@ class ParseActor @Inject()(config: Config, parseService: ParseService, @Named(In
 }
 
 object ParseActor extends NamedActor {
-
   override final val name = "ParseActor"
-
+  override final val poolName = "ParseActorPool"
 }

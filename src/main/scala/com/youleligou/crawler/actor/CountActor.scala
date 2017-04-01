@@ -49,6 +49,7 @@ class CountActor extends Actor {
 
 object CountActor extends NamedActor {
   override final val name = "CountActor"
+  override final val poolName = "CountActorPool"
 
   sealed trait Counter
 

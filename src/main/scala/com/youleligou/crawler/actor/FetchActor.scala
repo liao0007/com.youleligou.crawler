@@ -15,11 +15,9 @@ import scala.util.{Failure, Success}
   * Created by young.yang on 2016/8/28.
   * 网页抓取任务,采用Actor实现
   */
-class FetchActor @Inject()(config: Config, fetchService: FetchService, @Named(ParseActor.name) parserActor: ActorRef)
+class FetchActor @Inject()(config: Config, fetchService: FetchService, @Named(ParseActor.poolName) parserActor: ActorRef, @Named(CountActor.poolName) countActor: ActorRef)
   extends Actor
     with ActorLogging {
-  private val countActor =
-    context.system.actorSelection("akka://" + config.getString("crawler.appName") + "/user/" + CountActor.name)
 
   override def receive: Receive = {
     //处理抓取任务
@@ -37,7 +35,6 @@ class FetchActor @Inject()(config: Config, fetchService: FetchService, @Named(Pa
 }
 
 object FetchActor extends NamedActor {
-
   override final val name = "FetchActor"
-
+  override final val poolName = "FetchActorPool"
 }
