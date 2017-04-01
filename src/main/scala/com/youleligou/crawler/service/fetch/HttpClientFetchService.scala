@@ -21,8 +21,8 @@ class HttpClientFetchService @Inject()(config: Config, standaloneAhcWSClient: St
     standaloneAhcWSClient
       .url(urlInfo.url)
       .withHeaders("User-Agent" -> config.getString("crawler.actor.fetch.userAgent"))
-      .withProxyServer(
-        DefaultWSProxyServer(host = config.getString("crawler.actor.fetch.proxy.host"), port = config.getInt("crawler.actor.fetch.proxy.port")))
+      //      .withProxyServer(
+      //        DefaultWSProxyServer(host = config.getString("crawler.actor.fetch.proxy.host"), port = config.getInt("crawler.actor.fetch.proxy.port")))
       .get()
       .map { response =>
         logger.debug("fetching " + urlInfo + ", cost time: " + (System.currentTimeMillis() - start) + " content length: " + response.body.length)
