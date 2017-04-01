@@ -44,3 +44,9 @@ libraryDependencies ++= Seq(
   "com.typesafe.slick" %% "slick-hikaricp" % "3.2.0",
   "mysql" % "mysql-connector-java" % "5.1.40"
 )
+
+assemblyMergeStrategy in assembly := {
+  case PathList("META-INF", xs@_*) => MergeStrategy.discard
+  case PathList("reference.conf") => MergeStrategy.concat
+  case x => MergeStrategy.first
+}
