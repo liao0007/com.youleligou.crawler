@@ -34,24 +34,24 @@ case class Canteen(
 object Canteen {
   implicit val canteenReads: Reads[Canteen] = (
     (JsPath \ "id").read[Long] and
-      (JsPath \ "address").read[String] and
-      (JsPath \ "average_cost").read[String] and
-      (JsPath \ "description").read[String] and
-      (JsPath \ "distance").read[Int] and
-      (JsPath \ "float_delivery_fee").read[Float] and
-      (JsPath \ "float_minimum_order_amount").read[Float] and
-      (JsPath \ "image_path").read[String] and
-      (JsPath \ "is_new").read[Boolean] and
-      (JsPath \ "is_premium").read[Boolean] and
-      (JsPath \ "latitude").read[Float] and
-      (JsPath \ "longitude").read[Float] and
-      (JsPath \ "name").read[String] and
-      (JsPath \ "phone").read[String] and
-      (JsPath \ "promotion_info").read[String] and
-      (JsPath \ "rating").read[Float] and
-      (JsPath \ "rating_count").read[Int] and
-      (JsPath \ "recent_order_num").read[Int] and
-      (JsPath \ "status").read[Int]
+      (JsPath \ "address").readWithDefault[String]("") and
+      (JsPath \ "average_cost").readWithDefault[String]("") and
+      (JsPath \ "description").readWithDefault[String]("") and
+      (JsPath \ "distance").readWithDefault[Int](0) and
+      (JsPath \ "float_delivery_fee").readWithDefault[Float](0f) and
+      (JsPath \ "float_minimum_order_amount").readWithDefault[Float](0f) and
+      (JsPath \ "image_path").readWithDefault[String]("") and
+      (JsPath \ "is_new").readWithDefault[Boolean](false) and
+      (JsPath \ "is_premium").readWithDefault[Boolean](false) and
+      (JsPath \ "latitude").readWithDefault[Float](0f) and
+      (JsPath \ "longitude").readWithDefault[Float](0f) and
+      (JsPath \ "name").readWithDefault[String]("") and
+      (JsPath \ "phone").readWithDefault[String]("") and
+      (JsPath \ "promotion_info").readWithDefault[String]("") and
+      (JsPath \ "rating").readWithDefault[Float](0f) and
+      (JsPath \ "rating_count").readWithDefault[Int](0) and
+      (JsPath \ "recent_order_num").readWithDefault[Int](0) and
+      (JsPath \ "status").readWithDefault[Int](0)
     ) (Canteen.apply _)
 }
 
