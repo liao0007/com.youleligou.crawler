@@ -23,12 +23,11 @@ class FetchActor @Inject()(config: Config, fetchService: FetchService, @Named(Pa
   override def receive: Receive = {
     //处理抓取任务
     case page: UrlInfo =>
-      log.info("Receiving fetch task: " + page)
+      log.info("fetch url: " + page)
       countActor ! FetchCounter(1)
       fetchService.fetch(page) map {
         case Some(httpResult) =>
           parserActor ! httpResult
-          log.info("FetcherTask send parserTask a httpResult [" + httpResult + "]")
           countActor ! FetchOk(1)
         case _ =>
           countActor ! FetchError(1)

@@ -21,10 +21,10 @@ class ParseActor @Inject()(config: Config, parseService: ParseService, @Named(In
 
   override def receive: Receive = {
     case fetchResult: FetchResult =>
+      log.info("parse url: " + fetchResult.url)
       val page: ParseResult = parseService.parse(fetchResult)
       indexActor ! page
       countActor ! ParseCounter(1)
-      log.info("ParserTask send IndexerTask a index request -[" + page + "]")
       page.childLink.filter(_.deep < fetchDeep).foreach { urlInfo =>
         sender() ! urlInfo
         countActor ! ParseChildUrlCounter(1)

@@ -17,7 +17,7 @@ class InjectActor @Inject()(config: Config, @Named(FetchActor.name) fetchActor: 
 
   override def receive: Receive = {
     case urlInfo: UrlInfo if urlInfo.url.startsWith("http") =>
-      log.info("inject url: \n" + urlInfo)
+      log.info("inject url: " + urlInfo)
       fetchActor ! urlInfo
       countActor ! InjectCounter(1)
   }

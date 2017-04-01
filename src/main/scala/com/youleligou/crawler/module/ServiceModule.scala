@@ -20,7 +20,7 @@ class ServiceModule extends AbstractModule with ScalaModule with GuiceAkkaActorR
 
   @Provides
   @Singleton
-  def provideStandaloneAhcWSClient(implicit system: ActorSystem) = {
+  def provideStandaloneAhcWSClient()(implicit system: ActorSystem) = {
     implicit val materializer = ActorMaterializer()
     StandaloneAhcWSClient()
   }

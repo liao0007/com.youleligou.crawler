@@ -8,6 +8,7 @@ import com.youleligou.crawler.model.{FetchResult, UrlInfo}
 import com.youleligou.crawler.service.cache.CacheService
 import com.youleligou.crawler.service.fetch.FetchService.FetchException
 import com.youleligou.crawler.service.hash.HashService
+import play.api.libs.ws.DefaultWSProxyServer
 import play.api.libs.ws.ahc.StandaloneAhcWSClient
 
 import scala.concurrent.ExecutionContext.Implicits._
@@ -32,7 +33,8 @@ class HttpClientFetchService @Inject()(config: Config,
             val start = System.currentTimeMillis()
             standaloneAhcWSClient
               .url(urlInfo.url)
-              .withHeaders("User-Agent" -> config.getString("crawler.fetch.userAgent"))
+              .withProxyServer(DefaultWSProxyServer(host = config.getString("crawler.actor.fetch.proxy.host"),
+                port = config.getInt("crawler.actor.fetch.proxy.port")))
               .get()
               .map { response =>
                 logger.info(
