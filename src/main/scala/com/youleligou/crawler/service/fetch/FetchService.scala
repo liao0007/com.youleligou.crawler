@@ -1,17 +1,17 @@
-package com.youleligou.crawler.fetchers
+package com.youleligou.crawler.service.fetch
 
-import com.youleligou.crawler.models.{FetchResult, UrlInfo}
+import com.youleligou.crawler.model.{FetchResult, UrlInfo}
 
 import scala.concurrent.Future
 
 /**
   * Created by liangliao on 31/3/17.
   */
-trait Fetcher {
+trait FetchService {
   def fetch(urlInfo: UrlInfo): Future[Option[FetchResult]]
 }
 
-object Fetcher {
+object FetchService {
   val Ok = 200
   val NotFound = 404
 

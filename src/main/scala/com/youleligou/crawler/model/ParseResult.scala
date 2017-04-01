@@ -1,4 +1,4 @@
-package com.youleligou.crawler.models
+package com.youleligou.crawler.model
 
 /**
   * 解析出来的HTTP网页信息

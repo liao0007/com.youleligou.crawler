@@ -4,7 +4,7 @@ import java.net.InetAddress
 
 import com.youleligou.crawler.indexers.IndexerConstants
 import com.youleligou.crawler.utils.{JsonUtil, MD5Util}
-import com.youleligou.crawler.models.PageIndexEntity
+import com.youleligou.crawler.model.PageIndexEntity
 import org.elasticsearch.client.transport.TransportClient
 import org.elasticsearch.common.transport.InetSocketTransportAddress
 

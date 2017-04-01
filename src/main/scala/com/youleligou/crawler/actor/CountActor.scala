@@ -1,7 +1,7 @@
-package com.youleligou.crawler.actors
+package com.youleligou.crawler.actor
 
 import akka.actor.Actor
-import com.youleligou.crawler.actors.CountActor._
+import com.youleligou.crawler.actor.CountActor._
 
 /**
   * Created by young.yang on 2016/9/3.

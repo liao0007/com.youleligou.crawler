@@ -1,4 +1,4 @@
-package com.youleligou.crawler.actors
+package com.youleligou.crawler.actor
 
 /**
   * A convenience trait for an actor companion object to extend to provide names.

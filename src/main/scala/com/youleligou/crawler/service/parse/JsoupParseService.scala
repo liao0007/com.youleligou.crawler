@@ -1,7 +1,7 @@
-package com.youleligou.crawler.parsers
+package com.youleligou.crawler.service.parse
 
-import com.youleligou.crawler.models.UrlInfo.GenerateType
-import com.youleligou.crawler.models.{FetchResult, ParseResult, UrlInfo}
+import com.youleligou.crawler.model.UrlInfo.GenerateType
+import com.youleligou.crawler.model.{FetchResult, ParseResult, UrlInfo}
 import org.jsoup.Jsoup
 import org.jsoup.select.Elements
 
@@ -11,7 +11,7 @@ import scala.collection.JavaConverters._
   * Created by young.yang on 2016/8/31.
   * Jsoup解析器
   */
-class JsoupParser extends Parser {
+class JsoupParseService extends ParseService {
 
   /**
     * 解析子url

@@ -1,13 +1,13 @@
-package com.youleligou.crawler.indexers
+package com.youleligou.crawler.service.index
 
 import com.typesafe.scalalogging.LazyLogging
-import com.youleligou.crawler.models.ParseResult
+import com.youleligou.crawler.model.ParseResult
 
 /**
   * Created by dell on 2016/8/29.
   * ES索引器
   */
-class ElasticIndexer extends Indexer with LazyLogging {
+class ElasticIndexService extends IndexService with LazyLogging {
   /**
     * 文档索引
     *

@@ -1,13 +1,12 @@
-package com.youleligou.crawler.actors
+package com.youleligou.crawler.actor
 
-import javax.inject.Inject
-
+import com.google.inject.Inject
 import akka.actor.{Actor, ActorLogging, ActorRef}
 import com.google.inject.name.Named
 import com.typesafe.config.Config
-import com.youleligou.crawler.actors.CountActor._
-import com.youleligou.crawler.fetchers.Fetcher
-import com.youleligou.crawler.models.UrlInfo
+import com.youleligou.crawler.actor.CountActor._
+import com.youleligou.crawler.model.UrlInfo
+import com.youleligou.crawler.service.fetch.FetchService
 
 import scala.concurrent.ExecutionContext.Implicits._
 
@@ -15,7 +14,9 @@ import scala.concurrent.ExecutionContext.Implicits._
   * Created by young.yang on 2016/8/28.
   * 网页抓取任务,采用Actor实现
   */
-class FetchActor @Inject()(config: Config, fetcher: Fetcher, @Named(ParseActor.name) parserActor: ActorRef) extends Actor with ActorLogging {
+class FetchActor @Inject()(config: Config, fetchService: FetchService, @Named(ParseActor.name) parserActor: ActorRef)
+  extends Actor
+    with ActorLogging {
   private val countActor =
     context.system.actorSelection("akka://" + config.getString("crawler.appName") + "/user/" + CountActor.name)
 
@@ -24,7 +25,7 @@ class FetchActor @Inject()(config: Config, fetcher: Fetcher, @Named(ParseActor.n
     case page: UrlInfo =>
       log.info("Receiving fetch task: " + page)
       countActor ! FetchCounter(1)
-      fetcher.fetch(page) map {
+      fetchService.fetch(page) map {
         case Some(httpResult) =>
           parserActor ! httpResult
           log.info("FetcherTask send parserTask a httpResult [" + httpResult + "]")
@@ -32,8 +33,6 @@ class FetchActor @Inject()(config: Config, fetcher: Fetcher, @Named(ParseActor.n
         case _ =>
           countActor ! FetchError(1)
       }
-    //将解析完成的子url发送到注入任务继续抓取
-    case urls: List[UrlInfo] => sender() ! urls
   }
 }
 

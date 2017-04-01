@@ -1,12 +1,12 @@
-package com.youleligou.crawler.actors
+package com.youleligou.crawler.actor
 
-import javax.inject.Inject
+import com.google.inject.Inject
 
 import akka.actor.{Actor, ActorLogging, ActorRef}
 import com.google.inject.name.Named
 import com.typesafe.config.Config
-import com.youleligou.crawler.actors.CountActor._
-import com.youleligou.crawler.models._
+import com.youleligou.crawler.actor.CountActor._
+import com.youleligou.crawler.model._
 
 /**
   * 抓取种子注入任务,将需要抓取的任务注入到该任务中
@@ -16,14 +16,10 @@ class InjectActor @Inject()(config: Config, @Named(FetchActor.name) fetchActor: 
     context.system.actorSelection("akka://" + config.getString("crawler.appName") + "/user/" + CountActor.name)
 
   override def receive: Receive = {
-    case urlInfos: List[UrlInfo] =>
-      log.info("inject urls: \n" + urlInfos)
-      urlInfos
-        .filter(seed => seed.url.startsWith("http"))
-        .foreach(seed => {
-          fetchActor ! seed
-          countActor ! InjectCounter(1)
-        })
+    case urlInfo: UrlInfo if urlInfo.url.startsWith("http") =>
+      log.info("inject url: \n" + urlInfo)
+      fetchActor ! urlInfo
+      countActor ! InjectCounter(1)
   }
 }
 

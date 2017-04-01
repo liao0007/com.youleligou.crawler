@@ -1,19 +1,18 @@
-package com.youleligou.crawler.caches
+package com.youleligou.crawler.service.cache
 
 import scala.collection.mutable
 import scala.concurrent.Future
-import scala.concurrent.ExecutionContext.Implicits._
 
 /**
   * 采用本地Map实现的缓存
   */
-class MapCache extends Cache {
+class MapCacheService extends CacheService {
 
   private val map = new mutable.HashMap[String, String]()
 
   def contains(key: String): Future[Boolean] = Future.successful(map.contains(key))
 
-  def get(key: String): uture[Option[String]] = Future.successful(map.get(key))
+  def get(key: String): Future[Option[String]] = Future.successful(map.get(key))
 
   def put(key: String, value: String): Future[Boolean] = Future.successful {
     map.put(key, value)
@@ -21,8 +20,4 @@ class MapCache extends Cache {
   }
 
   def size(): Future[Long] = Future.successful(map.size.toLong)
-
-  def keys(): Future[scala.collection.Set[String]] = Future.successful {
-    map.keySet
-  }
 }

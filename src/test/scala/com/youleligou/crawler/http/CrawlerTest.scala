@@ -2,7 +2,7 @@ package com.youleligou.crawler.http
 
 import com.youleligou.crawler.entity.UrlInfo
 import com.youleligou.crawler.fetchers.support.HttpWatch
-import com.youleligou.crawler.models.{SeedType, UrlInfo}
+import com.youleligou.crawler.model.{SeedType, UrlInfo}
 
 /**
  * Created by young.yang on 2016/8/28.

@@ -1,4 +1,4 @@
-package com.youleligou.crawler.models
+package com.youleligou.crawler.model
 
 /**
   * Created by young.yang on 2016/8/28.

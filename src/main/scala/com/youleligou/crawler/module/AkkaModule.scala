@@ -1,15 +1,12 @@
-package com.youleligou.crawler.modules
-
-import javax.inject.Inject
+package com.youleligou.crawler.module
 
 import akka.actor.{Actor, ActorRef, ActorSystem, ExtendedActorSystem, Extension, ExtensionId, ExtensionIdProvider, IndirectActorProducer, Props}
 import com.google.inject.name.Names
-import com.google.inject.{AbstractModule, Injector, Key, Provider}
+import com.google.inject._
 import com.typesafe.config.Config
-import com.youleligou.crawler.modules.AkkaModule.ActorSystemProvider
 import net.codingwell.scalaguice.ScalaModule
 
-class GuiceActorProducer(val injector: Injector, val actorName: String) extends IndirectActorProducer {
+class GuiceActorProducer(injector: Injector, actorName: String) extends IndirectActorProducer {
   override def actorClass: Class[Actor] = classOf[Actor]
   override def produce(): Actor         = injector.getBinding(Key.get(classOf[Actor], Names.named(actorName))).getProvider.get()
 }
@@ -17,10 +14,9 @@ class GuiceActorProducer(val injector: Injector, val actorName: String) extends 
 class GuiceAkkaExtensionImpl extends Extension {
   private var injector: Injector = _
 
-  def initialize(injector: Injector) {
+  def initialize(injector: Injector): Unit = {
     this.injector = injector
   }
-
   def props(actorName: String) = Props(classOf[GuiceActorProducer], injector, actorName)
 }
 
@@ -48,23 +44,18 @@ trait GuiceAkkaActorRefProvider {
 /**
   * Created by liangliao on 31/3/17.
   */
-object AkkaModule {
-
-  class ActorSystemProvider @Inject()(val config: Config, val injector: Injector) extends Provider[ActorSystem] {
-    override def get(): ActorSystem = {
-      val system = ActorSystem(config.getString("crawler.appName"), config)
-      GuiceAkkaExtension(system).initialize(injector)
-      system
-    }
-  }
-
-}
-
 /**
   * A module providing an Akka ActorSystem.
   */
 class AkkaModule extends AbstractModule with ScalaModule {
-  override def configure() {
-    bind[ActorSystem].toProvider[ActorSystemProvider].asEagerSingleton()
+
+  @Provides
+  @Singleton
+  def providesActorSystem(config: Config, injector: Injector): ActorSystem = {
+    val system = ActorSystem(config.getString("crawler.appName"), config)
+    GuiceAkkaExtension(system).initialize(injector)
+    system
   }
+
+  override def configure() {}
 }

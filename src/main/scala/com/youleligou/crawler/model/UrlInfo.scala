@@ -1,6 +1,6 @@
-package com.youleligou.crawler.models
+package com.youleligou.crawler.model
 
-import com.youleligou.crawler.models.UrlInfo.UrlType
+import com.youleligou.crawler.model.UrlInfo.UrlType
 
 /**
   * 爬取url类

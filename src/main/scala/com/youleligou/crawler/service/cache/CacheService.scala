@@ -1,4 +1,4 @@
-package com.youleligou.crawler.caches
+package com.youleligou.crawler.service.cache
 
 import scala.concurrent.Future
 
@@ -6,7 +6,7 @@ import scala.concurrent.Future
   * Created by dell on 2016/9/2.
   * 缓存接口
   */
-trait Cache {
+trait CacheService {
   def contains(key: String): Future[Boolean]
 
   def put(key: String, value: String): Future[Boolean]
@@ -14,6 +14,4 @@ trait Cache {
   def get(key: String): Future[Option[String]]
 
   def size(): Future[Long]
-
-  def keys(): Future[Set[String]]
 }

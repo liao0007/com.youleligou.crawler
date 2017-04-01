@@ -1,6 +1,6 @@
 package com.youleligou.crawler.boot
 
-import javax.inject.Inject
+import com.google.inject.Inject
 
 import akka.actor._
 import akka.pattern.ask
@@ -8,11 +8,11 @@ import akka.routing.RoundRobinPool
 import akka.util.Timeout
 import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
-import com.youleligou.crawler.actors.CountActor._
-import com.youleligou.crawler.actors._
-import com.youleligou.crawler.models.UrlInfo.SeedType
-import com.youleligou.crawler.models.UrlInfo
-import com.youleligou.crawler.modules.GuiceAkkaExtension
+import com.youleligou.crawler.actor.CountActor._
+import com.youleligou.crawler.actor._
+import com.youleligou.crawler.model.UrlInfo.SeedType
+import com.youleligou.crawler.model.UrlInfo
+import com.youleligou.crawler.module.GuiceAkkaExtension
 
 import scala.collection.JavaConverters._
 import scala.concurrent.Await
@@ -58,7 +58,7 @@ class CrawlerBoot @Inject()(config: Config, system: ActorSystem) extends LazyLog
     system.actorOf(GuiceAkkaExtension(system).props(CountActor.name), CountActor.name)
     logger.info("create countActor name -[" + countActor + "]")
 
-    injectActor ! config.getStringList("crawler.seed").asScala.toList.map(url => UrlInfo(url.trim, None, SeedType, 0))
+    config.getStringList("crawler.seed").asScala.toList.foreach(url => injectActor ! UrlInfo(url.trim, None, SeedType, 0))
   }
 
   /**

@@ -1,9 +1,9 @@
 package com.youleligou.crawler.parsers
 
 import com.youleligou.crawler.entity.UrlInfo
-import com.youleligou.crawler.fetchers.HttpClientFetcher
-import com.youleligou.crawler.parsers.JsoupParser
-import com.youleligou.crawler.models.{SeedType, UrlInfo}
+import com.youleligou.crawler.model.{SeedType, UrlInfo}
+import com.youleligou.crawler.service.fetch.HttpClientFetchService
+import com.youleligou.crawler.service.parse.JsoupParseService
 
 /**
  * Created by dell on 2016/9/1.
@@ -11,8 +11,8 @@ import com.youleligou.crawler.models.{SeedType, UrlInfo}
 object JsoupExample {
 
   def parserHtml(url:UrlInfo): Unit ={
-    val fetcher = new HttpClientFetcher
-    val parser = new JsoupParser
+    val fetcher = new HttpClientFetchService
+    val parser = new JsoupParseService
     val page = fetcher.fetch(url)
     println(page)
     val page1 = fetcher.fetch(url)
