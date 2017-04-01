@@ -25,13 +25,11 @@ class HttpClientFetchService @Inject()(config: Config, standaloneAhcWSClient: St
       //        DefaultWSProxyServer(host = config.getString("crawler.actor.fetch.proxy.host"), port = config.getInt("crawler.actor.fetch.proxy.port")))
       .get()
       .map { response =>
-        logger.debug(
-          "fetching " + urlInfo.url + ", cost time: " + (System
-            .currentTimeMillis() - start) + " content length: " + response.body.length)
+        logger.debug("fetching " + urlInfo + ", cost time: " + (System.currentTimeMillis() - start) + " content length: " + response.body.length)
         if (response.status == FetchService.Ok) {
-          FetchResult(response.status, response.body, response.statusText, urlInfo.url, urlInfo.deep)
+          FetchResult(response.status, response.body, response.statusText, urlInfo)
         } else {
-          throw FetchException(response.status, response.statusText + " " + urlInfo.url)
+          throw FetchException(response.status, response.statusText + " " + urlInfo)
         }
       }
 

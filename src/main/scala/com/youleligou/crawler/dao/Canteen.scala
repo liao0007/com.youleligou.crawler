@@ -55,28 +55,23 @@ object Canteen {
     ) (Canteen.apply _)
 }
 
-class CanteenRepo extends CanCan {
+class CanteenRepo {
   val Canteens: TableQuery[CanteenTable] = TableQuery[CanteenTable]
 
-  def find(id: Long): Future[Option[Canteen]] = try {
-    db.run(Canteens.filter(_.id === id).result.headOption)
-  } finally db.close()
+  def find(id: Long): Future[Option[Canteen]] =
+    CanCan.db.run(Canteens.filter(_.id === id).result.headOption)
 
-  def delete(id: Long): Future[Int] = try {
-    db.run(Canteens.filter(_.id === id).delete)
-  } finally db.close()
+  def delete(id: Long): Future[Int] =
+    CanCan.db.run(Canteens.filter(_.id === id).delete)
 
-  def all(): Future[List[Canteen]] = try {
-    db.run(Canteens.to[List].result)
-  } finally db.close()
+  def all(): Future[List[Canteen]] =
+    CanCan.db.run(Canteens.to[List].result)
 
-  def create(canteen: Canteen): Future[Long] = try {
-    db.run(Canteens returning Canteens.map(_.id) += canteen)
-  } finally db.close()
+  def create(canteen: Canteen): Future[Long] =
+    CanCan.db.run(Canteens returning Canteens.map(_.id) += canteen)
 
-  def create(canteens: List[Canteen]): Future[Option[Int]] = try {
-    db.run(Canteens ++= canteens)
-  } finally db.close()
+  def create(canteens: List[Canteen]): Future[Option[Int]] =
+    CanCan.db.run(Canteens ++= canteens)
 }
 
 class CanteenTable(tag: Tag) extends Table[Canteen](tag, "canteen") {

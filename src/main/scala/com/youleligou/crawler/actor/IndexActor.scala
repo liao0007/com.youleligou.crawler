@@ -18,7 +18,7 @@ class IndexActor @Inject()(config: Config, indexService: IndexService, @Named(Co
 
   override def receive: Receive = {
     case page: ParseResult =>
-      log.debug("index: " + page.url)
+      log.debug("index: " + page.urlInfo)
       indexService.index(page)
       countActor ! IndexCounter(1)
   }

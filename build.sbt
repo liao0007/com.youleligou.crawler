@@ -23,6 +23,7 @@ resolvers ++= Seq(
 libraryDependencies ++= Seq(
 //  config
   "com.typesafe" % "config" % "1.3.1",
+  "com.github.andr83" %% "scalaconfig" % "0.3",
 //  logging
   "com.typesafe.scala-logging" %% "scala-logging" % "3.5.0",
   "com.typesafe.akka" %% "akka-slf4j" % "2.5.0-RC1",

@@ -5,11 +5,12 @@ import com.youleligou.crawler.model.UrlInfo.UrlType
 /**
   * 爬取url类
   *
-  * @param url    url
   * @param domain domain
   */
-case class UrlInfo(url: String, domain: String, urlType: UrlType, deep: Int) {
-  override def toString: String = url + "\n"
+case class UrlInfo(domain: String, queryParameters: Map[String, String], urlType: UrlType, deep: Int) {
+  val url: String = domain + queryParameters.map(queryParameter => queryParameter._1 + "=" + queryParameter._2).mkString("?", "&", "")
+
+  override def toString: String = url
 }
 
 object UrlInfo {

@@ -10,7 +10,8 @@ import com.youleligou.crawler.service.fetch.{FetchService, HttpClientFetchServic
 import com.youleligou.crawler.service.filter.{DefaultFilterService, FilterService}
 import com.youleligou.crawler.service.hash.{HashService, Md5HashService}
 import com.youleligou.crawler.service.index.{ElasticIndexService, IndexService}
-import com.youleligou.crawler.service.parse.{JsonParseService, JsoupParseService, ParseService}
+import com.youleligou.crawler.service.parse.json.CanteenParseService
+import com.youleligou.crawler.service.parse.ParseService
 import net.codingwell.scalaguice.ScalaModule
 import play.api.libs.ws.ahc.StandaloneAhcWSClient
 
@@ -30,7 +31,7 @@ class ServiceModule extends AbstractModule with ScalaModule with GuiceAkkaActorR
     bind[HashService].to[Md5HashService].asEagerSingleton()
     bind[FetchService].to[HttpClientFetchService].asEagerSingleton()
     bind[IndexService].to[ElasticIndexService].asEagerSingleton()
-    bind[ParseService].to[JsonParseService].asEagerSingleton()
+    bind[ParseService].to[CanteenParseService].asEagerSingleton()
     bind[CacheService].to[RedisCacheService].asEagerSingleton()
     bind[FilterService].to[DefaultFilterService].asEagerSingleton()
   }

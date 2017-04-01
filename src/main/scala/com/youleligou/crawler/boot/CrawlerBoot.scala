@@ -10,6 +10,7 @@ import com.youleligou.crawler.model.UrlInfo.SeedType
 import com.youleligou.crawler.model.UrlInfo
 
 import scala.collection.JavaConverters._
+import com.github.andr83.scalaconfig._
 
 /**
   * Created by dell on 2016/8/29.
@@ -21,7 +22,9 @@ class CrawlerBoot @Inject()(config: Config, system: ActorSystem, @Named(InjectAc
     * 爬虫启动函数
     */
   def start(): Unit = {
-    config.getStringList("crawler.seed").asScala.toList.foreach(url => injectActor ! UrlInfo(url.trim, url.trim, SeedType, 0))
+    config.getConfigList("crawler.seed").asScala.toList.foreach { seedConfig =>
+      injectActor ! UrlInfo(seedConfig.getString("domain"), seedConfig.as[Map[String, String]]("queryParameters"), SeedType, 0)
+    }
   }
 
   /**

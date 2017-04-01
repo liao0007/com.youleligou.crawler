@@ -11,6 +11,6 @@ class DefaultFilterService @Inject()(config: Config) extends FilterService {
   private val fetchDeep = config.getInt("crawler.actor.fetch.deep")
 
   override def filter(urlInfo: UrlInfo): Boolean = {
-    urlInfo.deep < fetchDeep && urlInfo.url.startsWith(urlInfo.domain) && urlInfo.url.startsWith("http")
+    urlInfo.url.startsWith(urlInfo.domain) && urlInfo.url.startsWith("http") //&& urlInfo.deep < fetchDeep
   }
 }
