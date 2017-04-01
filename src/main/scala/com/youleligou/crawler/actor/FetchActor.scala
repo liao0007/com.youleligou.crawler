@@ -15,20 +15,25 @@ import scala.util.{Failure, Success}
   * Created by young.yang on 2016/8/28.
   * 网页抓取任务,采用Actor实现
   */
-class FetchActor @Inject()(config: Config, fetchService: FetchService, @Named(ParseActor.poolName) parserActor: ActorRef, @Named(CountActor.poolName) countActor: ActorRef)
+class FetchActor @Inject()(config: Config,
+                           fetchService: FetchService,
+                           @Named(ParseActor.poolName) parserActor: ActorRef,
+                           @Named(CountActor.poolName) countActor: ActorRef)
   extends Actor
     with ActorLogging {
 
   override def receive: Receive = {
     //处理抓取任务
-    case page: UrlInfo =>
-      log.info("fetch url: " + page)
+    case urlInfo: UrlInfo =>
+      log.debug("fetch: " + urlInfo)
       countActor ! FetchCounter(1)
-      fetchService.fetch(page) onComplete {
+      fetchService.fetch(urlInfo) onComplete {
         case Success(fetchResult) =>
+          log.debug("fetch success: " + urlInfo.url)
           parserActor ! fetchResult
           countActor ! FetchOk(1)
         case Failure(_) =>
+          log.debug("fetch failed: " + urlInfo.url)
           countActor ! FetchError(1)
       }
   }

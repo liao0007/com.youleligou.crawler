@@ -15,20 +15,18 @@ import com.youleligou.crawler.service.parse.ParseService
 class ParseActor @Inject()(config: Config,
                            parseService: ParseService,
                            @Named(IndexActor.poolName) indexActor: ActorRef,
+                           @Named(InjectActor.poolName) injectActor: ActorRef,
                            @Named(CountActor.poolName) countActor: ActorRef)
   extends Actor
     with ActorLogging {
-
-  private val fetchDeep = config.getInt("crawler.actor.fetch.deep")
-
   override def receive: Receive = {
     case fetchResult: FetchResult =>
-      log.info("parse url: " + fetchResult.url)
-      val page: ParseResult = parseService.parse(fetchResult)
-      indexActor ! page
+      log.debug("parse: " + fetchResult.url)
+      val parseResult: ParseResult = parseService.parse(fetchResult)
+      indexActor ! parseResult
       countActor ! ParseCounter(1)
-      page.childLink.filter(urlInfo => urlInfo.deep < fetchDeep && urlInfo.url.startsWith(urlInfo.domain)).foreach { urlInfo =>
-        sender() ! urlInfo
+      parseResult.childLink.foreach { urlInfo =>
+        injectActor ! urlInfo
         countActor ! ParseChildUrlCounter(1)
       }
   }

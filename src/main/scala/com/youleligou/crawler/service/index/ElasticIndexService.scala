@@ -8,13 +8,14 @@ import com.youleligou.crawler.model.ParseResult
   * ES索引器
   */
 class ElasticIndexService extends IndexService with LazyLogging {
+
   /**
     * 文档索引
     *
-    * @param page
+    * @param parseResult
     * @return
     */
-  override def index(page: ParseResult): Unit = {
-    logger.info("indexing " + page.url)
+  override def index(parseResult: ParseResult): Unit = {
+    logger.debug("IndexService - indexing " + parseResult.url)
   }
 }
