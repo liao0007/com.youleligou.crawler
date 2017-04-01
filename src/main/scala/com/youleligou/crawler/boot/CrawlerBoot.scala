@@ -58,7 +58,7 @@ class CrawlerBoot @Inject()(config: Config, system: ActorSystem) extends LazyLog
     system.actorOf(GuiceAkkaExtension(system).props(CountActor.name), CountActor.name)
     logger.info("create countActor name -[" + countActor + "]")
 
-    config.getStringList("crawler.seed").asScala.toList.foreach(url => injectActor ! UrlInfo(url.trim, None, SeedType, 0))
+    config.getStringList("crawler.seed").asScala.toList.foreach(url => injectActor ! UrlInfo(url.trim, url.trim, SeedType, 0))
   }
 
   /**

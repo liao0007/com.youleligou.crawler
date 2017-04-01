@@ -25,7 +25,7 @@ class ParseActor @Inject()(config: Config, parseService: ParseService, @Named(In
       val page: ParseResult = parseService.parse(fetchResult)
       indexActor ! page
       countActor ! ParseCounter(1)
-      page.childLink.filter(_.deep < fetchDeep).foreach { urlInfo =>
+      page.childLink.filter(urlInfo => urlInfo.deep < fetchDeep && urlInfo.url.startsWith(urlInfo.domain)).foreach { urlInfo =>
         sender() ! urlInfo
         countActor ! ParseChildUrlCounter(1)
       }

@@ -9,6 +9,7 @@ import com.youleligou.crawler.model.UrlInfo
 import com.youleligou.crawler.service.fetch.FetchService
 
 import scala.concurrent.ExecutionContext.Implicits._
+import scala.util.{Failure, Success}
 
 /**
   * Created by young.yang on 2016/8/28.
@@ -25,11 +26,11 @@ class FetchActor @Inject()(config: Config, fetchService: FetchService, @Named(Pa
     case page: UrlInfo =>
       log.info("fetch url: " + page)
       countActor ! FetchCounter(1)
-      fetchService.fetch(page) map {
-        case Some(httpResult) =>
-          parserActor ! httpResult
+      fetchService.fetch(page) onComplete {
+        case Success(fetchResult) =>
+          parserActor ! fetchResult
           countActor ! FetchOk(1)
-        case _ =>
+        case Failure(_) =>
           countActor ! FetchError(1)
       }
   }

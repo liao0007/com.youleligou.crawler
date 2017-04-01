@@ -16,9 +16,9 @@ class JsoupParseService extends ParseService {
   /**
     * 解析子url
     */
-  private def parserUrls(parentUrl: String, urls: Elements, deep: Int): List[UrlInfo] = {
+  private def parserUrls(domain: String, urls: Elements, deep: Int): List[UrlInfo] = {
     urls.asScala.toList.map(_.attr("href")).withFilter(_.startsWith("http")).map { url =>
-      UrlInfo(url, Some(parentUrl), GenerateType, deep + 1)
+      UrlInfo(url, domain, GenerateType, deep + 1)
     }
   }
 

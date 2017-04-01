@@ -24,7 +24,7 @@ class HttpClientFetchService @Inject()(config: Config,
                                        hashService: HashService)
   extends FetchService
     with LazyLogging {
-  def fetch(urlInfo: UrlInfo): Future[Option[FetchResult]] = {
+  def fetch(urlInfo: UrlInfo): Future[FetchResult] = {
     val md5 = hashService.hash(urlInfo.url)
     cacheService.get(md5) flatMap {
       case None =>
@@ -40,7 +40,7 @@ class HttpClientFetchService @Inject()(config: Config,
                 logger.info(
                   "fetch url " + urlInfo + ", cost time -" + (System.currentTimeMillis() - start) + " content length -" + response.body.length)
                 if (response.status == FetchService.Ok) {
-                  Some(FetchResult(response.status, response.body, response.statusText, urlInfo.url, urlInfo.deep))
+                  FetchResult(response.status, response.body, response.statusText, urlInfo.url, urlInfo.deep)
                 } else {
                   throw new FetchException("fetch error code is -" + response.status + ",error url is " + urlInfo)
                 }
@@ -50,7 +50,7 @@ class HttpClientFetchService @Inject()(config: Config,
         }
       case _ if urlInfo.urlType == GenerateType =>
         logger.info("url  -" + urlInfo + " is fetched ")
-        Future.successful(None)
+        throw new FetchException("url is fetched: " + urlInfo)
     }
   }
 }
