@@ -25,12 +25,12 @@ class HttpClientFetchService @Inject()(config: Config, standaloneAhcWSClient: St
       .get()
       .map { response =>
         logger.debug(
-          "FetchService - fetching " + urlInfo.url + ", cost time -" + (System
-            .currentTimeMillis() - start) + " content length -" + response.body.length)
+          "fetching " + urlInfo.url + ", cost time: " + (System
+            .currentTimeMillis() - start) + " content length: " + response.body.length)
         if (response.status == FetchService.Ok) {
           FetchResult(response.status, response.body, response.statusText, urlInfo.url, urlInfo.deep)
         } else {
-          throw new FetchException("FetchService - error code is -" + response.status + ", url: " + urlInfo.url)
+          throw new FetchException("error code is -" + response.status + ", url: " + urlInfo.url)
         }
       }
 

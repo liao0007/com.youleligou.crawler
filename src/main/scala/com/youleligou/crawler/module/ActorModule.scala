@@ -2,8 +2,9 @@ package com.youleligou.crawler.module
 
 import javax.inject.Singleton
 
-import akka.actor.{Actor, ActorRef, ActorSystem}
-import akka.routing.BalancingPool
+import akka.actor.SupervisorStrategy.Restart
+import akka.actor.{Actor, ActorRef, ActorSystem, OneForOneStrategy}
+import akka.routing.{DefaultResizer, RoundRobinPool}
 import com.google.inject.{AbstractModule, Provides}
 import com.google.inject.name.{Named, Names}
 import com.typesafe.config.Config
@@ -14,6 +15,13 @@ import net.codingwell.scalaguice.ScalaModule
   * Created by liangliao on 1/4/17.
   */
 class ActorModule extends AbstractModule with ScalaModule with GuiceAkkaActorRefProvider {
+
+  private val supervisorStrategy: OneForOneStrategy = OneForOneStrategy() {
+    case _ => Restart
+  }
+
+  private def roundRobinPool(lowerBound: Int, upperBound: Int): RoundRobinPool =
+    RoundRobinPool(nrOfInstances = lowerBound, resizer = Some(DefaultResizer(lowerBound, upperBound)), supervisorStrategy = supervisorStrategy)
 
   /**
     * provide Actors
@@ -26,7 +34,7 @@ class ActorModule extends AbstractModule with ScalaModule with GuiceAkkaActorRef
   @Singleton
   @Named(InjectActor.poolName)
   def provideInjectActorPoolRef(config: Config, system: ActorSystem): ActorRef = {
-    provideActorPoolRef(system, InjectActor, BalancingPool(config.getInt("crawler.actor.inject.parallel")))
+    provideActorPoolRef(system, InjectActor, roundRobinPool(1, config.getInt("crawler.actor.inject.parallel")))
   }
 
   @Provides
@@ -37,7 +45,7 @@ class ActorModule extends AbstractModule with ScalaModule with GuiceAkkaActorRef
   @Singleton
   @Named(CountActor.poolName)
   def provideCountActorPoolRef(config: Config, system: ActorSystem): ActorRef = {
-    provideActorPoolRef(system, CountActor, BalancingPool(config.getInt("crawler.actor.count.parallel")))
+    provideActorPoolRef(system, CountActor, roundRobinPool(1, config.getInt("crawler.actor.count.parallel")))
   }
 
   @Provides
@@ -48,7 +56,7 @@ class ActorModule extends AbstractModule with ScalaModule with GuiceAkkaActorRef
   @Singleton
   @Named(FetchActor.poolName)
   def provideFetchActorPoolRef(config: Config, system: ActorSystem): ActorRef = {
-    provideActorPoolRef(system, FetchActor, BalancingPool(config.getInt("crawler.actor.fetch.parallel")))
+    provideActorPoolRef(system, FetchActor, roundRobinPool(1, config.getInt("crawler.actor.fetch.parallel")))
   }
 
   @Provides
@@ -59,7 +67,7 @@ class ActorModule extends AbstractModule with ScalaModule with GuiceAkkaActorRef
   @Singleton
   @Named(ParseActor.poolName)
   def provideParseActorPoolRef(config: Config, system: ActorSystem): ActorRef = {
-    provideActorPoolRef(system, ParseActor, BalancingPool(config.getInt("crawler.actor.parse.parallel")))
+    provideActorPoolRef(system, ParseActor, roundRobinPool(1, config.getInt("crawler.actor.parse.parallel")))
   }
 
   @Provides
@@ -70,7 +78,7 @@ class ActorModule extends AbstractModule with ScalaModule with GuiceAkkaActorRef
   @Singleton
   @Named(IndexActor.poolName)
   def provideIndexActorPoolRef(config: Config, system: ActorSystem): ActorRef = {
-    provideActorPoolRef(system, IndexActor, BalancingPool(config.getInt("crawler.actor.index.parallel")))
+    provideActorPoolRef(system, IndexActor, roundRobinPool(1, config.getInt("crawler.actor.index.parallel")))
   }
 
   override def configure() {
