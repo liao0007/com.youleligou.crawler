@@ -21,7 +21,7 @@ class ElemeCrawlerBootstrap @Inject()(config: Config, system: ActorSystem, @Name
     * 爬虫启动函数
     */
   def start(): Unit = {
-    system.scheduler.schedule(FiniteDuration(200, MILLISECONDS), FiniteDuration(200, MILLISECONDS), injectActor, Generate)
+    system.scheduler.schedule(FiniteDuration(500, MILLISECONDS), FiniteDuration(500, MILLISECONDS), injectActor, Generate)
   }
 
   /**
