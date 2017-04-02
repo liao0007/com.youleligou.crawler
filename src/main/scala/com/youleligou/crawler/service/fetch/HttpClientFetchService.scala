@@ -5,7 +5,7 @@ import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
 import com.youleligou.crawler.model.{FetchResult, UrlInfo}
 import com.youleligou.crawler.service.fetch.FetchService.FetchException
-import play.api.libs.ws.DefaultWSProxyServer
+import play.api.libs.ws.{DefaultWSProxyServer, WSAuthScheme}
 import play.api.libs.ws.ahc.StandaloneAhcWSClient
 
 import scala.concurrent.ExecutionContext.Implicits._
@@ -21,8 +21,8 @@ class HttpClientFetchService @Inject()(config: Config, standaloneAhcWSClient: St
     standaloneAhcWSClient
       .url(urlInfo.url)
       .withHeaders("User-Agent" -> config.getString("crawler.actor.fetch.userAgent"))
-      .withProxyServer(
-        DefaultWSProxyServer(host = config.getString("crawler.actor.fetch.proxy.host"), port = config.getInt("crawler.actor.fetch.proxy.port")))
+      .withAuth(config.getString("proxy.user"), config.getString("proxy.password"), WSAuthScheme.BASIC)
+      .withProxyServer(DefaultWSProxyServer(host = config.getString("proxy.host"), port = config.getInt("proxy.port")))
       .get()
       .map { response =>
         logger.debug("fetching " + urlInfo + ", cost time: " + (System.currentTimeMillis() - start) + " content length: " + response.body.length)

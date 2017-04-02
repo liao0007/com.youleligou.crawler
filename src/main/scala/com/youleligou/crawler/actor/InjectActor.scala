@@ -33,6 +33,7 @@ class InjectActor @Inject()(config: Config,
           log.debug("inject: " + urlInfo)
           cacheService.put(md5, "1") map {
             case true =>
+              Thread.sleep(200)
               fetchActor ! urlInfo
               countActor ! InjectCounter(1)
             case false =>

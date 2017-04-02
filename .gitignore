@@ -4,3 +4,4 @@ target/
 log
 /src/main/resources/cache.conf
 /src/main/resources/database.conf
+/src/main/resources/abuyun.conf
