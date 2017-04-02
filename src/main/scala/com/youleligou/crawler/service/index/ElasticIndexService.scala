@@ -2,6 +2,7 @@ package com.youleligou.crawler.service.index
 
 import com.typesafe.scalalogging.LazyLogging
 import com.youleligou.crawler.model.ParseResult
+import com.youleligou.crawler.service.IndexService
 
 /**
   * Created by dell on 2016/8/29.

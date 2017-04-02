@@ -2,7 +2,7 @@ package com.youleligou.crawler.service.parse.html
 
 import com.youleligou.crawler.model.UrlInfo.GenerateType
 import com.youleligou.crawler.model.{FetchResult, ParseResult, UrlInfo}
-import com.youleligou.crawler.service.parse.ParseService
+import com.youleligou.crawler.service.ParseService
 import org.jsoup.Jsoup
 import org.jsoup.select.Elements
 

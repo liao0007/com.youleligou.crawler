@@ -3,6 +3,7 @@ package com.youleligou.crawler.service.cache
 import akka.actor.ActorSystem
 import com.google.inject.Inject
 import com.typesafe.config.Config
+import com.youleligou.crawler.service.CacheService
 import redis.RedisClient
 
 import scala.concurrent.Future

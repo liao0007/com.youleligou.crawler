@@ -1,5 +1,7 @@
 package com.youleligou.crawler.service.cache
 
+import com.youleligou.crawler.service.CacheService
+
 import scala.collection.mutable
 import scala.concurrent.Future
 

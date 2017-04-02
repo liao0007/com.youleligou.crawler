@@ -6,14 +6,15 @@ import com.google.inject.name.Named
 import com.typesafe.config.Config
 import com.youleligou.crawler.actor.CountActor._
 import com.youleligou.crawler.model.{FetchResult, ParseResult}
-import com.youleligou.crawler.service.parse.ParseService
+import com.youleligou.crawler.service.ParseService
+import com.youleligou.eleme.RestaurantParseService
 
 /**
   * Created by young.yang on 2016/8/28.
   * 解析任务
   */
 class ParseActor @Inject()(config: Config,
-                           parseService: ParseService,
+                           @Named(RestaurantParseService.name) parseService: ParseService,
                            @Named(IndexActor.poolName) indexActor: ActorRef,
                            @Named(InjectActor.poolName) injectActor: ActorRef,
                            @Named(CountActor.poolName) countActor: ActorRef)

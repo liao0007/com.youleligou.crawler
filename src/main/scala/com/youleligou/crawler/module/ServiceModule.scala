@@ -4,24 +4,23 @@ import javax.inject.Singleton
 
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
-import com.google.inject.{AbstractModule, Provides}
-import com.youleligou.crawler.service.cache.{CacheService, RedisCacheService}
-import com.youleligou.crawler.service.fetch.{FetchService, HttpClientFetchService}
-import com.youleligou.crawler.service.filter.{DefaultFilterService, FilterService}
-import com.youleligou.crawler.service.hash.{HashService, Md5HashService}
-import com.youleligou.crawler.service.index.{ElasticIndexService, IndexService}
-import com.youleligou.crawler.service.parse.json.CanteenParseService
-import com.youleligou.crawler.service.parse.ParseService
-import net.codingwell.scalaguice.ScalaModule
+import com.google.inject.{AbstractModule, PrivateModule, Provides}
+import com.youleligou.crawler.service._
+import com.youleligou.crawler.service.cache.RedisCacheService
+import com.youleligou.crawler.service.fetch.HttpClientFetchService
+import com.youleligou.crawler.service.filter.DefaultFilterService
+import com.youleligou.crawler.service.hash.Md5HashService
+import com.youleligou.crawler.service.index.ElasticIndexService
+import com.youleligou.crawler.service.parse.html.JsoupParseService
+import net.codingwell.scalaguice.{ScalaModule, ScalaPrivateModule}
 import play.api.libs.ws.ahc.StandaloneAhcWSClient
 
 /**
   * Created by liangliao on 31/3/17.
   */
-class ServiceModule extends AbstractModule with ScalaModule with GuiceAkkaActorRefProvider {
+class ServiceModule extends AbstractModule with ScalaModule {
 
   @Provides
-  @Singleton
   def provideStandaloneAhcWSClient()(implicit system: ActorSystem): StandaloneAhcWSClient = {
     implicit val materializer = ActorMaterializer()
     StandaloneAhcWSClient()
@@ -31,7 +30,6 @@ class ServiceModule extends AbstractModule with ScalaModule with GuiceAkkaActorR
     bind[HashService].to[Md5HashService].asEagerSingleton()
     bind[FetchService].to[HttpClientFetchService].asEagerSingleton()
     bind[IndexService].to[ElasticIndexService].asEagerSingleton()
-    bind[ParseService].to[CanteenParseService].asEagerSingleton()
     bind[CacheService].to[RedisCacheService].asEagerSingleton()
     bind[FilterService].to[DefaultFilterService].asEagerSingleton()
   }

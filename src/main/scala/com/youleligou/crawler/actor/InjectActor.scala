@@ -5,10 +5,10 @@ import akka.actor.{Actor, ActorLogging, ActorRef}
 import com.google.inject.name.Named
 import com.typesafe.config.Config
 import com.youleligou.crawler.actor.CountActor._
+import com.youleligou.crawler.actor.InjectActor.Generate
 import com.youleligou.crawler.model._
-import com.youleligou.crawler.service.cache.CacheService
-import com.youleligou.crawler.service.filter.FilterService
-import com.youleligou.crawler.service.hash.HashService
+import com.youleligou.crawler.service.{CacheService, FilterService, GenerateService, HashService}
+import com.youleligou.eleme.RestaurantGenerateService
 
 import scala.concurrent.ExecutionContext.Implicits._
 
@@ -19,12 +19,20 @@ class InjectActor @Inject()(config: Config,
                             cacheService: CacheService,
                             hashService: HashService,
                             filterService: FilterService,
+                            @Named(RestaurantGenerateService.name) generateService: GenerateService,
                             @Named(FetchActor.poolName) fetchActor: ActorRef,
                             @Named(CountActor.poolName) countActor: ActorRef)
   extends Actor
     with ActorLogging {
 
+  var seed: Long = 79
+
   override def receive: Receive = {
+    case Generate =>
+      seed = seed + 1
+      val urlInfo = generateService.generate(seed.toString)
+      log.info("generated: " + urlInfo)
+      self ! generateService.generate(seed.toString)
     case urlInfo: UrlInfo if filterService.filter(urlInfo) =>
       // check cache
       val md5 = hashService.hash(urlInfo.url)
@@ -40,7 +48,7 @@ class InjectActor @Inject()(config: Config,
               self ! urlInfo
           }
         case _ =>
-          log.info("canceled, cache hit: " + urlInfo)
+          log.info("cache hit: " + urlInfo)
       }
   }
 }
@@ -48,4 +56,6 @@ class InjectActor @Inject()(config: Config,
 object InjectActor extends NamedActor {
   override final val name = "InjectActor"
   override final val poolName = "InjectActorPool"
+
+  case object Generate
 }

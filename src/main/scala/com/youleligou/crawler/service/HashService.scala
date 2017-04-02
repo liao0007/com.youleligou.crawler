@@ -1,4 +1,4 @@
-package com.youleligou.crawler.service.hash
+package com.youleligou.crawler.service
 
 /**
   * Created by liangliao on 1/4/17.

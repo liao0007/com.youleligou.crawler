@@ -1,7 +1,6 @@
-package com.youleligou.crawler.service.parse
+package com.youleligou.crawler.service
 
-import com.youleligou.crawler.model.{FetchResult, ParseResult, UrlInfo}
-import org.jsoup.select.Elements
+import com.youleligou.crawler.model.{FetchResult, ParseResult}
 
 /**
   * Created by young.yang on 2016/8/28.

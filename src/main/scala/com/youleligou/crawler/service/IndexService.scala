@@ -1,4 +1,4 @@
-package com.youleligou.crawler.service.index
+package com.youleligou.crawler.service
 
 import com.youleligou.crawler.model.ParseResult
 

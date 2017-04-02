@@ -6,7 +6,7 @@ import com.google.inject.name.Named
 import com.typesafe.config.Config
 import com.youleligou.crawler.actor.CountActor.IndexCounter
 import com.youleligou.crawler.model.ParseResult
-import com.youleligou.crawler.service.index.IndexService
+import com.youleligou.crawler.service.IndexService
 
 /**
   * Created by dell on 2016/8/29.

@@ -1,10 +1,14 @@
 package com.youleligou.crawler.service.fetch
 
+import java.sql.Timestamp
+
 import com.google.inject.Inject
 import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
+import com.youleligou.crawler.dao.{CrawlerJob, CrawlerJobRepo}
 import com.youleligou.crawler.model.{FetchResult, UrlInfo}
-import com.youleligou.crawler.service.fetch.FetchService.FetchException
+import com.youleligou.crawler.service.FetchService
+import com.youleligou.crawler.service.FetchService.FetchException
 import play.api.libs.ws.{DefaultWSProxyServer, WSAuthScheme}
 import play.api.libs.ws.ahc.StandaloneAhcWSClient
 
@@ -15,7 +19,9 @@ import scala.concurrent.Future
   * Created by young.yang on 2016/8/28.
   * 采用HttpClient实现的爬取器
   */
-class HttpClientFetchService @Inject()(config: Config, standaloneAhcWSClient: StandaloneAhcWSClient) extends FetchService with LazyLogging {
+class HttpClientFetchService @Inject()(config: Config, standaloneAhcWSClient: StandaloneAhcWSClient, crawlerJobRepo: CrawlerJobRepo)
+  extends FetchService
+    with LazyLogging {
   def fetch(urlInfo: UrlInfo): Future[FetchResult] = {
     val start = System.currentTimeMillis()
     standaloneAhcWSClient
@@ -26,6 +32,12 @@ class HttpClientFetchService @Inject()(config: Config, standaloneAhcWSClient: St
       .get()
       .map { response =>
         logger.info("fetching " + urlInfo + ", cost time: " + (System.currentTimeMillis() - start) + " content length: " + response.body.length)
+        crawlerJobRepo.create(
+          CrawlerJob(
+            url = urlInfo.url,
+            statusCode = Some(response.status),
+            statusMessage = Some(response.statusText)
+          ))
         if (response.status == FetchService.Ok) {
           FetchResult(response.status, response.body, response.statusText, urlInfo)
         } else {

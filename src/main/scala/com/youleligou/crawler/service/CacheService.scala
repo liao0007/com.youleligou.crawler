@@ -1,4 +1,4 @@
-package com.youleligou.crawler.service.cache
+package com.youleligou.crawler.service
 
 import scala.concurrent.Future
 

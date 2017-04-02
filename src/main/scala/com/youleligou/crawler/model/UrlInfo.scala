@@ -7,7 +7,7 @@ import com.youleligou.crawler.model.UrlInfo.UrlType
   *
   * @param domain domain
   */
-case class UrlInfo(domain: String, queryParameters: Map[String, String], urlType: UrlType, deep: Int) {
+case class UrlInfo(domain: String, queryParameters: Set[(String, String)], urlType: UrlType, deep: Int) {
   val url: String = domain + queryParameters.map(queryParameter => queryParameter._1 + "=" + queryParameter._2).mkString("?", "&", "")
 
   override def toString: String = url

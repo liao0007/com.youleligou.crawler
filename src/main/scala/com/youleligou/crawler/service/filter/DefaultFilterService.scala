@@ -3,6 +3,7 @@ package com.youleligou.crawler.service.filter
 import com.google.inject.Inject
 import com.typesafe.config.Config
 import com.youleligou.crawler.model.UrlInfo
+import com.youleligou.crawler.service.FilterService
 
 /**
   * Created by liangliao on 1/4/17.
