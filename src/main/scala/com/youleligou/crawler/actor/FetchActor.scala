@@ -46,7 +46,7 @@ class FetchActor @Inject()(config: Config,
               log.info("fetch timeout, re-fetch: " + urlInfo.url)
               self ! urlInfo
             case FetchService.TooManyRequest =>
-              log.info("proxy too many request, re-fetch: " + urlInfo.url + " in seconds: " + sleepInterval / 1000)
+              log.info("proxy too many request, re-fetch: " + urlInfo.url + " in seconds: " + sleepInterval / 1000.0)
               sleepInterval = sleepInterval * 2
               Thread.sleep(sleepInterval)
               self ! urlInfo
@@ -58,6 +58,7 @@ class FetchActor @Inject()(config: Config,
           countActor ! FetchError(1)
         case _ =>
           retry = 1
+          sleepInterval = 100
           log.info("fetch failed with retry limit: " + urlInfo.url)
       }
   }
