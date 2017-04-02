@@ -13,6 +13,7 @@ trait FetchService {
 
 object FetchService {
   val Ok = 200
+  val PaymentRequired = 402
   val NotFound = 404
   val ServiceUnavailable = 503
   val Timeout = 504

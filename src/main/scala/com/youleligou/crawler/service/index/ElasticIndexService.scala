@@ -16,6 +16,6 @@ class ElasticIndexService extends IndexService with LazyLogging {
     * @return
     */
   override def index(parseResult: ParseResult): Unit = {
-    logger.debug("indexing: " + parseResult.urlInfo)
+    logger.info("indexing: " + parseResult.urlInfo)
   }
 }

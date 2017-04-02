@@ -30,17 +30,17 @@ class InjectActor @Inject()(config: Config,
       val md5 = hashService.hash(urlInfo.url)
       cacheService.get(md5) map {
         case None =>
-          log.debug("inject: " + urlInfo)
+          log.info("inject: " + urlInfo)
           cacheService.put(md5, "1") map {
             case true =>
               fetchActor ! urlInfo
               countActor ! InjectCounter(1)
             case false =>
-              log.debug("cache failed, re-inject: " + urlInfo)
+              log.info("cache failed, re-inject: " + urlInfo)
               self ! urlInfo
           }
         case _ =>
-          log.debug("canceled, cache hit: " + urlInfo)
+          log.info("canceled, cache hit: " + urlInfo)
       }
   }
 }

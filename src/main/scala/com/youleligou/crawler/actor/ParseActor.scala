@@ -21,7 +21,7 @@ class ParseActor @Inject()(config: Config,
     with ActorLogging {
   override def receive: Receive = {
     case fetchResult: FetchResult =>
-      log.debug("parse: " + fetchResult.urlInfo)
+      log.info("parse: " + fetchResult.urlInfo)
       val parseResult: ParseResult = parseService.parse(fetchResult)
       indexActor ! parseResult
       countActor ! ParseCounter(1)

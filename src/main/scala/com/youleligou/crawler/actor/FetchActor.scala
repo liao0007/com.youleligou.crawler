@@ -29,13 +29,13 @@ class FetchActor @Inject()(config: Config,
   override def receive: Receive = {
     //处理抓取任务
     case urlInfo: UrlInfo =>
-      log.debug("fetch: " + urlInfo)
+      log.info("fetch: " + urlInfo)
       countActor ! FetchCounter(1)
       fetchService.fetch(urlInfo) onComplete {
         case Success(fetchResult) =>
           sleepInterval = 100
           retry = 1
-          log.debug("fetch success: " + urlInfo.url)
+          log.info("fetch success: " + urlInfo.url)
           parserActor ! fetchResult
           countActor ! FetchOk(1)
         case Failure(FetchException(statusCode, message)) if retry < 10 =>
@@ -43,22 +43,22 @@ class FetchActor @Inject()(config: Config,
           statusCode match {
             case FetchService.Timeout =>
               sleepInterval = 100
-              log.debug("fetch timeout, re-fetch: " + urlInfo.url)
+              log.info("fetch timeout, re-fetch: " + urlInfo.url)
               self ! urlInfo
             case FetchService.TooManyRequest =>
-              log.debug("proxy too many request, re-fetch: " + urlInfo.url + " in seconds: " + sleepInterval / 1000)
+              log.info("proxy too many request, re-fetch: " + urlInfo.url + " in seconds: " + sleepInterval / 1000)
               sleepInterval = sleepInterval * 2
               Thread.sleep(sleepInterval)
               self ! urlInfo
             case _ =>
               sleepInterval = 100
-              log.debug("fetch failed: " + statusCode + " " + message)
+              log.info("fetch failed: " + statusCode + " " + message)
               self ! urlInfo
           }
           countActor ! FetchError(1)
         case _ =>
           retry = 1
-          log.debug("fetch failed with retry limit: " + urlInfo.url)
+          log.info("fetch failed with retry limit: " + urlInfo.url)
       }
   }
 }
