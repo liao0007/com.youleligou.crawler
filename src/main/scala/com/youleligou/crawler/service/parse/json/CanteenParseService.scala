@@ -31,8 +31,8 @@ class CanteenParseService @Inject()(canteenRepo: CanteenRepo) extends ParseServi
         latitudeDelta <- -5 to 5
         longitudeDelta <- -5 to 5
       } yield {
-        val latitude = (queryParameters("latitude").toFloat + latitudeDelta / 2).toString
-        val longitude = (queryParameters("longitude").toFloat + longitudeDelta / 2).toString
+        val latitude = (queryParameters("latitude").toFloat + latitudeDelta / 100.0).toString
+        val longitude = (queryParameters("longitude").toFloat + longitudeDelta / 100.0).toString
         val offset = "0"
         urlInfo.copy(queryParameters = Map[String, String](
           "latitude" -> latitude,

@@ -14,7 +14,9 @@ trait FetchService {
 object FetchService {
   val Ok = 200
   val NotFound = 404
+  val ServiceUnavailable = 503
   val Timeout = 504
+  val TooManyRequest = 429
 
   case class FetchException(statusCode: Int, message: String) extends Exception
 
