@@ -8,7 +8,7 @@ import scala.concurrent.Future
   * Created by liangliao on 31/3/17.
   */
 trait FetchService {
-  def fetch(urlInfo: UrlInfo): Future[FetchResult]
+  def fetch(jobName: String, urlInfo: UrlInfo): Future[FetchResult]
 }
 
 object FetchService {

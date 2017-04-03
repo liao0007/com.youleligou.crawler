@@ -40,9 +40,7 @@ object GuiceAkkaExtension extends ExtensionId[GuiceAkkaExtensionImpl] with Exten
   */
 trait GuiceAkkaActorRefProvider {
   def propsFor(system: ActorSystem, namedActor: NamedActor): Props = GuiceAkkaExtension(system).props(namedActor.name)
-
   def provideActorRef(system: ActorSystem, actor: NamedActor): ActorRef = system.actorOf(propsFor(system, actor))
-
   def provideActorPoolRef(system: ActorSystem, actor: NamedActor, pool: Pool): ActorRef =
     system.actorOf(pool.props(GuiceAkkaExtension(system).props(actor.name)), actor.poolName)
 }

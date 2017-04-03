@@ -5,10 +5,10 @@ import com.google.inject.Inject
 import com.google.inject.name.Named
 import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
-import com.youleligou.crawler.actor.InjectActor.Generate
+import com.youleligou.crawler.actor.InjectActor.{GenerateFetch, Init}
 import com.youleligou.crawler.actor._
-import scala.concurrent.duration._
 
+import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits._
 
 /**
@@ -21,7 +21,8 @@ class ElemeCrawlerBootstrap @Inject()(config: Config, system: ActorSystem, @Name
     * 爬虫启动函数
     */
   def start(): Unit = {
-    system.scheduler.schedule(FiniteDuration(500, MILLISECONDS), FiniteDuration(500, MILLISECONDS), injectActor, Generate)
+    system.scheduler.scheduleOnce(FiniteDuration(300, MILLISECONDS), injectActor, Init)
+    system.scheduler.schedule(FiniteDuration(300, MILLISECONDS), FiniteDuration(300, MILLISECONDS), injectActor, GenerateFetch)
   }
 
   /**

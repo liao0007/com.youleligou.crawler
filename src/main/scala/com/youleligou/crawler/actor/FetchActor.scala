@@ -5,6 +5,7 @@ import akka.actor.{Actor, ActorLogging, ActorRef}
 import com.google.inject.name.Named
 import com.typesafe.config.Config
 import com.youleligou.crawler.actor.CountActor._
+import com.youleligou.crawler.actor.FetchActor.Fetch
 import com.youleligou.crawler.model.UrlInfo
 import com.youleligou.crawler.service.FetchService
 import com.youleligou.crawler.service.FetchService.FetchException
@@ -29,10 +30,10 @@ class FetchActor @Inject()(config: Config,
 
   override def receive: Receive = {
     //处理抓取任务
-    case urlInfo: UrlInfo =>
+    case Fetch(jobName, urlInfo) =>
       log.info("fetch: " + urlInfo)
       countActor ! FetchCounter(1)
-      fetchService.fetch(urlInfo) onComplete {
+      fetchService.fetch(jobName, urlInfo) onComplete {
         case Success(fetchResult) =>
           sleepInterval = 100
           retry = 1
@@ -67,4 +68,6 @@ class FetchActor @Inject()(config: Config,
 object FetchActor extends NamedActor {
   override final val name = "FetchActor"
   override final val poolName = "FetchActorPool"
+
+  case class Fetch(jobName: String, urlInfo: UrlInfo)
 }

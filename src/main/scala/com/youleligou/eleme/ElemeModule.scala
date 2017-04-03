@@ -1,7 +1,7 @@
 package com.youleligou.eleme
 
 import com.google.inject.AbstractModule
-import com.youleligou.crawler.service.{GenerateService, ParseService}
+import com.youleligou.crawler.service.{InjectService, ParseService}
 import net.codingwell.scalaguice.ScalaModule
 
 /**
@@ -11,7 +11,7 @@ class ElemeModule extends AbstractModule with ScalaModule {
 
   override def configure() {
     bind[ParseService].annotatedWithName(RestaurantParseService.name).to[RestaurantParseService].asEagerSingleton()
-    bind[GenerateService].annotatedWithName(RestaurantGenerateService.name).to[RestaurantGenerateService].asEagerSingleton()
+    bind[InjectService].annotatedWithName(RestaurantInjectService.name).to[RestaurantInjectService].asEagerSingleton()
   }
 
 }

@@ -22,7 +22,7 @@ import scala.concurrent.Future
 class HttpClientFetchService @Inject()(config: Config, standaloneAhcWSClient: StandaloneAhcWSClient, crawlerJobRepo: CrawlerJobRepo)
   extends FetchService
     with LazyLogging {
-  def fetch(urlInfo: UrlInfo): Future[FetchResult] = {
+  def fetch(jobName: String, urlInfo: UrlInfo): Future[FetchResult] = {
     val start = System.currentTimeMillis()
     standaloneAhcWSClient
       .url(urlInfo.url)
@@ -35,6 +35,7 @@ class HttpClientFetchService @Inject()(config: Config, standaloneAhcWSClient: St
         crawlerJobRepo.create(
           CrawlerJob(
             url = urlInfo.url,
+            jobName = jobName,
             statusCode = Some(response.status),
             statusMessage = Some(response.statusText)
           ))

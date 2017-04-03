@@ -3,7 +3,7 @@ package com.youleligou.crawler.dao
 import java.sql.Timestamp
 
 import com.typesafe.scalalogging.LazyLogging
-import com.youleligou.crawler.dao.CrawlerJob.FetchJob
+import com.youleligou.crawler.dao.CrawlerJob.{FetchJobType, JobType}
 import com.youleligou.crawler.dao.schema.CanCan
 import slick.jdbc.MySQLProfile.api._
 import slick.lifted.Tag
@@ -14,21 +14,24 @@ import scala.concurrent.ExecutionContext.Implicits._
 
 case class CrawlerJob(
                        id: Long = 0,
-                       jobType: String = FetchJob,
+                       jobType: String = FetchJobType,
+                       jobName: String,
                        url: String,
-                       createdAt: Option[Timestamp] = None,
+                       createdAt: Timestamp = new Timestamp(System.currentTimeMillis()),
                        statusCode: Option[Int] = None,
                        statusMessage: Option[String] = None
                      )
 
 object CrawlerJob {
 
-  abstract class JobType(val name: String)
+  abstract class JobType(val name: String) {
+    override def toString: String = name
+  }
 
-  case object FetchJob extends JobType("Fetch")
+  case object FetchJobType extends JobType("Fetch")
 
   object JobType {
-    implicit def jobToString(jobType: JobType): String = jobType.name
+    implicit def jobToString(jobType: JobType): String = jobType.toString
   }
 
 }
@@ -38,6 +41,15 @@ class CrawlerJobRepo extends LazyLogging {
 
   def find(id: Long): Future[Option[CrawlerJob]] =
     CanCan.db.run(CrawlerJobs.filter(_.id === id).result.headOption)
+
+  def findWithMaxId(jobType: JobType, jobName: String): Future[Option[CrawlerJob]] =
+    CanCan.db.run(
+      CrawlerJobs
+        .filter(job => job.jobType === jobType.toString && job.jobName === jobName)
+        .sortBy(_.id.desc)
+        .take(1)
+        .result
+        .headOption)
 
   def delete(id: Long): Future[Int] =
     CanCan.db.run(CrawlerJobs.filter(_.id === id).delete)
@@ -61,6 +73,8 @@ class CrawlerJobTable(tag: Tag) extends Table[CrawlerJob](tag, "crawler_job") {
 
   def jobType = column[String]("job_type")
 
+  def jobName = column[String]("job_name")
+
   def url = column[String]("url")
 
   def createdAt = column[Timestamp]("created_at", SqlType("timestamp not null default CURRENT_TIMESTAMP"))
@@ -70,6 +84,6 @@ class CrawlerJobTable(tag: Tag) extends Table[CrawlerJob](tag, "crawler_job") {
   def statusMessage = column[String]("status_message")
 
   def * =
-    (id, jobType, url, createdAt.?, statusCode.?, statusMessage.?) <> ((CrawlerJob.apply _).tupled, CrawlerJob.unapply)
+    (id, jobType, jobName, url, createdAt, statusCode.?, statusMessage.?) <> ((CrawlerJob.apply _).tupled, CrawlerJob.unapply)
 
 }
