@@ -22,7 +22,7 @@ class ElemeCrawlerBootstrap @Inject()(config: Config, system: ActorSystem, @Name
     */
   def start(): Unit = {
     system.scheduler.scheduleOnce(FiniteDuration(300, MILLISECONDS), injectActor, Init)
-    system.scheduler.schedule(FiniteDuration(300, MILLISECONDS), FiniteDuration(300, MILLISECONDS), injectActor, GenerateFetch)
+
   }
 
   /**

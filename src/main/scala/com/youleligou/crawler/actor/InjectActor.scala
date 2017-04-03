@@ -13,6 +13,9 @@ import com.youleligou.eleme.RestaurantInjectService
 
 import scala.concurrent.ExecutionContext.Implicits._
 import akka.actor.Stash
+import akka.pattern.pipe
+
+import scala.concurrent.duration.{FiniteDuration, MILLISECONDS}
 
 /**
   * 抓取种子注入任务,将需要抓取的任务注入到该任务中
@@ -31,14 +34,17 @@ class InjectActor @Inject()(config: Config,
   var seed: Int = 0
 
   override def receive: Receive = {
+
     case Init =>
-      injectService.initSeed().map { initSeed =>
-        seed = initSeed
-        unstashAll()
-        context.become(initialized)
-      }
+      log.info("initializing seed")
+      injectService.initSeed().pipeTo(self)
+
+    case initSeed: Int =>
+      log.info("seed inited with: " + initSeed + ", scheduling GenerateFetch")
+      seed = initSeed
+      context.system.scheduler.schedule(FiniteDuration(300, MILLISECONDS), FiniteDuration(300, MILLISECONDS), self, GenerateFetch)
+      context.become(initialized)
     case _ =>
-      stash()
   }
 
   def initialized: Receive = {
