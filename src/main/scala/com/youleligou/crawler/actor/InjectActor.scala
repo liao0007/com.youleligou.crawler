@@ -33,11 +33,17 @@ class InjectActor @Inject()(config: Config,
 
   var seed: Int = 0
 
+  override def preStart(): Unit = {
+    injectService.initSeed().pipeTo(self)
+  }
+
+  override def postRestart(reason: Throwable): Unit = {
+    preStart()
+  }
+
   override def receive: Receive = {
 
     case Init =>
-      log.info("initializing seed")
-      injectService.initSeed().pipeTo(self)
 
     case initSeed: Int =>
       log.info("seed inited with: " + initSeed + ", scheduling GenerateFetch")
