@@ -3,9 +3,9 @@ package com.youleligou.crawler.actors
 import akka.actor.{Actor, ActorLogging, ActorRef, Stash}
 import akka.pattern.pipe
 import com.typesafe.config.Config
+import com.youleligou.crawler.actors.AbstractFetchActor.Fetch
 import com.youleligou.crawler.actors.AbstractInjectActor.{GenerateFetch, Init}
 import com.youleligou.crawler.actors.CountActor._
-import com.youleligou.crawler.actors.FetchActor.Fetch
 import com.youleligou.crawler.models._
 import com.youleligou.crawler.services.{CacheService, FilterService, HashService, InjectService}
 

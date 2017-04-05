@@ -3,7 +3,6 @@ package com.youleligou.crawler
 import akka.actor.ActorRef
 import com.google.inject.Guice
 import com.youleligou.crawler.actors.ProxyAssistantActor.Hunt
-import com.youleligou.crawler.modules.{ActorModule, AkkaModule, ConfigModule, ServiceModule}
 import com.youleligou.crawler.proxyHunters.xicidaili.XiCiDaiLiModule
 import com.youleligou.eleme.ElemeModule
 
@@ -12,10 +11,6 @@ import com.youleligou.eleme.ElemeModule
   */
 object Main extends App {
   val injector = Guice.createInjector(
-    new ConfigModule,
-    new AkkaModule,
-    new ServiceModule,
-    new ActorModule,
     new ElemeModule,
     new XiCiDaiLiModule
   )

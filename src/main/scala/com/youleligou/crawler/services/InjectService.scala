@@ -1,6 +1,6 @@
 package com.youleligou.crawler.services
 
-import com.youleligou.crawler.actors.FetchActor.Fetch
+import com.youleligou.crawler.actors.AbstractFetchActor.Fetch
 
 import scala.concurrent.Future
 

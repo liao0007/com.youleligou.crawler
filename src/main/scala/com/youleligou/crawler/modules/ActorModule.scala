@@ -40,17 +40,6 @@ class ActorModule extends AbstractModule with ScalaModule with GuiceAkkaActorRef
   }
 
   @Provides
-  @Named(FetchActor.name)
-  def provideFetchActorRef(system: ActorSystem): ActorRef = provideActorRef(system, FetchActor)
-
-  @Provides
-  @Singleton
-  @Named(FetchActor.poolName)
-  def provideFetchActorPoolRef(config: Config, system: ActorSystem): ActorRef = {
-    provideActorPoolRef(system, FetchActor, roundRobinPool(1, config.getInt("crawler.actor.fetch.parallel")))
-  }
-
-  @Provides
   @Named(ProxyAssistantActor.name)
   def provideProxyAssistantActorRef(system: ActorSystem): ActorRef = provideActorRef(system, ProxyAssistantActor)
 
@@ -74,7 +63,6 @@ class ActorModule extends AbstractModule with ScalaModule with GuiceAkkaActorRef
 
   override def configure() {
     bind[Actor].annotatedWith(Names.named(CountActor.name)).to[CountActor]
-    bind[Actor].annotatedWith(Names.named(FetchActor.name)).to[FetchActor]
     bind[Actor].annotatedWith(Names.named(ProxyAssistantActor.name)).to[ProxyAssistantActor]
     bind[Actor].annotatedWith(Names.named(IndexActor.name)).to[IndexActor]
   }

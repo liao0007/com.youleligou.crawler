@@ -1,7 +1,7 @@
 package com.youleligou.eleme.services
 
 import com.google.inject.Inject
-import com.youleligou.crawler.actors.FetchActor.Fetch
+import com.youleligou.crawler.actors.AbstractFetchActor.Fetch
 import com.youleligou.crawler.daos.CrawlerJob.FetchJobType
 import com.youleligou.crawler.daos.CrawlerJobRepo
 import com.youleligou.crawler.models.UrlInfo

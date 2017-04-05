@@ -20,6 +20,6 @@ class ProxyListParseActor @Inject()(config: Config,
   extends AbstractParseActor(config, parseService, indexActor, injectActor, countActor)
 
 object ProxyListParseActor extends NamedActor {
-  override final val name = "XiCiProxyListParseActor"
-  override final val poolName = "XiCiProxyListParseActor"
+  override final val name: String = "XiCiDaiLiProxyList" + "ParseActor"
+  override final val poolName: String = "XiCiDaiLiProxyList" + "ParseActorPool"
 }

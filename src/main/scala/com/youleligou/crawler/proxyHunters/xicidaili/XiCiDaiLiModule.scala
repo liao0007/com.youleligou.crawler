@@ -8,8 +8,8 @@ import akka.routing.{DefaultResizer, RoundRobinPool}
 import com.google.inject.name.{Named, Names}
 import com.google.inject.{AbstractModule, Provides}
 import com.typesafe.config.Config
-import com.youleligou.crawler.modules.GuiceAkkaActorRefProvider
-import com.youleligou.crawler.proxyHunters.xicidaili.actors.{ProxyListInjectActor, ProxyListParseActor}
+import com.youleligou.crawler.modules._
+import com.youleligou.crawler.proxyHunters.xicidaili.actors.{ProxyListFetchActor, ProxyListInjectActor, ProxyListParseActor}
 import com.youleligou.crawler.proxyHunters.xicidaili.services.{ProxyListInjectService, ProxyListParseService}
 import com.youleligou.crawler.services.{InjectService, ParseService}
 import net.codingwell.scalaguice.ScalaModule
@@ -28,9 +28,9 @@ class XiCiDaiLiModule extends AbstractModule with ScalaModule with GuiceAkkaActo
       resizer = Some(DefaultResizer(lowerBound, upperBound)),
       supervisorStrategy = restartSupervisorStrategy)
 
-  /**
-    * provide Actors
-    */
+  /*
+  inject actor
+   */
   @Provides
   @Named(ProxyListInjectActor.name)
   def provideInjectActorRef(system: ActorSystem): ActorRef = provideActorRef(system, ProxyListInjectActor)
@@ -42,6 +42,23 @@ class XiCiDaiLiModule extends AbstractModule with ScalaModule with GuiceAkkaActo
     provideActorPoolRef(system, ProxyListInjectActor, roundRobinPool(1, config.getInt("crawler.actor.inject.parallel")))
   }
 
+  /*
+  fetch actor
+   */
+  @Provides
+  @Named(ProxyListFetchActor.name)
+  def provideFetchActorRef(system: ActorSystem): ActorRef = provideActorRef(system, ProxyListFetchActor)
+
+  @Provides
+  @Singleton
+  @Named(ProxyListFetchActor.poolName)
+  def provideFetchActorPoolRef(config: Config, system: ActorSystem): ActorRef = {
+    provideActorPoolRef(system, ProxyListFetchActor, roundRobinPool(1, config.getInt("crawler.actor.fetch.parallel")))
+  }
+
+  /*
+  parse actor
+   */
   @Provides
   @Named(ProxyListParseActor.name)
   def provideParseActorRef(system: ActorSystem): ActorRef = provideActorRef(system, ProxyListParseActor)
@@ -54,7 +71,13 @@ class XiCiDaiLiModule extends AbstractModule with ScalaModule with GuiceAkkaActo
   }
 
   override def configure() {
+    install(new ConfigModule)
+    install(new AkkaModule)
+    install(new ServiceModule)
+    install(new ActorModule)
+
     bind[Actor].annotatedWith(Names.named(ProxyListInjectActor.name)).to[ProxyListInjectActor]
+    bind[Actor].annotatedWith(Names.named(ProxyListFetchActor.name)).to[ProxyListFetchActor]
     bind[Actor].annotatedWith(Names.named(ProxyListParseActor.name)).to[ProxyListParseActor]
 
     bind[ParseService].annotatedWithName(ProxyListParseService.name).to[ProxyListParseService]
