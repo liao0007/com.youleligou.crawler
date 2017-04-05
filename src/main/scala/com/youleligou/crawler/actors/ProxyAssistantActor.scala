@@ -18,14 +18,14 @@ class ProxyAssistantActor @Inject()(config: Config, proxyAssistantService: Proxy
     case _ =>
       log.info("proxy cache unavailable, loading")
       stash()
-      pipe(proxyAssistantService.load) to self
+      pipe(proxyAssistantService.load(self.path.toString)) to self
       context.become(proxyCacheLoading)
   }
 
   def proxyCacheLoading: Receive = {
     case Loaded(proxyServerCount) =>
       log.info(s"loaded $proxyServerCount proxy server(s) to cache")
-      context.system.scheduler.schedule(FiniteDuration(2, SECONDS), FiniteDuration(5, MINUTES), self, CleanUp)
+      context.system.scheduler.schedule(FiniteDuration(2, SECONDS), FiniteDuration(2, SECONDS), self, CleanUp)
       unstashAll()
       context.become(proxyCacheAvailable)
     case _ =>
@@ -36,11 +36,11 @@ class ProxyAssistantActor @Inject()(config: Config, proxyAssistantService: Proxy
   def proxyCacheAvailable: Receive = {
     case CleanUp =>
       log.info("scheduled cleaning up proxy server caches")
-      proxyAssistantService.cleanUp
+      proxyAssistantService.cleanUp(self.path.toString)
 
     case Get(limit) =>
       log.info(s"request and return $limit proxy server list")
-      pipe(proxyAssistantService.get(limit)) to sender()
+      pipe(proxyAssistantService.get(self.path.toString, limit)) to sender()
   }
 }
 

@@ -36,6 +36,9 @@ libraryDependencies ++= Seq(
   "com.github.etaty" %% "rediscala" % "1.8.0",
 //  akka
   "com.typesafe.akka" %% "akka-actor" % akkaVersion,
+  "com.typesafe.akka" %% "akka-cluster-tools" % akkaVersion,
+  "com.typesafe.akka" %% "akka-cluster-sharding" % akkaVersion,
+  "com.typesafe.akka" %% "akka-persistence" % akkaVersion,
   //  parser
   "org.jsoup" % "jsoup" % jsoupVersion,
   "com.typesafe.play" %% "play-json" % "2.6.0-M1",
@@ -46,7 +49,7 @@ libraryDependencies ++= Seq(
 )
 
 assemblyMergeStrategy in assembly := {
-  case PathList("META-INF", xs@_*) => MergeStrategy.discard
+  case PathList("META-INF", xs@_ *) => MergeStrategy.discard
   case PathList("reference.conf") => MergeStrategy.concat
   case x => MergeStrategy.first
 }

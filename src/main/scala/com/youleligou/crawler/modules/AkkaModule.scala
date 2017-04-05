@@ -56,7 +56,7 @@ class AkkaModule extends AbstractModule with ScalaModule {
   @Provides
   @Singleton
   def providesActorSystem(config: Config, injector: Injector): ActorSystem = {
-    val system = ActorSystem(config.getString("crawler.appName"), config)
+    val system = ActorSystem(config.getString("appName"), config)
     GuiceAkkaExtension(system).initialize(injector)
     system
   }
