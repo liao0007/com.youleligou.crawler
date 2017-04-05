@@ -2,7 +2,7 @@ package com.youleligou.eleme
 
 import javax.inject.Singleton
 
-import akka.actor.SupervisorStrategy.Restart
+import akka.actor.SupervisorStrategy.Escalate
 import akka.actor.{Actor, ActorRef, ActorSystem, OneForOneStrategy}
 import akka.routing.{DefaultResizer, RoundRobinPool}
 import com.google.inject.name.{Named, Names}
@@ -20,7 +20,7 @@ import net.codingwell.scalaguice.ScalaModule
 class ElemeModule extends AbstractModule with ScalaModule with GuiceAkkaActorRefProvider {
 
   private val restartSupervisorStrategy: OneForOneStrategy = OneForOneStrategy() {
-    case _ => Restart
+    case _ => Escalate
   }
 
   private def roundRobinPool(lowerBound: Int, upperBound: Int): RoundRobinPool =
@@ -71,11 +71,6 @@ class ElemeModule extends AbstractModule with ScalaModule with GuiceAkkaActorRef
   }
 
   override def configure() {
-    install(new ConfigModule)
-    install(new AkkaModule)
-    install(new ServiceModule)
-    install(new ActorModule)
-
     bind[Actor].annotatedWith(Names.named(RestaurantInjectActor.name)).to[RestaurantInjectActor]
     bind[Actor].annotatedWith(Names.named(RestaurantFetchActor.name)).to[RestaurantFetchActor]
     bind[Actor].annotatedWith(Names.named(RestaurantParseActor.name)).to[RestaurantParseActor]

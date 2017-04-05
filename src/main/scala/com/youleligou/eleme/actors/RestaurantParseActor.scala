@@ -20,6 +20,6 @@ class RestaurantParseActor @Inject()(config: Config,
   extends AbstractParseActor(config, parseService, indexActor, injectActor, countActor)
 
 object RestaurantParseActor extends NamedActor {
-  override final val name: String = "ElemeRestaurant" + "ParseActor"
-  override final val poolName: String = "ElemeRestaurant" + "ParseActorPool"
+  final val name = "ElemeRestaurantParseActor"
+  final val poolName = "ElemeRestaurantParseActorPool"
 }

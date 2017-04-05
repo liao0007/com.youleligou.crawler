@@ -1,6 +1,6 @@
 package com.youleligou.crawler.modules
 
-import com.google.inject.AbstractModule
+import com.google.inject.{AbstractModule, Provides}
 import com.typesafe.config.{Config, ConfigFactory}
 import net.codingwell.scalaguice.ScalaModule
 
@@ -14,7 +14,11 @@ import net.codingwell.scalaguice.ScalaModule
   * as early as possible.
   */
 class ConfigModule extends AbstractModule with ScalaModule {
-  override def configure() {
-    bind[Config].toInstance(ConfigFactory.load())
+
+  @Provides
+  def provideConfig: Config = {
+    ConfigFactory.load()
   }
+
+  override def configure() {}
 }

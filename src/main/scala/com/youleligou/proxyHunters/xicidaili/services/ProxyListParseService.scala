@@ -1,4 +1,4 @@
-package com.youleligou.crawler.proxyHunters.xicidaili.services
+package com.youleligou.proxyHunters.xicidaili.services
 
 import java.sql.Timestamp
 

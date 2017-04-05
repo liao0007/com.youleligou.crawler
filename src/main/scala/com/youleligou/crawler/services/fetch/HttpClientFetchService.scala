@@ -3,11 +3,12 @@ package com.youleligou.crawler.services.fetch
 import com.google.inject.Inject
 import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
-import com.youleligou.crawler.daos.{CrawlerJob, CrawlerJobRepo}
+import com.youleligou.crawler.daos.{CrawlerJob, CrawlerJobRepo, CrawlerProxyServer}
 import com.youleligou.crawler.models.{FetchResult, UrlInfo}
 import com.youleligou.crawler.services.FetchService
 import com.youleligou.crawler.services.FetchService.FetchException
 import play.api.libs.ws.ahc.StandaloneAhcWSClient
+import play.api.libs.ws.{DefaultWSProxyServer, WSAuthScheme}
 
 import scala.concurrent.ExecutionContext.Implicits._
 import scala.concurrent.Future
@@ -19,13 +20,14 @@ import scala.concurrent.Future
 class HttpClientFetchService @Inject()(config: Config, standaloneAhcWSClient: StandaloneAhcWSClient, crawlerJobRepo: CrawlerJobRepo)
   extends FetchService
     with LazyLogging {
-  def fetch(jobName: String, urlInfo: UrlInfo): Future[FetchResult] = {
+  def fetch(jobName: String, urlInfo: UrlInfo, crawlerProxyServer: CrawlerProxyServer): Future[FetchResult] = {
     val start = System.currentTimeMillis()
     standaloneAhcWSClient
       .url(urlInfo.url)
       .withHeaders("User-Agent" -> config.getString("crawler.actor.fetch.userAgent"))
-      //      .withAuth(config.getString("proxy.user"), config.getString("proxy.password"), WSAuthScheme.BASIC)
+      .withAuth(config.getString("proxy.user"), config.getString("proxy.password"), WSAuthScheme.BASIC)
       //      .withProxyServer(DefaultWSProxyServer(host = config.getString("proxy.host"), port = config.getInt("proxy.port")))
+      .withProxyServer(DefaultWSProxyServer(host = crawlerProxyServer.ip, port = crawlerProxyServer.port))
       .get()
       .map { response =>
         logger.info("fetching " + urlInfo + ", cost time: " + (System.currentTimeMillis() - start) + " content length: " + response.body.length)

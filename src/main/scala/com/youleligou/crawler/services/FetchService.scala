@@ -1,5 +1,6 @@
 package com.youleligou.crawler.services
 
+import com.youleligou.crawler.daos.CrawlerProxyServer
 import com.youleligou.crawler.models.{FetchResult, UrlInfo}
 
 import scala.concurrent.Future
@@ -8,7 +9,7 @@ import scala.concurrent.Future
   * Created by liangliao on 31/3/17.
   */
 trait FetchService {
-  def fetch(jobName: String, urlInfo: UrlInfo): Future[FetchResult]
+  def fetch(jobName: String, urlInfo: UrlInfo, crawlerProxyServer: CrawlerProxyServer): Future[FetchResult]
 }
 
 object FetchService {

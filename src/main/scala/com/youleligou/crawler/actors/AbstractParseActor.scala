@@ -10,14 +10,12 @@ import com.youleligou.crawler.services.ParseService
   * Created by young.yang on 2016/8/28.
   * 解析任务
   */
-abstract class AbstractParseActor(config: Config,
-                                  parseService: ParseService,
-                                  indexActor: ActorRef,
-                                  injectActor: ActorRef,
-                                  countActor: ActorRef)
+abstract class AbstractParseActor(config: Config, parseService: ParseService, indexActor: ActorRef, injectActor: ActorRef, countActor: ActorRef)
   extends Actor
     with ActorLogging {
+
   override def receive: Receive = {
+
     case fetchResult: FetchResult =>
       log.info("parse: " + fetchResult.urlInfo)
       val parseResult: ParseResult = parseService.parse(fetchResult)
@@ -27,5 +25,6 @@ abstract class AbstractParseActor(config: Config,
         injectActor ! urlInfo
         countActor ! ParseChildUrlCounter(1)
       }
+
   }
 }

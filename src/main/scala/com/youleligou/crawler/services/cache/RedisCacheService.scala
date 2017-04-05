@@ -12,10 +12,7 @@ import scala.concurrent.Future
 /**
   * 采用Redis实现的缓存
   */
-class RedisCacheService @Inject()(config: Config)(implicit system: ActorSystem) extends CacheService {
-  private val redisConfig: Config = config.getConfig("cache.redis")
-  private val redisClient =
-    RedisClient(host = redisConfig.getString("host"), port = redisConfig.getInt("port"), password = Some(redisConfig.getString("password")))
+class RedisCacheService @Inject()(config: Config, redisClient: RedisClient)(implicit system: ActorSystem) extends CacheService {
 
   override def contains(key: String): Future[Boolean] = {
     redisClient.exists(key)
@@ -26,7 +23,7 @@ class RedisCacheService @Inject()(config: Config)(implicit system: ActorSystem) 
   }
 
   override def put(key: String, value: String): Future[Boolean] = {
-    redisClient.setex(key, redisConfig.getLong("expire"), value)
+    redisClient.set(key, value)
   }
 
   override def size(): Future[Long] = {

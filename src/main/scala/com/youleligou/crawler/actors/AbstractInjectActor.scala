@@ -4,7 +4,7 @@ import akka.actor.{Actor, ActorLogging, ActorRef, Stash}
 import akka.pattern.pipe
 import com.typesafe.config.Config
 import com.youleligou.crawler.actors.AbstractFetchActor.Fetch
-import com.youleligou.crawler.actors.AbstractInjectActor.{GenerateFetch, Init}
+import com.youleligou.crawler.actors.AbstractInjectActor.{GenerateFetch, SeedInitialized}
 import com.youleligou.crawler.actors.CountActor._
 import com.youleligou.crawler.models._
 import com.youleligou.crawler.services.{CacheService, FilterService, HashService, InjectService}
@@ -29,18 +29,13 @@ abstract class AbstractInjectActor(config: Config,
   var seed: Int = 0
 
   override def preStart(): Unit = {
-    injectService.initSeed().pipeTo(self)
-  }
-
-  override def postRestart(reason: Throwable): Unit = {
-    preStart()
+    super.preStart()
+    pipe(injectService.initSeed()).to(self)
   }
 
   override def receive: Receive = {
-
-    case Init =>
-    case initSeed: Int =>
-      log.info("seed inited with: " + initSeed + ", scheduling GenerateFetch")
+    case SeedInitialized(initSeed) =>
+      log.info("seed initialized with: " + initSeed + ", scheduling GenerateFetch")
       seed = initSeed
       context.system.scheduler.schedule(FiniteDuration(300, MILLISECONDS), FiniteDuration(300, MILLISECONDS), self, GenerateFetch)
       context.become(initialized)
@@ -48,7 +43,6 @@ abstract class AbstractInjectActor(config: Config,
   }
 
   def initialized: Receive = {
-
     case GenerateFetch =>
       seed = seed + 1
       self ! injectService.generateFetch(seed)
@@ -74,6 +68,7 @@ abstract class AbstractInjectActor(config: Config,
 }
 
 object AbstractInjectActor {
-  case object Init
+
+  case class SeedInitialized(seed: Int)
   case object GenerateFetch
 }

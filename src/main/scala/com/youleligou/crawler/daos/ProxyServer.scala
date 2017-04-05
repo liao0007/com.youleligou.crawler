@@ -1,9 +1,11 @@
 package com.youleligou.crawler.daos
 
 import java.sql.Timestamp
+import java.text.SimpleDateFormat
 
 import com.typesafe.scalalogging.LazyLogging
 import com.youleligou.crawler.daos.schema.CanCan
+import play.api.libs.json._
 import slick.jdbc.MySQLProfile.api._
 import slick.lifted.Tag
 import slick.sql.SqlProfile.ColumnOption.SqlType
@@ -25,6 +27,22 @@ case class CrawlerProxyServer(
                                createdAt: Timestamp = new Timestamp(System.currentTimeMillis())
                              )
 
+object CrawlerProxyServer {
+
+  implicit object timestampFormat extends Format[Timestamp] {
+    val format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SS'Z'")
+
+    def reads(json: JsValue) = {
+      val str = json.as[String]
+      JsSuccess(new Timestamp(format.parse(str).getTime))
+    }
+
+    def writes(ts: Timestamp) = JsString(format.format(ts))
+  }
+
+  implicit val jsonFormat: OFormat[CrawlerProxyServer] = Json.format[CrawlerProxyServer]
+}
+
 class CrawlerProxyServerRepo extends LazyLogging {
   val CrawlerProxyServers: TableQuery[CrawlerProxyServerTable] = TableQuery[CrawlerProxyServerTable]
 
@@ -37,6 +55,9 @@ class CrawlerProxyServerRepo extends LazyLogging {
   def all(): Future[List[CrawlerProxyServer]] =
     CanCan.db.run(CrawlerProxyServers.to[List].result)
 
+  def all(limit: Int): Future[List[CrawlerProxyServer]] =
+    CanCan.db.run(CrawlerProxyServers.to[List].sortBy(_.lastVerifiedAt.desc).take(limit).result)
+
   def create(crawlerProxyServer: CrawlerProxyServer): Future[Long] =
     CanCan.db.run(CrawlerProxyServers returning CrawlerProxyServers.map(_.id) += crawlerProxyServer).recover {
       case t: Throwable =>
@@ -46,6 +67,14 @@ class CrawlerProxyServerRepo extends LazyLogging {
 
   def create(crawlerProxyServers: List[CrawlerProxyServer]): Future[Option[Int]] =
     CanCan.db.run(CrawlerProxyServers ++= crawlerProxyServers)
+
+  def update(id: Long, isLive: Boolean, lastVerifiedAt: Timestamp): Future[Int] =
+    CanCan.db.run {
+      val query = for {
+        crawlerProxyServer <- CrawlerProxyServers if crawlerProxyServer.id === id
+      } yield (crawlerProxyServer.isLive, crawlerProxyServer.lastVerifiedAt)
+      query.update(isLive, lastVerifiedAt)
+    }
 }
 
 class CrawlerProxyServerTable(tag: Tag) extends Table[CrawlerProxyServer](tag, "crawler_proxy_server") {

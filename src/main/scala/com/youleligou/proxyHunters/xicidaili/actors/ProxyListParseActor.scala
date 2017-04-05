@@ -1,12 +1,12 @@
-package com.youleligou.crawler.proxyHunters.xicidaili.actors
+package com.youleligou.proxyHunters.xicidaili.actors
 
 import akka.actor.ActorRef
 import com.google.inject.Inject
 import com.google.inject.name.Named
 import com.typesafe.config.Config
 import com.youleligou.crawler.actors.{AbstractParseActor, CountActor, IndexActor, NamedActor}
-import com.youleligou.crawler.proxyHunters.xicidaili.services.ProxyListParseService
 import com.youleligou.crawler.services.ParseService
+import com.youleligou.proxyHunters.xicidaili.services.ProxyListParseService
 
 /**
   * Created by young.yang on 2016/8/28.
@@ -20,6 +20,6 @@ class ProxyListParseActor @Inject()(config: Config,
   extends AbstractParseActor(config, parseService, indexActor, injectActor, countActor)
 
 object ProxyListParseActor extends NamedActor {
-  override final val name: String = "XiCiDaiLiProxyList" + "ParseActor"
-  override final val poolName: String = "XiCiDaiLiProxyList" + "ParseActorPool"
+  final val name = "XiCiDaiLiProxyListParseActor"
+  final val poolName = "XiCiDaiLiProxyListParseActorPool"
 }

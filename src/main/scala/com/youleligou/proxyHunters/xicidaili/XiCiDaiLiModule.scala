@@ -1,17 +1,17 @@
-package com.youleligou.crawler.proxyHunters.xicidaili
+package com.youleligou.proxyHunters.xicidaili
 
 import javax.inject.Singleton
 
-import akka.actor.SupervisorStrategy.Restart
+import akka.actor.SupervisorStrategy.Escalate
 import akka.actor.{Actor, ActorRef, ActorSystem, OneForOneStrategy}
 import akka.routing.{DefaultResizer, RoundRobinPool}
 import com.google.inject.name.{Named, Names}
 import com.google.inject.{AbstractModule, Provides}
 import com.typesafe.config.Config
 import com.youleligou.crawler.modules._
-import com.youleligou.crawler.proxyHunters.xicidaili.actors.{ProxyListFetchActor, ProxyListInjectActor, ProxyListParseActor}
-import com.youleligou.crawler.proxyHunters.xicidaili.services.{ProxyListInjectService, ProxyListParseService}
 import com.youleligou.crawler.services.{InjectService, ParseService}
+import com.youleligou.proxyHunters.xicidaili.actors.{ProxyListFetchActor, ProxyListInjectActor, ProxyListParseActor}
+import com.youleligou.proxyHunters.xicidaili.services.{ProxyListInjectService, ProxyListParseService}
 import net.codingwell.scalaguice.ScalaModule
 
 /**
@@ -20,7 +20,7 @@ import net.codingwell.scalaguice.ScalaModule
 class XiCiDaiLiModule extends AbstractModule with ScalaModule with GuiceAkkaActorRefProvider {
 
   private val restartSupervisorStrategy: OneForOneStrategy = OneForOneStrategy() {
-    case _ => Restart
+    case _ => Escalate
   }
 
   private def roundRobinPool(lowerBound: Int, upperBound: Int): RoundRobinPool =
@@ -71,11 +71,6 @@ class XiCiDaiLiModule extends AbstractModule with ScalaModule with GuiceAkkaActo
   }
 
   override def configure() {
-    install(new ConfigModule)
-    install(new AkkaModule)
-    install(new ServiceModule)
-    install(new ActorModule)
-
     bind[Actor].annotatedWith(Names.named(ProxyListInjectActor.name)).to[ProxyListInjectActor]
     bind[Actor].annotatedWith(Names.named(ProxyListFetchActor.name)).to[ProxyListFetchActor]
     bind[Actor].annotatedWith(Names.named(ProxyListParseActor.name)).to[ProxyListParseActor]

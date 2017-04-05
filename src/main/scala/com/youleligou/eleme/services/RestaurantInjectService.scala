@@ -2,6 +2,7 @@ package com.youleligou.eleme.services
 
 import com.google.inject.Inject
 import com.youleligou.crawler.actors.AbstractFetchActor.Fetch
+import com.youleligou.crawler.actors.AbstractInjectActor.SeedInitialized
 import com.youleligou.crawler.daos.CrawlerJob.FetchJobType
 import com.youleligou.crawler.daos.CrawlerJobRepo
 import com.youleligou.crawler.models.UrlInfo
@@ -13,12 +14,12 @@ import scala.concurrent.Future
 
 class RestaurantInjectService @Inject()(crawlerJobRepo: CrawlerJobRepo) extends InjectService {
 
-  override def initSeed(): Future[Int] = {
+  override def initSeed(): Future[SeedInitialized] = {
     val idPattern = """[0-9]+""".r
     crawlerJobRepo.findWithMaxId(FetchJobType, RestaurantInjectService.fetchJobName) map {
       case Some(crawlerJob) => idPattern.findFirstIn(crawlerJob.url).map(_.toInt).getOrElse(0)
       case None => 0
-    }
+    } map SeedInitialized
   }
 
   override def generateFetch(seed: Int): Fetch = {

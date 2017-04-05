@@ -18,6 +18,6 @@ class RestaurantInjectActor @Inject()(config: Config,
   extends AbstractInjectActor(config, cacheService, hashService, filterService, injectService, fetchActor, countActor)
 
 object RestaurantInjectActor extends NamedActor {
-  override final val name: String = "ElemeRestaurant" + "InjectActor"
-  override final val poolName: String = "ElemeRestaurant" + "InjectActorPool"
+  final val name = "ElemeRestaurantInjectActor"
+  final val poolName = "ElemeRestaurantInjectActorPool"
 }

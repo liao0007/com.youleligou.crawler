@@ -4,16 +4,17 @@ import akka.actor.ActorRef
 import com.google.inject.Inject
 import com.google.inject.name.Named
 import com.typesafe.config.Config
-import com.youleligou.crawler.actors.{AbstractFetchActor, CountActor, NamedActor}
+import com.youleligou.crawler.actors.{AbstractFetchActor, CountActor, NamedActor, ProxyAssistantActor}
 import com.youleligou.crawler.services.FetchService
 
 class RestaurantFetchActor @Inject()(config: Config,
                                      fetchService: FetchService,
                                      @Named(RestaurantParseActor.poolName) parserActor: ActorRef,
-                                     @Named(CountActor.poolName) countActor: ActorRef)
-  extends AbstractFetchActor(config, fetchService, parserActor, countActor)
+                                     @Named(CountActor.poolName) countActor: ActorRef,
+                                     @Named(ProxyAssistantActor.poolName) proxyAssistantActor: ActorRef)
+  extends AbstractFetchActor(config, fetchService, parserActor, countActor, proxyAssistantActor)
 
 object RestaurantFetchActor extends NamedActor {
-  override final val name: String = "ElemeRestaurant" + "FetchActor"
-  override final val poolName: String = "ElemeRestaurant" + "FetchActorPool"
+  final val name = "ElemeRestaurantFetchActor"
+  final val poolName = "ElemeRestaurantFetchActorPool"
 }

@@ -2,7 +2,7 @@ package com.youleligou.crawler.modules
 
 import javax.inject.Singleton
 
-import akka.actor.SupervisorStrategy.Restart
+import akka.actor.SupervisorStrategy.Escalate
 import akka.actor.{Actor, ActorRef, ActorSystem, OneForOneStrategy}
 import akka.routing.{DefaultResizer, RoundRobinPool}
 import com.google.inject.name.{Named, Names}
@@ -17,7 +17,7 @@ import net.codingwell.scalaguice.ScalaModule
 class ActorModule extends AbstractModule with ScalaModule with GuiceAkkaActorRefProvider {
 
   private val restartSupervisorStrategy: OneForOneStrategy = OneForOneStrategy() {
-    case _ => Restart
+    case _ => Escalate
   }
 
   private def roundRobinPool(lowerBound: Int, upperBound: Int): RoundRobinPool =
@@ -25,9 +25,9 @@ class ActorModule extends AbstractModule with ScalaModule with GuiceAkkaActorRef
       resizer = Some(DefaultResizer(lowerBound, upperBound)),
       supervisorStrategy = restartSupervisorStrategy)
 
-  /**
-    * provide Actors
-    */
+  /*
+  count actor
+   */
   @Provides
   @Named(CountActor.name)
   def provideAuditActorRef(system: ActorSystem): ActorRef = provideActorRef(system, CountActor)
@@ -39,6 +39,9 @@ class ActorModule extends AbstractModule with ScalaModule with GuiceAkkaActorRef
     provideActorPoolRef(system, CountActor, roundRobinPool(1, config.getInt("crawler.actor.count.parallel")))
   }
 
+  /*
+  proxy assistant actor
+   */
   @Provides
   @Named(ProxyAssistantActor.name)
   def provideProxyAssistantActorRef(system: ActorSystem): ActorRef = provideActorRef(system, ProxyAssistantActor)
@@ -47,9 +50,12 @@ class ActorModule extends AbstractModule with ScalaModule with GuiceAkkaActorRef
   @Singleton
   @Named(ProxyAssistantActor.poolName)
   def provideProxyAssistantActorPoolRef(config: Config, system: ActorSystem): ActorRef = {
-    provideActorPoolRef(system, ProxyAssistantActor, roundRobinPool(1, config.getInt("crawler.actor.fetch.parallel")))
+    provideActorPoolRef(system, ProxyAssistantActor, roundRobinPool(1, config.getInt("crawler.actor.proxy.parallel")))
   }
 
+  /*
+  index actor
+   */
   @Provides
   @Named(IndexActor.name)
   def provideIndexActorRef(system: ActorSystem): ActorRef = provideActorRef(system, IndexActor)
