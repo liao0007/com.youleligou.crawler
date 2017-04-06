@@ -4,30 +4,45 @@ import akka.actor.{Actor, ActorLogging, Stash}
 import akka.pattern.pipe
 import com.google.inject.Inject
 import com.typesafe.config.Config
-import com.youleligou.crawler.actors.ProxyAssistantActor.{CleanUp, Get, Loaded}
+import com.youleligou.crawler.actors.ProxyAssistantActor._
 import com.youleligou.crawler.services.ProxyAssistantService
 
-import scala.concurrent.ExecutionContext.Implicits._
-import scala.concurrent.duration._
-
 class ProxyAssistantActor @Inject()(config: Config, proxyAssistantService: ProxyAssistantService) extends Actor with Stash with ActorLogging {
+
+  import context.dispatcher
 
   override def receive: Receive = proxyCacheUnavailable
 
   def proxyCacheUnavailable: Receive = {
-    case _ =>
-      log.info("proxy cache unavailable, loading")
-      stash()
-      pipe(proxyAssistantService.load(self.path.toString)) to self
+    case CheckCache =>
+      log.info(s"checking cache")
+      proxyAssistantService.cacheSize() pipeTo self
+
+    case Cached(proxyServerCount) if proxyServerCount > 0 =>
+      log.info(s"already cached $proxyServerCount proxy server(s) to cache")
+      unstashAll()
+      context.become(proxyCacheAvailable)
+
+    case Cached(proxyServerCount) if proxyServerCount <= 0 =>
+      log.info(s"no cache available, now load")
+      self ! LoadCache
+
+    case LoadCache =>
+      proxyAssistantService.load() pipeTo self
+      unstashAll()
       context.become(proxyCacheLoading)
+
+    case _ =>
+      log.info("proxy cache unavailable, stashing")
+      stash()
   }
 
   def proxyCacheLoading: Receive = {
-    case Loaded(proxyServerCount) =>
+    case CacheLoaded(proxyServerCount) =>
       log.info(s"loaded $proxyServerCount proxy server(s) to cache")
-      context.system.scheduler.schedule(FiniteDuration(2, SECONDS), FiniteDuration(2, SECONDS), self, CleanUp)
       unstashAll()
       context.become(proxyCacheAvailable)
+
     case _ =>
       log.info("still loading proxy servers")
       stash()
@@ -36,21 +51,30 @@ class ProxyAssistantActor @Inject()(config: Config, proxyAssistantService: Proxy
   def proxyCacheAvailable: Receive = {
     case CleanUp =>
       log.info("scheduled cleaning up proxy server caches")
-      proxyAssistantService.cleanUp(self.path.toString)
+      proxyAssistantService.cleanUp()
 
     case Get(limit) =>
-      log.info(s"request and return $limit proxy server list")
-      pipe(proxyAssistantService.get(self.path.toString, limit)) to sender()
+      log.info(s"requested and returning $limit proxy server list")
+      proxyAssistantService.get(limit) pipeTo sender()
   }
+
 }
 
 object ProxyAssistantActor extends NamedActor {
   override final val name = "ProxyAssistantActor"
   override final val poolName = "ProxyAssistantActorPool"
 
-  case class Loaded(proxyServerCount: Int)
+  sealed trait ProxyAssistantActorMessage
 
-  case object CleanUp
+  case object CheckCache extends ProxyAssistantActorMessage
 
-  case class Get(limit: Int)
+  case class Cached(proxyServerCount: Int) extends ProxyAssistantActorMessage
+
+  case object LoadCache extends ProxyAssistantActorMessage
+
+  case class CacheLoaded(proxyServerCount: Int) extends ProxyAssistantActorMessage
+
+  case object CleanUp extends ProxyAssistantActorMessage
+
+  case class Get(limit: Int) extends ProxyAssistantActorMessage
 }

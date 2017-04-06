@@ -36,6 +36,7 @@ libraryDependencies ++= Seq(
   "com.github.etaty" %% "rediscala" % "1.8.0",
 //  akka
   "com.typesafe.akka" %% "akka-actor" % akkaVersion,
+  "com.typesafe.akka" %% "akka-remote" % akkaVersion,
   "com.typesafe.akka" %% "akka-cluster-tools" % akkaVersion,
   "com.typesafe.akka" %% "akka-cluster-sharding" % akkaVersion,
   "com.typesafe.akka" %% "akka-persistence" % akkaVersion,

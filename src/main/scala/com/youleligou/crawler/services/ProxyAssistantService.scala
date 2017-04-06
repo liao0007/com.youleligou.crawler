@@ -3,35 +3,40 @@ package com.youleligou.crawler.services
 import java.sql.Timestamp
 
 import com.google.inject.Inject
-import com.youleligou.crawler.actors.ProxyAssistantActor.Loaded
+import com.typesafe.scalalogging.LazyLogging
+import com.youleligou.crawler.actors.ProxyAssistantActor.{CacheLoaded, Cached}
 import com.youleligou.crawler.daos.{CrawlerProxyServer, CrawlerProxyServerRepo}
 import play.api.libs.json.Json
 import play.api.libs.ws.DefaultWSProxyServer
 import play.api.libs.ws.ahc.StandaloneAhcWSClient
 import redis.RedisClient
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
-import scala.concurrent.{Future, TimeoutException}
+import scala.concurrent.{ExecutionContext, Future}
 
 /**
   * Created by liangliao on 5/4/17.
   */
 trait ProxyAssistantService {
+
+  def calculateQueueId(): String = ProxyAssistantService.ProxyQueuePrefix
+
+  def cacheSize()(implicit executor: ExecutionContext): Future[Cached]
   /*
   load from database to redis
    */
-  def load(queueId: String): Future[Loaded]
+  def load()(implicit executor: ExecutionContext): Future[CacheLoaded]
 
   /*
   clean up invalid
    */
-  def cleanUp(queueId: String): Future[Long]
+  def cleanUp()(implicit executor: ExecutionContext): Future[Int]
 
   /*
   get by FIFO
    */
-  def get(queueId: String, limit: Int): Future[Seq[CrawlerProxyServer]]
+  def get(limit: Int)(implicit executor: ExecutionContext): Future[Seq[CrawlerProxyServer]]
+
 }
 
 object ProxyAssistantService {
@@ -41,19 +46,30 @@ object ProxyAssistantService {
 class DefaultProxyAssistantService @Inject()(redisClient: RedisClient,
                                              crawlerProxyServerRepo: CrawlerProxyServerRepo,
                                              standaloneAhcWSClient: StandaloneAhcWSClient)
-  extends ProxyAssistantService {
+  extends ProxyAssistantService
+    with LazyLogging {
 
-  def load(queueId: String): Future[Loaded] = crawlerProxyServerRepo.all(100).flatMap { proxyServers =>
-    redisClient.rpush[String](ProxyAssistantService.ProxyQueuePrefix + queueId, proxyServers map (Json.toJson(_).toString()): _*).map(_.toInt).map(Loaded)
-  }
+  def cacheSize()(implicit executor: ExecutionContext): Future[Cached] = redisClient.llen(calculateQueueId()).map(_.toInt).map(Cached)
 
-  def cleanUp(queueId: String): Future[Long] =
-    try {
-      redisClient.lpop[String](ProxyAssistantService.ProxyQueuePrefix + queueId) flatMap {
-        case Some(crawlerProxyServerString) =>
-          Json.parse(crawlerProxyServerString).validate[CrawlerProxyServer].asOpt.map {
-            _.copy(isLive = true, lastVerifiedAt = Some(new Timestamp(System.currentTimeMillis())))
-          } map { proxyServer =>
+  def load()(implicit executor: ExecutionContext): Future[CacheLoaded] =
+    crawlerProxyServerRepo.all().flatMap { proxyServers =>
+      for {
+        _ <- redisClient.del(calculateQueueId())
+        result <- redisClient
+          .rpush[String](calculateQueueId(), proxyServers map (Json.toJson(_).toString()): _*)
+          .map(_.toInt)
+          .map(CacheLoaded)
+      } yield {
+        result
+      }
+    }
+
+  def cleanUp()(implicit executor: ExecutionContext): Future[Int] =
+    redisClient.lpop[String](calculateQueueId()) flatMap {
+      case Some(crawlerProxyServerString) =>
+        Json.parse(crawlerProxyServerString).validate[CrawlerProxyServer].asOpt match {
+          case Some(crawlerProxyServer) =>
+            val proxyServer = crawlerProxyServer.copy(lastVerifiedAt = Some(new Timestamp(System.currentTimeMillis())))
             standaloneAhcWSClient
               .url("http://www.baidu.com")
               .withProxyServer(DefaultWSProxyServer(proxyServer.ip, proxyServer.port))
@@ -61,33 +77,33 @@ class DefaultProxyAssistantService @Inject()(redisClient: RedisClient,
               .get()
               .flatMap { response =>
                 if (response.status == 200) {
-                  redisClient.rpush(ProxyAssistantService.ProxyQueuePrefix + queueId, Json.toJson(proxyServer).toString)
+                  redisClient.rpush(calculateQueueId(), Json.toJson(proxyServer).toString).map(_.toInt)
+                  crawlerProxyServerRepo.update(proxyServer.id, isLive = true, proxyServer.lastVerifiedAt.get)
                 } else {
-                  crawlerProxyServerRepo.update(proxyServer.id, proxyServer.isLive, proxyServer.lastVerifiedAt.get).map(_.toLong)
+                  crawlerProxyServerRepo.update(proxyServer.id, isLive = false, proxyServer.lastVerifiedAt.get)
                 }
               } recover {
-              case _: TimeoutException => 0L
-              case _ => 0L
+              case _: Throwable =>
+                crawlerProxyServerRepo.update(proxyServer.id, isLive = false, proxyServer.lastVerifiedAt.get)
+                0
             }
+          case None =>
+            logger.error("failed to de-json" + crawlerProxyServerString)
+            Future.successful(0)
+        }
 
-          } getOrElse Future.successful(0L)
-
-        case _ =>
-          Future.successful(0L)
-      }
-    } catch {
-      case _: Throwable => Future.successful(0L)
+      case None =>
+        logger.error("failed to lpop")
+        Future.successful(0)
     }
 
-  def get(queueId: String, limit: Int): Future[Seq[CrawlerProxyServer]] = {
-    val futureStrings = (1 to limit).map { _ =>
-      redisClient.rpoplpush[String](ProxyAssistantService.ProxyQueuePrefix + queueId, ProxyAssistantService.ProxyQueuePrefix + queueId)
-    }
-
-    Future.sequence(futureStrings).map { proxyServerString =>
+  def get(limit: Int)(implicit executor: ExecutionContext): Future[Seq[CrawlerProxyServer]] =
+    Future.sequence(Seq.fill(limit) {
+      redisClient.rpoplpush[String](calculateQueueId(), calculateQueueId())
+    }).map { proxyServerString =>
       proxyServerString.flatten.flatMap { proxyServerString =>
         Json.parse(proxyServerString).validate[CrawlerProxyServer].asOpt
       }
     }
-  }
+
 }
