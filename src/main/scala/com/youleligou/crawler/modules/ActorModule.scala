@@ -4,7 +4,7 @@ import javax.inject.Singleton
 
 import akka.actor.SupervisorStrategy.Escalate
 import akka.actor.{Actor, ActorRef, ActorSystem, OneForOneStrategy}
-import akka.routing.{BalancingPool, DefaultResizer, RoundRobinPool}
+import akka.routing.{DefaultResizer, RoundRobinPool}
 import com.google.inject.name.{Named, Names}
 import com.google.inject.{AbstractModule, Provides}
 import com.typesafe.config.Config
@@ -50,7 +50,7 @@ class ActorModule extends AbstractModule with ScalaModule with GuiceAkkaActorRef
   @Singleton
   @Named(ProxyAssistantActor.poolName)
   def provideProxyAssistantActorPoolRef(config: Config, system: ActorSystem): ActorRef = {
-    provideActorPoolRef(system, ProxyAssistantActor, roundRobinPool(1, config.getInt("crawler.actor.proxy.parallel")))
+    provideActorPoolRef(system, ProxyAssistantActor, roundRobinPool(1, config.getInt("crawler.actor.proxy-assistant.parallel")))
   }
 
   /*
@@ -64,7 +64,7 @@ class ActorModule extends AbstractModule with ScalaModule with GuiceAkkaActorRef
   @Singleton
   @Named(IndexActor.poolName)
   def provideIndexActorPoolRef(config: Config, system: ActorSystem): ActorRef = {
-    provideActorPoolRef(system, IndexActor, BalancingPool(config.getInt("crawler.actor.index.parallel")))
+    provideActorPoolRef(system, IndexActor, roundRobinPool(1, config.getInt("crawler.actor.index.parallel")))
   }
 
   override def configure() {

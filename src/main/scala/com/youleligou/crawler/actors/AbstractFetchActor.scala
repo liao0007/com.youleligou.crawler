@@ -2,15 +2,14 @@ package com.youleligou.crawler.actors
 
 import akka.actor.{Actor, ActorLogging, ActorRef, Stash}
 import com.typesafe.config.Config
-import com.youleligou.crawler.actors.AbstractFetchActor.{Fetch, SetCrawlerProxyServers}
+import com.youleligou.crawler.actors.AbstractFetchActor.Fetch
 import com.youleligou.crawler.actors.CountActor._
-import com.youleligou.crawler.actors.ProxyAssistantActor.Get
+import com.youleligou.crawler.actors.ProxyAssistantActor.{CachedProxyServer, GetProxyServer}
 import com.youleligou.crawler.daos.CrawlerProxyServer
 import com.youleligou.crawler.models.UrlInfo
 import com.youleligou.crawler.services.FetchService
 import com.youleligou.crawler.services.FetchService.FetchException
 
-import scala.collection.mutable
 import scala.concurrent.ExecutionContext.Implicits._
 import scala.util.{Failure, Success}
 
@@ -27,14 +26,13 @@ abstract class AbstractFetchActor(config: Config,
     with Stash
     with ActorLogging {
 
-  val proxyServers: mutable.Seq[CrawlerProxyServer] = mutable.Seq.empty[CrawlerProxyServer]
-
+  var proxyServer: Option[CrawlerProxyServer] = None
   var retry = 1
   val maxRetry = 20
 
   override def preStart(): Unit = {
     super.preStart()
-    if (proxyServers.nonEmpty) {
+    if (proxyServer.nonEmpty) {
       context.become(proxyServerAvailable)
     } else {
       context.become(proxyServerUnavailable)
@@ -47,27 +45,33 @@ abstract class AbstractFetchActor(config: Config,
     case _ =>
       log.info("proxy server list unavailable, getting")
       stash()
-      proxyAssistantActor ! Get
+      proxyAssistantActor ! GetProxyServer
       context.become(gettingProxyServer)
   }
 
   def gettingProxyServer: Receive = {
-    case SetCrawlerProxyServers(pendingCrawlerProxyServers) =>
-      log.info("server list got")
-      this.proxyServers ++: pendingCrawlerProxyServers
+    case CachedProxyServer(Some(pendingProxyServer)) =>
+      log.info("server got")
+      proxyServer = Some(pendingProxyServer)
       unstashAll()
       context.become(proxyServerAvailable)
+
+    case CachedProxyServer(None) =>
+      log.info("server got None, retry")
+      unstashAll()
+      context.become(proxyServerUnavailable)
+
     case _ =>
-      log.info("getting proxy server list")
+      log.info("getting proxy server")
       stash()
   }
 
   def proxyServerAvailable: Receive = {
-    case Fetch(jobName, urlInfo) if proxyServers.nonEmpty =>
+    case Fetch(jobName, urlInfo) if proxyServer.nonEmpty =>
       log.info("fetch: " + urlInfo)
       countActor ! FetchCounter(1)
 
-      fetchService.fetch(jobName, urlInfo, proxyServers.head) onComplete {
+      fetchService.fetch(jobName, urlInfo, proxyServer.head) onComplete {
         case Success(fetchResult) =>
           retry = 1
           log.info("fetch success: " + urlInfo.url)
@@ -96,7 +100,7 @@ abstract class AbstractFetchActor(config: Config,
           log.info("fetch failed with retry limit: " + urlInfo.url)
       }
 
-    case message if proxyServers.isEmpty =>
+    case message if proxyServer.isEmpty =>
       self ! message
       context.become(proxyServerUnavailable)
   }
@@ -104,6 +108,7 @@ abstract class AbstractFetchActor(config: Config,
 
 object AbstractFetchActor {
 
-  case class SetCrawlerProxyServers(crawlerProxyServers: Seq[CrawlerProxyServer])
-  case class Fetch(jobName: String, urlInfo: UrlInfo)
+  sealed trait FetchActorCommand
+
+  case class Fetch(jobName: String, urlInfo: UrlInfo) extends FetchActorCommand
 }

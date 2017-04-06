@@ -10,7 +10,6 @@ import com.youleligou.crawler.models._
 import com.youleligou.crawler.services.{CacheService, FilterService, HashService, InjectService}
 
 import scala.concurrent.ExecutionContext.Implicits._
-import scala.concurrent.duration.{FiniteDuration, MILLISECONDS}
 
 /**
   * 抓取种子注入任务,将需要抓取的任务注入到该任务中
@@ -37,9 +36,10 @@ abstract class AbstractInjectActor(config: Config,
     case SeedInitialized(initSeed) =>
       log.info("seed initialized with: " + initSeed + ", scheduling GenerateFetch")
       seed = initSeed
-      context.system.scheduler.schedule(FiniteDuration(300, MILLISECONDS), FiniteDuration(300, MILLISECONDS), self, GenerateFetch)
+      unstashAll()
       context.become(initialized)
     case _ =>
+      stash()
   }
 
   def initialized: Receive = {

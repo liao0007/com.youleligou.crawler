@@ -68,13 +68,9 @@ class CrawlerProxyServerRepo extends LazyLogging {
   def create(crawlerProxyServers: List[CrawlerProxyServer]): Future[Option[Int]] =
     CanCan.db.run(CrawlerProxyServers ++= crawlerProxyServers)
 
-  def update(id: Long, isLive: Boolean, lastVerifiedAt: Timestamp): Future[Int] =
-    CanCan.db.run {
-      val query = for {
-        crawlerProxyServer <- CrawlerProxyServers if crawlerProxyServer.id === id
-      } yield (crawlerProxyServer.isLive, crawlerProxyServer.lastVerifiedAt)
-      query.update(isLive, lastVerifiedAt)
-    }
+  def insertOrUpdate(crawlerProxyServer: CrawlerProxyServer): Future[Int] = CanCan.db.run {
+    CrawlerProxyServers.insertOrUpdate(crawlerProxyServer)
+  }
 }
 
 class CrawlerProxyServerTable(tag: Tag) extends Table[CrawlerProxyServer](tag, "crawler_proxy_server") {

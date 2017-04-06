@@ -5,6 +5,7 @@ import akka.pattern.pipe
 import com.google.inject.Inject
 import com.typesafe.config.Config
 import com.youleligou.crawler.actors.ProxyAssistantActor._
+import com.youleligou.crawler.daos.CrawlerProxyServer
 import com.youleligou.crawler.services.ProxyAssistantService
 
 class ProxyAssistantActor @Inject()(config: Config, proxyAssistantService: ProxyAssistantService) extends Actor with Stash with ActorLogging {
@@ -28,7 +29,7 @@ class ProxyAssistantActor @Inject()(config: Config, proxyAssistantService: Proxy
       self ! LoadCache
 
     case LoadCache =>
-      proxyAssistantService.load() pipeTo self
+      proxyAssistantService.loadCache() pipeTo self
       unstashAll()
       context.become(proxyCacheLoading)
 
@@ -49,13 +50,13 @@ class ProxyAssistantActor @Inject()(config: Config, proxyAssistantService: Proxy
   }
 
   def proxyCacheAvailable: Receive = {
-    case CleanUp =>
+    case Clean =>
       log.info("scheduled cleaning up proxy server caches")
-      proxyAssistantService.cleanUp()
+      proxyAssistantService.clean()
 
-    case Get(limit) =>
-      log.info(s"requested and returning $limit proxy server list")
-      proxyAssistantService.get(limit) pipeTo sender()
+    case GetProxyServer =>
+      log.info(s"requested and returning proxy server")
+      proxyAssistantService.get pipeTo sender()
   }
 
 }
@@ -71,10 +72,11 @@ object ProxyAssistantActor extends NamedActor {
   case class Cached(proxyServerCount: Int) extends ProxyAssistantActorMessage
 
   case object LoadCache extends ProxyAssistantActorMessage
-
   case class CacheLoaded(proxyServerCount: Int) extends ProxyAssistantActorMessage
 
-  case object CleanUp extends ProxyAssistantActorMessage
+  case object Clean extends ProxyAssistantActorMessage
 
-  case class Get(limit: Int) extends ProxyAssistantActorMessage
+  case object GetProxyServer extends ProxyAssistantActorMessage
+
+  case class CachedProxyServer(crawlerProxyServerOpt: Option[CrawlerProxyServer]) extends ProxyAssistantActorMessage
 }
