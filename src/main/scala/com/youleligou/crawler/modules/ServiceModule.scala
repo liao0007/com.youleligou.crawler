@@ -22,7 +22,6 @@ import redis.RedisClient
 class ServiceModule extends AbstractModule with ScalaModule {
 
   @Provides
-  @Singleton
   def provideStandaloneAhcWSClient()(implicit system: ActorSystem): StandaloneAhcWSClient = {
     implicit val materializer = ActorMaterializer()
     StandaloneAhcWSClient()
@@ -35,11 +34,11 @@ class ServiceModule extends AbstractModule with ScalaModule {
   }
 
   override def configure() {
-    bind[HashService].to[Md5HashService].asEagerSingleton()
-    bind[FetchService].to[HttpClientFetchService].asEagerSingleton()
-    bind[IndexService].to[ElasticIndexService].asEagerSingleton()
-    bind[CacheService].to[RedisCacheService].asEagerSingleton()
-    bind[FilterService].to[DefaultFilterService].asEagerSingleton()
-    bind[ProxyAssistantService].to[DefaultProxyAssistantService].asEagerSingleton()
+    bind[HashService].to[Md5HashService]
+    bind[FetchService].to[HttpClientFetchService]
+    bind[IndexService].to[ElasticIndexService]
+    bind[CacheService].to[RedisCacheService]
+    bind[FilterService].to[DefaultFilterService]
+    bind[ProxyAssistantService].to[DefaultProxyAssistantService]
   }
 }

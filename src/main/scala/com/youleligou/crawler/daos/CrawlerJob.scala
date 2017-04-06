@@ -13,14 +13,15 @@ import scala.concurrent.ExecutionContext.Implicits._
 import scala.concurrent.Future
 
 case class CrawlerJob(
-                       id: Long = 0,
-                       jobType: String = FetchJobType,
-                       jobName: String,
-                       url: String,
-                       createdAt: Timestamp = new Timestamp(System.currentTimeMillis()),
-                       statusCode: Option[Int] = None,
-                       statusMessage: Option[String] = None
-                     )
+    id: Long = 0,
+    jobType: String = FetchJobType,
+    jobName: String,
+    url: String,
+    proxy: Option[String] = None,
+    createdAt: Timestamp = new Timestamp(System.currentTimeMillis()),
+    statusCode: Option[Int] = None,
+    statusMessage: Option[String] = None
+)
 
 object CrawlerJob {
 

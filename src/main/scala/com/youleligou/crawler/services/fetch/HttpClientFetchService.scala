@@ -18,15 +18,15 @@ import scala.concurrent.Future
   * 采用HttpClient实现的爬取器
   */
 class HttpClientFetchService @Inject()(config: Config, standaloneAhcWSClient: StandaloneAhcWSClient, crawlerJobRepo: CrawlerJobRepo)
-  extends FetchService
+    extends FetchService
     with LazyLogging {
   def fetch(jobName: String, urlInfo: UrlInfo, crawlerProxyServer: CrawlerProxyServer): Future[FetchResult] = {
     val start = System.currentTimeMillis()
     standaloneAhcWSClient
       .url(urlInfo.url)
       .withHeaders("User-Agent" -> config.getString("crawler.actor.fetch.userAgent"))
-      .withAuth(config.getString("proxy.user"), config.getString("proxy.password"), WSAuthScheme.BASIC)
-      //      .withProxyServer(DefaultWSProxyServer(host = config.getString("proxy.host"), port = config.getInt("proxy.port")))
+//      .withAuth(config.getString("proxy.user"), config.getString("proxy.password"), WSAuthScheme.BASIC)
+//      .withProxyServer(DefaultWSProxyServer(host = config.getString("proxy.host"), port = config.getInt("proxy.port")))
       .withProxyServer(DefaultWSProxyServer(host = crawlerProxyServer.ip, port = crawlerProxyServer.port))
       .get()
       .map { response =>
@@ -35,9 +35,11 @@ class HttpClientFetchService @Inject()(config: Config, standaloneAhcWSClient: St
           CrawlerJob(
             url = urlInfo.url,
             jobName = jobName,
+            proxy = Some(s"""${crawlerProxyServer.ip}:${crawlerProxyServer.port}"""),
             statusCode = Some(response.status),
             statusMessage = Some(response.statusText)
-          ))
+          )
+        )
         if (response.status == FetchService.Ok) {
           FetchResult(response.status, response.body, response.statusText, urlInfo)
         } else {
