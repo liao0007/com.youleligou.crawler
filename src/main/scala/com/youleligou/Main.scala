@@ -41,4 +41,7 @@ object Main extends App {
 
   injector.instance[ProxyAssistantBootstrap].start(FiniteDuration(50, MILLISECONDS))
   injector.instance[ElemeCrawlerBootstrap].start(FiniteDuration(10, SECONDS), FiniteDuration(3, MILLISECONDS))
+
+//  injector.instance[ProxyAssistantBootstrap].start(FiniteDuration(5000000, MILLISECONDS))
+//  injector.instance[ElemeCrawlerBootstrap].start(FiniteDuration(10, SECONDS), FiniteDuration(3000, MILLISECONDS))
 }

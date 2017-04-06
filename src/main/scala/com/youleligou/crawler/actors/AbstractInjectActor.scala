@@ -50,6 +50,7 @@ abstract class AbstractInjectActor(config: Config,
     case fetch @ Fetch(_, urlInfo: UrlInfo) if filterService.filter(urlInfo) =>
       // check cache
       val md5 = hashService.hash(urlInfo.url)
+      log.info("getting hashing info: " + md5)
       cacheService.hget(AbstractInjectActor.InjectActorUrlHash, md5) map {
         case None =>
           log.info("inject: " + urlInfo)
@@ -63,6 +64,8 @@ abstract class AbstractInjectActor(config: Config,
           }
         case _ =>
           log.info("cache hit: " + urlInfo)
+      } recover {
+        case x: Throwable => log.error(x.getMessage)
       }
   }
 }
