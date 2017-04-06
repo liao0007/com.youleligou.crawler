@@ -21,7 +21,7 @@ abstract class AbstractInjectActor(config: Config,
                                    injectService: InjectService,
                                    fetchActor: ActorRef,
                                    countActor: ActorRef)
-  extends Actor
+    extends Actor
     with Stash
     with ActorLogging {
 
@@ -47,13 +47,13 @@ abstract class AbstractInjectActor(config: Config,
       seed = seed + 1
       self ! injectService.generateFetch(seed)
 
-    case fetch@Fetch(_, urlInfo: UrlInfo) if filterService.filter(urlInfo) =>
+    case fetch @ Fetch(_, urlInfo: UrlInfo) if filterService.filter(urlInfo) =>
       // check cache
       val md5 = hashService.hash(urlInfo.url)
-      cacheService.get(md5) map {
+      cacheService.hget(AbstractInjectActor.InjectActorUrlHash, md5) map {
         case None =>
           log.info("inject: " + urlInfo)
-          cacheService.put(md5, "1") map {
+          cacheService.hset(AbstractInjectActor.InjectActorUrlHash, md5, "1") map {
             case true =>
               fetchActor ! fetch
               countActor ! InjectCounter(1)
@@ -68,7 +68,8 @@ abstract class AbstractInjectActor(config: Config,
 }
 
 object AbstractInjectActor {
-
   case class SeedInitialized(seed: Int)
   case object GenerateFetch
+
+  final val InjectActorUrlHash: String = "InjectActorUrlHash"
 }

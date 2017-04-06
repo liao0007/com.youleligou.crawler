@@ -14,19 +14,19 @@ import scala.concurrent.Future
   */
 class RedisCacheService @Inject()(config: Config, redisClient: RedisClient)(implicit system: ActorSystem) extends CacheService {
 
-  override def contains(key: String): Future[Boolean] = {
-    redisClient.exists(key)
+  override def hexists(key: String, field: String): Future[Boolean] = {
+    redisClient.hexists(key, field)
   }
 
-  override def get(key: String): Future[Option[String]] = {
+  override def hget(key: String, field: String): Future[Option[String]] = {
     redisClient.get(key).map(_.map(_.toString()))
   }
 
-  override def put(key: String, value: String): Future[Boolean] = {
+  override def hset(key: String, field: String, value: String): Future[Boolean] = {
     redisClient.set(key, value)
   }
 
-  override def size(): Future[Long] = {
+  override def hlength(key: String): Future[Long] = {
     redisClient.dbsize()
   }
 }

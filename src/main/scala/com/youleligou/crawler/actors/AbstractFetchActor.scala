@@ -22,22 +22,13 @@ abstract class AbstractFetchActor(config: Config,
                                   parserActor: ActorRef,
                                   countActor: ActorRef,
                                   proxyAssistantActor: ActorRef)
-  extends Actor
+    extends Actor
     with Stash
     with ActorLogging {
 
-  var proxyServer: Option[CrawlerProxyServer] = None
-  var retry = 1
-  val maxRetry = 20
-
-  override def preStart(): Unit = {
-    super.preStart()
-    if (proxyServer.nonEmpty) {
-      context.become(proxyServerAvailable)
-    } else {
-      context.become(proxyServerUnavailable)
-    }
-  }
+  var proxyServerOpt: Option[CrawlerProxyServer] = None
+  var retry                                      = 1
+  val maxRetry                                   = 20
 
   override def receive: Receive = proxyServerUnavailable
 
@@ -46,13 +37,14 @@ abstract class AbstractFetchActor(config: Config,
       log.info("proxy server list unavailable, getting")
       stash()
       proxyAssistantActor ! GetProxyServer
+      unstashAll()
       context.become(gettingProxyServer)
   }
 
   def gettingProxyServer: Receive = {
     case CachedProxyServer(Some(pendingProxyServer)) =>
       log.info("server got")
-      proxyServer = Some(pendingProxyServer)
+      proxyServerOpt = Some(pendingProxyServer)
       unstashAll()
       context.become(proxyServerAvailable)
 
@@ -67,16 +59,17 @@ abstract class AbstractFetchActor(config: Config,
   }
 
   def proxyServerAvailable: Receive = {
-    case Fetch(jobName, urlInfo) if proxyServer.nonEmpty =>
+    case Fetch(jobName, urlInfo) if proxyServerOpt.nonEmpty =>
       log.info("fetch: " + urlInfo)
       countActor ! FetchCounter(1)
 
-      fetchService.fetch(jobName, urlInfo, proxyServer.head) onComplete {
+      fetchService.fetch(jobName, urlInfo, proxyServerOpt.head) onComplete {
         case Success(fetchResult) =>
           retry = 1
           log.info("fetch success: " + urlInfo.url)
           parserActor ! fetchResult
           countActor ! FetchOk(1)
+          proxyServerOpt = None
 
         case Failure(FetchException(statusCode, message)) if retry < maxRetry =>
           retry = retry + 1
@@ -94,15 +87,19 @@ abstract class AbstractFetchActor(config: Config,
               self ! urlInfo
           }
           countActor ! FetchError(1)
+          proxyServerOpt = None
 
         case _ =>
           retry = 1
           log.info("fetch failed with retry limit: " + urlInfo.url)
+          proxyServerOpt = None
       }
 
-    case message if proxyServer.isEmpty =>
-      self ! message
+    case _ if proxyServerOpt.isEmpty =>
+      stash()
+      unstashAll()
       context.become(proxyServerUnavailable)
+
   }
 }
 

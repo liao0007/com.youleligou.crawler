@@ -17,7 +17,7 @@ import scala.concurrent.duration._
   * Created by liangliao on 31/3/17.
   */
 class ProxyAssistantBootstrap @Inject()(config: Config, system: ActorSystem, @Named(ProxyAssistantActor.poolName) proxyAssistantActor: ActorRef)
-  extends LazyLogging {
+    extends LazyLogging {
 
   import system.dispatcher
 
@@ -40,5 +40,5 @@ object Main extends App {
   import net.codingwell.scalaguice.InjectorExtensions._
 
   injector.instance[ProxyAssistantBootstrap].start(FiniteDuration(50, MILLISECONDS))
-  injector.instance[ElemeCrawlerBootstrap].start(FiniteDuration(30, MINUTES), FiniteDuration(30, MILLISECONDS))
+  injector.instance[ElemeCrawlerBootstrap].start(FiniteDuration(1, MINUTES), FiniteDuration(6, MILLISECONDS))
 }

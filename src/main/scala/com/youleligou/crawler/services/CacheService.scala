@@ -7,11 +7,11 @@ import scala.concurrent.Future
   * 缓存接口
   */
 trait CacheService {
-  def contains(key: String): Future[Boolean]
+  def hexists(key: String, field: String): Future[Boolean]
 
-  def put(key: String, value: String): Future[Boolean]
+  def hset(key: String, field: String, value: String): Future[Boolean]
 
-  def get(key: String): Future[Option[String]]
+  def hget(key: String, field: String): Future[Option[String]]
 
-  def size(): Future[Long]
+  def hlength(key: String): Future[Long]
 }
