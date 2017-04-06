@@ -9,7 +9,6 @@ scalaVersion := "2.12.1"
 updateOptions := updateOptions.value.withCachedResolution(true)
 
 val akkaVersion = "2.4.17"
-
 val jsoupVersion = "1.8.3"
 
 scalacOptions := Seq("-unchecked", "-deprecation", "-encoding", "utf8")
