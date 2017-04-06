@@ -19,14 +19,14 @@ class RedisCacheService @Inject()(config: Config, redisClient: RedisClient)(impl
   }
 
   override def hget(key: String, field: String): Future[Option[String]] = {
-    redisClient.get(key).map(_.map(_.toString()))
+    redisClient.hget(key, field).map(_.map(_.toString()))
   }
 
   override def hset(key: String, field: String, value: String): Future[Boolean] = {
-    redisClient.set(key, value)
+    redisClient.hset(key, field, value)
   }
 
   override def hlength(key: String): Future[Long] = {
-    redisClient.dbsize()
+    redisClient.hlen(key)
   }
 }
