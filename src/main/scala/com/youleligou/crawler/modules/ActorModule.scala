@@ -2,7 +2,7 @@ package com.youleligou.crawler.modules
 
 import javax.inject.Singleton
 
-import akka.actor.SupervisorStrategy.Escalate
+import akka.actor.SupervisorStrategy.Restart
 import akka.actor.{Actor, ActorRef, ActorSystem, OneForOneStrategy}
 import akka.routing.{DefaultResizer, RoundRobinPool}
 import com.google.inject.name.{Named, Names}
@@ -17,7 +17,7 @@ import net.codingwell.scalaguice.ScalaModule
 class ActorModule extends AbstractModule with ScalaModule with GuiceAkkaActorRefProvider {
 
   private val restartSupervisorStrategy: OneForOneStrategy = OneForOneStrategy() {
-    case _ => Escalate
+    case _ => Restart
   }
 
   private def roundRobinPool(lowerBound: Int, upperBound: Int): RoundRobinPool =
