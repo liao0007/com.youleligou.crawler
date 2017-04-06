@@ -11,7 +11,7 @@ import com.youleligou.crawler.services.ParseService
   * 解析任务
   */
 abstract class AbstractParseActor(config: Config, parseService: ParseService, indexActor: ActorRef, injectActor: ActorRef, countActor: ActorRef)
-  extends Actor
+    extends Actor
     with ActorLogging {
 
   override def receive: Receive = {
@@ -19,7 +19,7 @@ abstract class AbstractParseActor(config: Config, parseService: ParseService, in
     case fetchResult: FetchResult =>
       log.info("parse: " + fetchResult.urlInfo)
       val parseResult: ParseResult = parseService.parse(fetchResult)
-      indexActor ! parseResult
+//      indexActor ! parseResult
       countActor ! ParseCounter(1)
       parseResult.childLink.foreach { urlInfo =>
         injectActor ! urlInfo

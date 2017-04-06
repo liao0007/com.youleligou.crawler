@@ -12,25 +12,25 @@ import scala.concurrent.ExecutionContext.Implicits._
 import scala.concurrent.Future
 
 case class Restaurant(
-                       id: Long = 0,
-                       address: String,
-                       averageCost: String,
-                       description: String,
-                       deliveryFee: Float,
-                       minimumOrderAmount: Float,
-                       imagePath: String,
-                       isNew: Boolean,
-                       isPremium: Boolean,
-                       latitude: Float,
-                       longitude: Float,
-                       name: String,
-                       phone: String,
-                       promotionInfo: String,
-                       rating: Float,
-                       ratingCount: Int,
-                       recentOrderNum: Int,
-                       status: Int
-                     )
+    id: Long = 0,
+    address: String,
+    averageCost: String,
+    description: String,
+    deliveryFee: Float,
+    minimumOrderAmount: Float,
+    imagePath: String,
+    isNew: Boolean,
+    isPremium: Boolean,
+    latitude: Float,
+    longitude: Float,
+    name: String,
+    phone: String,
+    promotionInfo: String,
+    rating: Float,
+    ratingCount: Int,
+    recentOrderNum: Int,
+    status: Int
+)
 
 object Restaurant {
   implicit val restaurantReads: Reads[Restaurant] = (
@@ -52,29 +52,45 @@ object Restaurant {
       (JsPath \ "rating_count").readWithDefault[Int](0) and
       (JsPath \ "recent_order_num").readWithDefault[Int](0) and
       (JsPath \ "status").readWithDefault[Int](0)
-    ) (Restaurant.apply _)
+  )(Restaurant.apply _)
 }
 
 class RestaurantRepo extends LazyLogging {
   val Restaurants: TableQuery[RestaurantTable] = TableQuery[RestaurantTable]
 
   def find(id: Long): Future[Option[Restaurant]] =
-    CanCan.db.run(Restaurants.filter(_.id === id).result.headOption)
+    CanCan.db.run(Restaurants.filter(_.id === id).result.headOption) recover {
+      case x: Throwable =>
+        logger.warn(x.getMessage)
+        None
+    }
 
   def delete(id: Long): Future[Int] =
-    CanCan.db.run(Restaurants.filter(_.id === id).delete)
+    CanCan.db.run(Restaurants.filter(_.id === id).delete) recover {
+      case x: Throwable =>
+        logger.warn(x.getMessage)
+        0
+    }
 
   def all(): Future[List[Restaurant]] =
-    CanCan.db.run(Restaurants.to[List].result)
+    CanCan.db.run(Restaurants.to[List].result) recover {
+      case x: Throwable =>
+        logger.warn(x.getMessage)
+        List.empty[Restaurant]
+    }
 
   def create(restaurant: Restaurant): Future[Any] =
-    CanCan.db.run(Restaurants += restaurant).recover {
-      case t: Throwable =>
-        logger.error(t.getMessage)
+    CanCan.db.run(Restaurants += restaurant) recover {
+      case x: Throwable =>
+        logger.warn(x.getMessage)
     }
 
   def create(restaurants: List[Restaurant]): Future[Option[Int]] =
-    CanCan.db.run(Restaurants ++= restaurants)
+    CanCan.db.run(Restaurants ++= restaurants) recover {
+      case x: Throwable =>
+        logger.warn(x.getMessage)
+        None
+    }
 }
 
 class RestaurantTable(tag: Tag) extends Table[Restaurant](tag, "restaurant") {
@@ -116,22 +132,22 @@ class RestaurantTable(tag: Tag) extends Table[Restaurant](tag, "restaurant") {
 
   def * =
     (id,
-      address,
-      averageCost,
-      description,
-      deliveryFee,
-      minimumOrderAmount,
-      imagePath,
-      isNew,
-      isPremium,
-      latitude,
-      longitude,
-      name,
-      phone,
-      promotionInfo,
-      rating,
-      ratingCount,
-      recentOrderNum,
-      status) <> ((Restaurant.apply _).tupled, Restaurant.unapply)
+     address,
+     averageCost,
+     description,
+     deliveryFee,
+     minimumOrderAmount,
+     imagePath,
+     isNew,
+     isPremium,
+     latitude,
+     longitude,
+     name,
+     phone,
+     promotionInfo,
+     rating,
+     ratingCount,
+     recentOrderNum,
+     status) <> ((Restaurant.apply _).tupled, Restaurant.unapply)
 
 }

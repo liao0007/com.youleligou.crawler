@@ -18,8 +18,12 @@ class RestaurantInjectService @Inject()(crawlerJobRepo: CrawlerJobRepo) extends 
     val idPattern = """[0-9]+""".r
     crawlerJobRepo.findWithMaxId(FetchJobType, RestaurantInjectService.fetchJobName) map {
       case Some(crawlerJob) => idPattern.findFirstIn(crawlerJob.url).map(_.toInt).getOrElse(0)
-      case None => 0
+      case None             => 0
     } map SeedInitialized
+  } recover {
+    case x: Throwable =>
+      logger.warn(x.getMessage)
+      SeedInitialized(0)
   }
 
   override def generateFetch(seed: Int): Fetch = {

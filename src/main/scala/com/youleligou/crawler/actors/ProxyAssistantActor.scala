@@ -18,7 +18,15 @@ class ProxyAssistantActor @Inject()(config: Config, proxyAssistantService: Proxy
     case CheckCache =>
       log.info(s"checking cache")
       proxyAssistantService.cacheSize() pipeTo self
+      unstashAll()
+      context.become(checkingCache)
 
+    case _ =>
+      log.info("proxy cache unavailable, stashing")
+      stash()
+  }
+
+  def checkingCache: Receive = {
     case Cached(proxyServerCount) if proxyServerCount > 0 =>
       log.info(s"already cached $proxyServerCount proxy server(s) to cache")
       unstashAll()
@@ -26,15 +34,12 @@ class ProxyAssistantActor @Inject()(config: Config, proxyAssistantService: Proxy
 
     case Cached(proxyServerCount) if proxyServerCount <= 0 =>
       log.info(s"no cache available, now load")
-      self ! LoadCache
-
-    case LoadCache =>
       proxyAssistantService.loadCache() pipeTo self
       unstashAll()
       context.become(proxyCacheLoading)
 
     case _ =>
-      log.info("proxy cache unavailable, stashing")
+      log.info(s"still checking cache, stash")
       stash()
   }
 
@@ -62,21 +67,14 @@ class ProxyAssistantActor @Inject()(config: Config, proxyAssistantService: Proxy
 }
 
 object ProxyAssistantActor extends NamedActor {
-  override final val name = "ProxyAssistantActor"
+  override final val name     = "ProxyAssistantActor"
   override final val poolName = "ProxyAssistantActorPool"
 
   sealed trait ProxyAssistantActorMessage
-
-  case object CheckCache extends ProxyAssistantActorMessage
-
-  case class Cached(proxyServerCount: Int) extends ProxyAssistantActorMessage
-
-  case object LoadCache extends ProxyAssistantActorMessage
-  case class CacheLoaded(proxyServerCount: Int) extends ProxyAssistantActorMessage
-
-  case object Clean extends ProxyAssistantActorMessage
-
-  case object GetProxyServer extends ProxyAssistantActorMessage
-
+  case object CheckCache                                                          extends ProxyAssistantActorMessage
+  case class Cached(proxyServerCount: Int)                                        extends ProxyAssistantActorMessage
+  case class CacheLoaded(proxyServerCount: Int)                                   extends ProxyAssistantActorMessage
+  case object Clean                                                               extends ProxyAssistantActorMessage
+  case object GetProxyServer                                                      extends ProxyAssistantActorMessage
   case class CachedProxyServer(crawlerProxyServerOpt: Option[CrawlerProxyServer]) extends ProxyAssistantActorMessage
 }

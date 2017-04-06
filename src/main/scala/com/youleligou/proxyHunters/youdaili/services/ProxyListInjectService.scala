@@ -1,6 +1,7 @@
 package com.youleligou.proxyHunters.youdaili.services
 
 import com.google.inject.Inject
+import com.typesafe.scalalogging.LazyLogging
 import com.youleligou.crawler.actors.AbstractFetchActor.Fetch
 import com.youleligou.crawler.actors.AbstractInjectActor.SeedInitialized
 import com.youleligou.crawler.daos.CrawlerJob.FetchJobType
@@ -18,8 +19,12 @@ class ProxyListInjectService @Inject()(crawlerJobRepo: CrawlerJobRepo) extends I
     val idPattern = """[0-9]+""".r
     crawlerJobRepo.findWithMaxId(FetchJobType, ProxyListInjectService.fetchJobName) map {
       case Some(crawlerJob) => idPattern.findFirstIn(crawlerJob.url).map(_.toInt).getOrElse(0)
-      case None => 0
+      case _                => 0
     } map (_ % ProxyListInjectService.maxPage) map SeedInitialized
+  } recover {
+    case x: Throwable =>
+      logger.warn(x.getMessage)
+      SeedInitialized(0)
   }
 
   override def generateFetch(seed: Int): Fetch = {
@@ -36,7 +41,7 @@ class ProxyListInjectService @Inject()(crawlerJobRepo: CrawlerJobRepo) extends I
 }
 
 object ProxyListInjectService {
-  val maxPage = 36718
-  final val name = "YouDaiLiInjectService"
+  val maxPage            = 36718
+  final val name         = "YouDaiLiInjectService"
   final val fetchJobName = "fetch_youdaili_list"
 }

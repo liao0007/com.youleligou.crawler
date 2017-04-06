@@ -14,18 +14,18 @@ import scala.concurrent.ExecutionContext.Implicits._
 import scala.concurrent.Future
 
 case class CrawlerProxyServer(
-                               id: Long = 0,
-                               hash: String,
-                               ip: String,
-                               port: Int,
-                               isAnonymous: Option[Boolean],
-                               supportedType: Option[String],
-                               location: Option[String],
-                               reactTime: Option[Float],
-                               isLive: Boolean = false,
-                               lastVerifiedAt: Option[Timestamp],
-                               createdAt: Timestamp = new Timestamp(System.currentTimeMillis())
-                             )
+    id: Long = 0,
+    hash: String,
+    ip: String,
+    port: Int,
+    isAnonymous: Option[Boolean],
+    supportedType: Option[String],
+    location: Option[String],
+    reactTime: Option[Float],
+    isLive: Boolean = false,
+    lastVerifiedAt: Option[Timestamp],
+    createdAt: Timestamp = new Timestamp(System.currentTimeMillis())
+)
 
 object CrawlerProxyServer {
 
@@ -47,30 +47,59 @@ class CrawlerProxyServerRepo extends LazyLogging {
   val CrawlerProxyServers: TableQuery[CrawlerProxyServerTable] = TableQuery[CrawlerProxyServerTable]
 
   def find(id: Long): Future[Option[CrawlerProxyServer]] =
-    CanCan.db.run(CrawlerProxyServers.filter(_.id === id).result.headOption)
+    CanCan.db.run(CrawlerProxyServers.filter(_.id === id).result.headOption) recover {
+      case x: Throwable =>
+        logger.warn(x.getMessage)
+        None
+    }
 
   def delete(id: Long): Future[Int] =
-    CanCan.db.run(CrawlerProxyServers.filter(_.id === id).delete)
+    CanCan.db.run(CrawlerProxyServers.filter(_.id === id).delete) recover {
+      case x: Throwable =>
+        logger.warn(x.getMessage)
+        0
+    }
 
   def all(): Future[List[CrawlerProxyServer]] =
-    CanCan.db.run(CrawlerProxyServers.to[List].result)
+    CanCan.db.run(CrawlerProxyServers.to[List].result) recover {
+      case x: Throwable =>
+        logger.warn(x.getMessage)
+        List.empty[CrawlerProxyServer]
+    }
 
   def all(limit: Int): Future[List[CrawlerProxyServer]] =
-    CanCan.db.run(CrawlerProxyServers.to[List].sortBy(_.lastVerifiedAt.desc).take(limit).result)
+    CanCan.db.run(CrawlerProxyServers.to[List].sortBy(_.lastVerifiedAt.desc).take(limit).result) recover {
+      case x: Throwable =>
+        logger.warn(x.getMessage)
+        List.empty[CrawlerProxyServer]
+    }
 
   def create(crawlerProxyServer: CrawlerProxyServer): Future[Long] =
     CanCan.db.run(CrawlerProxyServers returning CrawlerProxyServers.map(_.id) += crawlerProxyServer).recover {
       case t: Throwable =>
-        logger.error(t.getMessage)
-        0l
+        logger.warn(t.getMessage)
+        0L
+    } recover {
+      case x: Throwable =>
+        logger.warn(x.getMessage)
+        0L
     }
 
   def create(crawlerProxyServers: List[CrawlerProxyServer]): Future[Option[Int]] =
-    CanCan.db.run(CrawlerProxyServers ++= crawlerProxyServers)
+    CanCan.db.run(CrawlerProxyServers ++= crawlerProxyServers) recover {
+      case x: Throwable =>
+        logger.warn(x.getMessage)
+        None
+    }
 
-  def insertOrUpdate(crawlerProxyServer: CrawlerProxyServer): Future[Int] = CanCan.db.run {
-    CrawlerProxyServers.insertOrUpdate(crawlerProxyServer)
-  }
+  def insertOrUpdate(crawlerProxyServer: CrawlerProxyServer): Future[Int] =
+    CanCan.db.run {
+      CrawlerProxyServers.insertOrUpdate(crawlerProxyServer)
+    } recover {
+      case x: Throwable =>
+        logger.warn(x.getMessage)
+        0
+    }
 }
 
 class CrawlerProxyServerTable(tag: Tag) extends Table[CrawlerProxyServer](tag, "crawler_proxy_server") {

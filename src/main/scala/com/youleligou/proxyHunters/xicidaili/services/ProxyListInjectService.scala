@@ -18,8 +18,12 @@ class ProxyListInjectService @Inject()(crawlerJobRepo: CrawlerJobRepo) extends I
     val idPattern = """[0-9]+""".r
     crawlerJobRepo.findWithMaxId(FetchJobType, ProxyListInjectService.fetchJobName) map {
       case Some(crawlerJob) => idPattern.findFirstIn(crawlerJob.url).map(_.toInt).getOrElse(0)
-      case None => 0
+      case None             => 0
     } map (_ % ProxyListInjectService.maxPage) map SeedInitialized
+  } recover {
+    case x: Throwable =>
+      logger.warn(x.getMessage)
+      SeedInitialized(0)
   }
 
   override def generateFetch(seed: Int): Fetch = {
@@ -36,7 +40,7 @@ class ProxyListInjectService @Inject()(crawlerJobRepo: CrawlerJobRepo) extends I
 }
 
 object ProxyListInjectService {
-  val maxPage = 480
-  final val name = "XiCiDaiLiInjectService"
+  val maxPage            = 480
+  final val name         = "XiCiDaiLiInjectService"
   final val fetchJobName = "fetch_xicidaili_list"
 }

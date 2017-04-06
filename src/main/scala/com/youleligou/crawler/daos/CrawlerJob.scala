@@ -41,7 +41,11 @@ class CrawlerJobRepo extends LazyLogging {
   val CrawlerJobs: TableQuery[CrawlerJobTable] = TableQuery[CrawlerJobTable]
 
   def find(id: Long): Future[Option[CrawlerJob]] =
-    CanCan.db.run(CrawlerJobs.filter(_.id === id).result.headOption)
+    CanCan.db.run(CrawlerJobs.filter(_.id === id).result.headOption) recover {
+      case x: Throwable =>
+        logger.warn(x.getMessage)
+        None
+    }
 
   def findWithMaxId(jobType: JobType, jobName: String): Future[Option[CrawlerJob]] =
     CanCan.db.run(
@@ -50,23 +54,43 @@ class CrawlerJobRepo extends LazyLogging {
         .sortBy(_.id.desc)
         .take(1)
         .result
-        .headOption)
+        .headOption) recover {
+      case x: Throwable =>
+        logger.warn(x.getMessage)
+        None
+    }
 
   def delete(id: Long): Future[Int] =
-    CanCan.db.run(CrawlerJobs.filter(_.id === id).delete)
+    CanCan.db.run(CrawlerJobs.filter(_.id === id).delete) recover {
+      case x: Throwable =>
+        logger.warn(x.getMessage)
+        0
+    }
 
   def all(): Future[List[CrawlerJob]] =
-    CanCan.db.run(CrawlerJobs.to[List].result)
+    CanCan.db.run(CrawlerJobs.to[List].result) recover {
+      case x: Throwable =>
+        logger.warn(x.getMessage)
+        List.empty[CrawlerJob]
+    }
 
   def create(job: CrawlerJob): Future[Long] =
     CanCan.db.run(CrawlerJobs returning CrawlerJobs.map(_.id) += job).recover {
       case t: Throwable =>
-        logger.error(t.getMessage)
-        0l
+        logger.warn(t.getMessage)
+        0L
+    } recover {
+      case x: Throwable =>
+        logger.warn(x.getMessage)
+        0L
     }
 
   def create(jobs: List[CrawlerJob]): Future[Option[Int]] =
-    CanCan.db.run(CrawlerJobs ++= jobs)
+    CanCan.db.run(CrawlerJobs ++= jobs) recover {
+      case x: Throwable =>
+        logger.warn(x.getMessage)
+        None
+    }
 }
 
 class CrawlerJobTable(tag: Tag) extends Table[CrawlerJob](tag, "crawler_job") {

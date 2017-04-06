@@ -3,8 +3,9 @@
 
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <target>System.out</target>
+        <withJansi>true</withJansi>
         <encoder>
-            <pattern>%X{akkaTimestamp} %-5level[%thread] %logger{0} - %msg%n</pattern>
+            <pattern>[%thread] %highlight(%-5level) %cyan(%logger{0}) - %msg %n</pattern>
         </encoder>
     </appender>
 

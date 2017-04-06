@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <target>System.out</target>
+        <withJansi>true</withJansi>
         <encoder>
-            <pattern>%X{akkaTimestamp} %-5level[%thread] %logger{0} - %msg%n</pattern>
+            <pattern>[%thread] %highlight(%-5level) %cyan(%logger{0}) - %msg %n</pattern>
         </encoder>
     </appender>
 
@@ -16,9 +16,10 @@
         </encoder>
     </appender>
 
-    <logger name="akka" level="INFO"/>
+    <logger name="akka" level="DEBUG"/>
+    <logger name="slick" level="INFO"/>
 
-    <root level="DEBUG">
+    <root level="INFO">
         <appender-ref ref="CONSOLE"/>
         <appender-ref ref="FILE"/>
     </root>

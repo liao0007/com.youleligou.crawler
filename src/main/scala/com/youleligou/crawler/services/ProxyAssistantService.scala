@@ -13,17 +13,20 @@ import redis.RedisClient
 
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.Try
 
 /**
   * Created by liangliao on 5/4/17.
   */
-trait ProxyAssistantService {
+trait ProxyAssistantService extends LazyLogging {
   val redisClient: RedisClient
   val standaloneAhcWSClient: StandaloneAhcWSClient
   val crawlerProxyServerRepo: CrawlerProxyServerRepo
 
-  val cachedProxyQueueKey: String = ProxyAssistantService.ProxyQueuePrefix
+  val cachedProxyQueueKey: String     = ProxyAssistantService.ProxyQueuePrefix
   val cachedLiveProxyQueueKey: String = ProxyAssistantService.LiveProxyQueuePrefix
+
+  def currentTimestamp = new Timestamp(System.currentTimeMillis())
 
   def cacheSize()(implicit executor: ExecutionContext): Future[Cached]
   /*
@@ -34,7 +37,7 @@ trait ProxyAssistantService {
   /*
   clean up invalid
    */
-  def clean()(implicit executor: ExecutionContext): Future[Unit]
+  def clean()(implicit executor: ExecutionContext): Future[Any]
 
   /*
   get by FIFO
@@ -42,49 +45,65 @@ trait ProxyAssistantService {
   def get()(implicit executor: ExecutionContext): Future[CachedProxyServer]
 
   protected def testAvailability(proxyServer: CrawlerProxyServer)(implicit executor: ExecutionContext): Future[CrawlerProxyServer] = {
-    val currentTimestamp = new Timestamp(System.currentTimeMillis())
-    standaloneAhcWSClient
-      .url("http://www.baidu.com")
-      .withProxyServer(DefaultWSProxyServer(proxyServer.ip, proxyServer.port))
-      .withRequestTimeout(Duration(2, SECONDS))
-      .get()
-      .map { response =>
-        if (response.status == 200) {
-          proxyServer.copy(isLive = true, lastVerifiedAt = Some(currentTimestamp))
-        } else {
+    Try {
+      standaloneAhcWSClient
+        .url("http://www.baidu.com")
+        .withProxyServer(DefaultWSProxyServer(proxyServer.ip, proxyServer.port))
+        .withRequestTimeout(Duration(2, SECONDS))
+        .get()
+        .map { response =>
+          if (response.status == 200 && response.body.contains("百度一下，你就知道")) {
+            proxyServer.copy(isLive = true, lastVerifiedAt = Some(currentTimestamp))
+          } else {
+            proxyServer.copy(isLive = false, lastVerifiedAt = Some(currentTimestamp))
+          }
+        } recover {
+        case _: Throwable =>
           proxyServer.copy(isLive = false, lastVerifiedAt = Some(currentTimestamp))
-        }
-      } recover {
-      case _: Throwable =>
-        proxyServer.copy(isLive = false, lastVerifiedAt = Some(currentTimestamp))
+      }
+    } getOrElse {
+      Future.successful(proxyServer.copy(isLive = false, lastVerifiedAt = Some(currentTimestamp)))
     }
+  } recover {
+    case x: Throwable =>
+      logger.warn(x.getMessage)
+      proxyServer.copy(isLive = false, lastVerifiedAt = Some(currentTimestamp))
   }
 
 }
 
 object ProxyAssistantService {
-  final val ProxyQueuePrefix = "ProxyQueue"
+  final val ProxyQueuePrefix     = "ProxyQueue"
   final val LiveProxyQueuePrefix = "LiveProxyQueue"
 }
 
 class DefaultProxyAssistantService @Inject()(val redisClient: RedisClient,
                                              val crawlerProxyServerRepo: CrawlerProxyServerRepo,
                                              val standaloneAhcWSClient: StandaloneAhcWSClient)
-  extends ProxyAssistantService
-    with LazyLogging {
+    extends ProxyAssistantService {
 
-  def cacheSize()(implicit executor: ExecutionContext): Future[Cached] = redisClient.llen(cachedLiveProxyQueueKey).map(_.toInt).map(Cached)
-
-  def loadCache()(implicit executor: ExecutionContext): Future[CacheLoaded] = redisClient.del(cachedProxyQueueKey) flatMap { _ =>
-    crawlerProxyServerRepo.all().flatMap { proxyServers =>
-      redisClient
-        .lpush[String](cachedProxyQueueKey, proxyServers map (Json.toJson(_).toString()): _*)
-        .map(_.toInt)
-        .map(CacheLoaded)
+  def cacheSize()(implicit executor: ExecutionContext): Future[Cached] =
+    redisClient.llen(cachedLiveProxyQueueKey).map(_.toInt).map(Cached) recover {
+      case x: Throwable =>
+        logger.warn(x.getMessage)
+        Cached(0)
     }
-  }
 
-  def clean()(implicit executor: ExecutionContext): Future[Unit] =
+  def loadCache()(implicit executor: ExecutionContext): Future[CacheLoaded] =
+    redisClient.del(cachedProxyQueueKey) flatMap { _ =>
+      crawlerProxyServerRepo.all().flatMap { proxyServers =>
+        redisClient
+          .lpush[String](cachedProxyQueueKey, proxyServers map (Json.toJson(_).toString()): _*)
+          .map(_.toInt)
+          .map(CacheLoaded)
+      }
+    } recover {
+      case x: Throwable =>
+        logger.warn(x.getMessage)
+        CacheLoaded(0)
+    }
+
+  def clean()(implicit executor: ExecutionContext): Future[Any] =
     redisClient.rpop[String](cachedProxyQueueKey) map {
       case Some(proxyServerString) =>
         Json.parse(proxyServerString).validate[CrawlerProxyServer].asOpt match {
@@ -100,6 +119,9 @@ class DefaultProxyAssistantService @Inject()(val redisClient: RedisClient,
           case _ => //failed to validate
         }
       case _ => //failed to pop
+    } recover {
+      case x: Throwable =>
+        logger.warn(x.getMessage)
     }
 
   def get()(implicit executor: ExecutionContext): Future[CachedProxyServer] =
@@ -121,6 +143,10 @@ class DefaultProxyAssistantService @Inject()(val redisClient: RedisClient,
             Future.successful(CachedProxyServer(None))
         }
       case _ => Future.successful(CachedProxyServer(None))
+    } recover {
+      case x: Throwable =>
+        logger.warn(x.getMessage)
+        CachedProxyServer(None)
     }
 
 }
