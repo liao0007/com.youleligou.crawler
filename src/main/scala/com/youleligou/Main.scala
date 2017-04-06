@@ -5,14 +5,13 @@ import com.google.inject.name.Named
 import com.google.inject.{Guice, Inject}
 import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
-import com.youleligou.crawler.actors.AbstractInjectActor.GenerateFetch
 import com.youleligou.crawler.actors.ProxyAssistantActor
-import com.youleligou.crawler.actors.ProxyAssistantActor.CheckCache
+import com.youleligou.crawler.actors.ProxyAssistantActor.{CheckCache, Clean}
 import com.youleligou.crawler.modules.{ActorModule, AkkaModule, ConfigModule, ServiceModule}
 import com.youleligou.eleme.{ElemeCrawlerBootstrap, ElemeModule}
 import com.youleligou.proxyHunters.xicidaili.XiCiDaiLiModule
 
-import scala.concurrent.duration.{FiniteDuration, MILLISECONDS, SECONDS}
+import scala.concurrent.duration._
 
 /**
   * Created by liangliao on 31/3/17.
@@ -23,8 +22,8 @@ class ProxyAssistantBootstrap @Inject()(config: Config, system: ActorSystem, @Na
   import system.dispatcher
 
   def start(interval: FiniteDuration): Unit = {
-    system.scheduler.scheduleOnce(FiniteDuration(0, SECONDS), proxyAssistantActor, CheckCache)
-    system.scheduler.schedule(FiniteDuration(2, SECONDS), interval, proxyAssistantActor, GenerateFetch)
+    system.scheduler.scheduleOnce(FiniteDuration(20, MILLISECONDS), proxyAssistantActor, CheckCache)
+    system.scheduler.schedule(FiniteDuration(1, SECONDS), interval, proxyAssistantActor, Clean)
   }
 }
 
@@ -41,5 +40,5 @@ object Main extends App {
   import net.codingwell.scalaguice.InjectorExtensions._
 
   injector.instance[ProxyAssistantBootstrap].start(FiniteDuration(50, MILLISECONDS))
-  injector.instance[ElemeCrawlerBootstrap].start(FiniteDuration(10, SECONDS), FiniteDuration(30, MILLISECONDS))
+  injector.instance[ElemeCrawlerBootstrap].start(FiniteDuration(1, MINUTES), FiniteDuration(30, MILLISECONDS))
 }
