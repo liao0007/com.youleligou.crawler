@@ -109,6 +109,7 @@ class DefaultProxyAssistantService @Inject()(val redisClient: RedisClient,
         Json.parse(proxyServerString).validate[CrawlerProxyServer].asOpt match {
           case Some(proxyServer) =>
             testAvailability(proxyServer) map { testedProxyServer =>
+              logger.info(s"tested proxy server ${testedProxyServer.ip}:${testedProxyServer.port}, isLive = ${testedProxyServer.isLive}")
               crawlerProxyServerRepo.insertOrUpdate(testedProxyServer)
               val testedProxyServerString = Json.toJson(testedProxyServer).toString()
               redisClient.lpush(cachedProxyQueueKey, testedProxyServerString)
@@ -129,9 +130,10 @@ class DefaultProxyAssistantService @Inject()(val redisClient: RedisClient,
       case Some(proxyServerString) =>
         Json.parse(proxyServerString).validate[CrawlerProxyServer].asOpt match {
           case Some(proxyServer) =>
+            redisClient.lpush(cachedLiveProxyQueueKey, proxyServer)
             CachedProxyServer(Some(proxyServer))
 
-            //without test
+          //without test
 //            testAvailability(proxyServer) map { testedLiveProxyServer =>
 //              crawlerProxyServerRepo.insertOrUpdate(testedLiveProxyServer)
 //              val testedProxyServerString = Json.toJson(testedLiveProxyServer).toString()
