@@ -8,22 +8,24 @@ import com.typesafe.scalalogging.LazyLogging
 import com.youleligou.crawler.actors.AbstractInjectActor.GenerateFetch
 import com.youleligou.eleme.actors.RestaurantInjectActor
 
-import scala.concurrent.duration.FiniteDuration
+import scala.concurrent.duration._
 
 /**
   * Created by dell on 2016/8/29.
   * 爬虫主函数
   */
 class ElemeCrawlerBootstrap @Inject()(config: Config, system: ActorSystem, @Named(RestaurantInjectActor.poolName) injectActor: ActorRef)
-  extends LazyLogging {
-
+    extends LazyLogging {
   import system.dispatcher
+
+  val timeout       = config.getInt("crawler.actor.proxy-assistant.timeout")
+  val fetchParallel = config.getInt("crawler.actor.fetch.parallel")
 
   /**
     * 爬虫启动函数
     */
-  def start(delay: FiniteDuration, interval: FiniteDuration): Unit = {
-    system.scheduler.schedule(delay, interval, injectActor, GenerateFetch)
+  def start(delay: FiniteDuration): Unit = {
+    system.scheduler.schedule(delay, FiniteDuration(timeout / fetchParallel, MILLISECONDS), injectActor, GenerateFetch)
   }
 
 }

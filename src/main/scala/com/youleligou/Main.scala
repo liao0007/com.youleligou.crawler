@@ -8,7 +8,7 @@ import com.typesafe.scalalogging.LazyLogging
 import com.youleligou.crawler.actors.ProxyAssistantActor
 import com.youleligou.crawler.actors.ProxyAssistantActor.{CheckCache, Clean}
 import com.youleligou.crawler.modules.{ActorModule, AkkaModule, ConfigModule, ServiceModule}
-import com.youleligou.eleme.ElemeModule
+import com.youleligou.eleme.{ElemeCrawlerBootstrap, ElemeModule}
 import com.youleligou.proxyHunters.xicidaili.XiCiDaiLiModule
 
 import scala.concurrent.duration._
@@ -16,9 +16,7 @@ import scala.concurrent.duration._
 /**
   * Created by liangliao on 31/3/17.
   */
-class ProxyAssistantBootstrap @Inject()(config: Config,
-                                        system: ActorSystem,
-                                        @Named(ProxyAssistantActor.poolName) proxyAssistantActor: ActorRef)
+class ProxyAssistantBootstrap @Inject()(config: Config, system: ActorSystem, @Named(ProxyAssistantActor.poolName) proxyAssistantActor: ActorRef)
     extends LazyLogging {
   import system.dispatcher
 
@@ -46,7 +44,8 @@ object Main extends App {
   injector.instance[ProxyAssistantBootstrap].start()
 
   //min interval: 2000/100 = 20 milliseconds
-//  injector.instance[ElemeCrawlerBootstrap].start(FiniteDuration(5, SECONDS), FiniteDuration(1000, MILLISECONDS))
+  injector.instance[ElemeCrawlerBootstrap].start(FiniteDuration(5, SECONDS))
+
 //  injector.instance[ProxyAssistantBootstrap].start(FiniteDuration(5000000, MILLISECONDS))
 //  injector.instance[ElemeCrawlerBootstrap].start(FiniteDuration(3, SECONDS), FiniteDuration(3, SECONDS))
 }

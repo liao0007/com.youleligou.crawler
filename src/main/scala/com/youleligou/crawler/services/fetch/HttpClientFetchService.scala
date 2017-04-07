@@ -24,7 +24,7 @@ class HttpClientFetchService @Inject()(config: Config, standaloneAhcWSClient: St
       standaloneAhcWSClient
         .url(urlInfo.url)
         .withHeaders("User-Agent" -> config.getString("crawler.actor.fetch.userAgent"))
-        .withRequestTimeout(Duration(2, SECONDS))
+        .withRequestTimeout(Duration(config.getInt("crawler.actor.proxy-assistant.timeout"), MILLISECONDS))
         //      .withAuth(config.getString("proxy.user"), config.getString("proxy.password"), WSAuthScheme.BASIC)
         //      .withProxyServer(DefaultWSProxyServer(host = config.getString("proxy.host"), port = config.getInt("proxy.port")))
         .withProxyServer(DefaultWSProxyServer(host = crawlerProxyServer.ip, port = crawlerProxyServer.port))
