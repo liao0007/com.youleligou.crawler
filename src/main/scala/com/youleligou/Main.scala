@@ -8,7 +8,7 @@ import com.typesafe.scalalogging.LazyLogging
 import com.youleligou.crawler.actors.ProxyAssistantActor
 import com.youleligou.crawler.actors.ProxyAssistantActor.{CheckCache, Clean}
 import com.youleligou.crawler.modules.{ActorModule, AkkaModule, ConfigModule, ServiceModule}
-import com.youleligou.eleme.{ElemeCrawlerBootstrap, ElemeModule}
+import com.youleligou.eleme.ElemeModule
 import com.youleligou.proxyHunters.xicidaili.XiCiDaiLiModule
 
 import scala.concurrent.duration._
