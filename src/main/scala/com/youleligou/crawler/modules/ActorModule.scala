@@ -3,7 +3,9 @@ package com.youleligou.crawler.modules
 import javax.inject.Singleton
 
 import akka.actor.SupervisorStrategy.Restart
-import akka.actor.{Actor, ActorRef, ActorSystem, OneForOneStrategy}
+import akka.actor.{Actor, ActorRef, ActorSystem, OneForOneStrategy, Props}
+import akka.contrib.throttle.Throttler.SetTarget
+import akka.contrib.throttle.TimerBasedThrottler
 import akka.routing.{DefaultResizer, RoundRobinPool}
 import com.google.inject.name.{Named, Names}
 import com.google.inject.{AbstractModule, Provides}
@@ -22,8 +24,8 @@ class ActorModule extends AbstractModule with ScalaModule with GuiceAkkaActorRef
 
   private def roundRobinPool(lowerBound: Int, upperBound: Int): RoundRobinPool =
     RoundRobinPool(nrOfInstances = lowerBound,
-      resizer = Some(DefaultResizer(lowerBound, upperBound)),
-      supervisorStrategy = restartSupervisorStrategy)
+                   resizer = Some(DefaultResizer(lowerBound, upperBound)),
+                   supervisorStrategy = restartSupervisorStrategy)
 
   /*
   count actor
@@ -51,6 +53,24 @@ class ActorModule extends AbstractModule with ScalaModule with GuiceAkkaActorRef
   @Named(ProxyAssistantActor.poolName)
   def provideProxyAssistantActorPoolRef(config: Config, system: ActorSystem): ActorRef = {
     provideActorPoolRef(system, ProxyAssistantActor, roundRobinPool(1, config.getInt("crawler.actor.proxy-assistant.parallel")))
+  }
+
+  @Provides
+  @Singleton
+  @Named(ProxyAssistantActor.poolThrottlerName)
+  def provideProxyAssistantActorPoolThrottlerRef(config: Config,
+                                                 system: ActorSystem,
+                                                 @Named(ProxyAssistantActor.poolName) proxyAssistantPoolActor: ActorRef): ActorRef = {
+    import akka.contrib.throttle.Throttler._
+    import scala.concurrent.duration._
+    val throttler = system.actorOf(
+      Props(
+        classOf[TimerBasedThrottler],
+        (config.getInt("crawler.actor.proxy-assistant.parallel") - config
+          .getInt("crawler.actor.fetch.parallel")) msgsPer config.getInt("crawler.actor.proxy-assistant.timeout").millis
+      ))
+    throttler ! SetTarget(Some(proxyAssistantPoolActor))
+    throttler
   }
 
   /*

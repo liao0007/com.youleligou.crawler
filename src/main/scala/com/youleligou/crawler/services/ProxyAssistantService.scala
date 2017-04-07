@@ -3,6 +3,7 @@ package com.youleligou.crawler.services
 import java.sql.Timestamp
 
 import com.google.inject.Inject
+import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
 import com.youleligou.crawler.actors.ProxyAssistantActor.{CacheLoaded, Cached, CachedProxyServer}
 import com.youleligou.crawler.daos.{CrawlerProxyServer, CrawlerProxyServerRepo}
@@ -19,12 +20,14 @@ import scala.util.Try
   * Created by liangliao on 5/4/17.
   */
 trait ProxyAssistantService extends LazyLogging {
+  val config: Config
   val redisClient: RedisClient
   val standaloneAhcWSClient: StandaloneAhcWSClient
   val crawlerProxyServerRepo: CrawlerProxyServerRepo
 
   val cachedProxyQueueKey: String     = ProxyAssistantService.ProxyQueuePrefix
   val cachedLiveProxyQueueKey: String = ProxyAssistantService.LiveProxyQueuePrefix
+  val timeout                         = Duration(config.getInt("crawler.actor.proxy-assistant.timeout"), MILLISECONDS)
 
   def currentTimestamp = new Timestamp(System.currentTimeMillis())
 
@@ -49,7 +52,7 @@ trait ProxyAssistantService extends LazyLogging {
       standaloneAhcWSClient
         .url("http://www.baidu.com")
         .withProxyServer(DefaultWSProxyServer(proxyServer.ip, proxyServer.port))
-        .withRequestTimeout(Duration(2, SECONDS))
+        .withRequestTimeout(timeout)
         .get()
         .map { response =>
           if (response.status == 200 && response.body.contains("百度一下，你就知道")) {
@@ -77,7 +80,8 @@ object ProxyAssistantService {
   final val LiveProxyQueuePrefix = "LiveProxyQueue"
 }
 
-class DefaultProxyAssistantService @Inject()(val redisClient: RedisClient,
+class DefaultProxyAssistantService @Inject()(val config: Config,
+                                             val redisClient: RedisClient,
                                              val crawlerProxyServerRepo: CrawlerProxyServerRepo,
                                              val standaloneAhcWSClient: StandaloneAhcWSClient)
     extends ProxyAssistantService {

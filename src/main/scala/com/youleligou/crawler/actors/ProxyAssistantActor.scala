@@ -1,6 +1,7 @@
 package com.youleligou.crawler.actors
 
-import akka.actor.{Actor, ActorLogging, Stash}
+import akka.actor.{Actor, ActorLogging, Props, Stash}
+import akka.contrib.throttle.TimerBasedThrottler
 import akka.pattern.pipe
 import com.google.inject.Inject
 import com.typesafe.config.Config
@@ -9,7 +10,6 @@ import com.youleligou.crawler.daos.CrawlerProxyServer
 import com.youleligou.crawler.services.ProxyAssistantService
 
 class ProxyAssistantActor @Inject()(config: Config, proxyAssistantService: ProxyAssistantService) extends Actor with Stash with ActorLogging {
-
   import context.dispatcher
 
   override def receive: Receive = proxyCacheUnavailable
@@ -69,6 +69,7 @@ class ProxyAssistantActor @Inject()(config: Config, proxyAssistantService: Proxy
 object ProxyAssistantActor extends NamedActor {
   override final val name     = "ProxyAssistantActor"
   override final val poolName = "ProxyAssistantActorPool"
+  final val poolThrottlerName = "ProxyAssistantActorPoolThrottler"
 
   sealed trait ProxyAssistantActorMessage
   case object CheckCache                                                          extends ProxyAssistantActorMessage

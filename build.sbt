@@ -39,6 +39,7 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-cluster-tools" % akkaVersion,
   "com.typesafe.akka" %% "akka-cluster-sharding" % akkaVersion,
   "com.typesafe.akka" %% "akka-persistence" % akkaVersion,
+  "com.typesafe.akka" %% "akka-contrib" % akkaVersion,
   //  parser
   "org.jsoup" % "jsoup" % jsoupVersion,
   "com.typesafe.play" %% "play-json" % "2.6.0-M1",
