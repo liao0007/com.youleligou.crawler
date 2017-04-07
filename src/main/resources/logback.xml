@@ -17,9 +17,9 @@
         </encoder>
     </appender>
 
-    <logger name="akka" level="INFO"/>
+    <logger name="akka" level="WARN"/>
 
-    <root level="INFO">
+    <root level="WARN">
         <appender-ref ref="CONSOLE"/>
         <appender-ref ref="FILE"/>
     </root>
