@@ -25,9 +25,9 @@ trait ProxyAssistantService extends LazyLogging {
   val standaloneAhcWSClient: StandaloneAhcWSClient
   val crawlerProxyServerRepo: CrawlerProxyServerRepo
 
-  val cachedProxyQueueKey: String   = ProxyAssistantService.ProxyQueueKey
-  val cachedLiveProxySetKey: String = ProxyAssistantService.LiveProxySetKey
-  val timeout                       = Duration(config.getInt("crawler.actor.proxy-assistant.timeout"), MILLISECONDS)
+  val ProxyQueueKey: String   = ProxyAssistantService.ProxyQueueKey
+  val LiveProxySetKey: String = ProxyAssistantService.LiveProxySetKey
+  val timeout                 = Duration(config.getInt("crawler.actor.proxy-assistant.timeout"), MILLISECONDS)
 
   def currentTimestamp = new Timestamp(System.currentTimeMillis())
 
@@ -87,17 +87,17 @@ class DefaultProxyAssistantService @Inject()(val config: Config,
     extends ProxyAssistantService {
 
   def cacheSize()(implicit executor: ExecutionContext): Future[Cached] =
-    redisClient.llen(cachedLiveProxySetKey).map(_.toInt).map(Cached) recover {
+    redisClient.scard(LiveProxySetKey).map(_.toInt).map(Cached) recover {
       case x: Throwable =>
         logger.warn(x.getMessage)
         Cached(0)
     }
 
   def loadCache()(implicit executor: ExecutionContext): Future[CacheLoaded] =
-    redisClient.del(cachedProxyQueueKey) flatMap { _ =>
+    redisClient.del(ProxyQueueKey) flatMap { _ =>
       crawlerProxyServerRepo.all().flatMap { proxyServers =>
         redisClient
-          .lpush[String](cachedProxyQueueKey, proxyServers map (Json.toJson(_).toString()): _*)
+          .lpush[String](ProxyQueueKey, proxyServers map (Json.toJson(_).toString()): _*)
           .map(_.toInt)
           .map(CacheLoaded)
       }
@@ -108,16 +108,16 @@ class DefaultProxyAssistantService @Inject()(val config: Config,
     }
 
   def clean()(implicit executor: ExecutionContext): Future[Any] =
-    redisClient.rpop[String](cachedProxyQueueKey) map {
+    redisClient.rpop[String](ProxyQueueKey) map {
       case Some(proxyServerString) =>
         Json.parse(proxyServerString).validate[CrawlerProxyServer].asOpt match {
           case Some(proxyServer) =>
             testAvailability(proxyServer) map { testedProxyServer =>
               logger.info(s"tested proxy server ${testedProxyServer.ip}:${testedProxyServer.port}, isLive = ${testedProxyServer.isLive}")
               crawlerProxyServerRepo.insertOrUpdate(testedProxyServer)
-              redisClient.lpush(cachedProxyQueueKey, Json.toJson(testedProxyServer).toString())
+              redisClient.lpush(ProxyQueueKey, Json.toJson(testedProxyServer).toString())
               if (testedProxyServer.isLive) {
-                redisClient.sadd(cachedLiveProxySetKey, Json.toJson(testedProxyServer.copy(lastVerifiedAt = None)).toString())
+                redisClient.sadd(LiveProxySetKey, Json.toJson(testedProxyServer.copy(lastVerifiedAt = None)).toString())
               }
             }
           case _ => //failed to validate
@@ -129,14 +129,14 @@ class DefaultProxyAssistantService @Inject()(val config: Config,
     }
 
   def get()(implicit executor: ExecutionContext): Future[CachedProxyServer] =
-    redisClient.spop[String](cachedLiveProxySetKey) flatMap {
+    redisClient.spop[String](LiveProxySetKey) flatMap {
       case Some(proxyServerString) =>
         Json.parse(proxyServerString).validate[CrawlerProxyServer].asOpt match {
           case Some(proxyServer) =>
             testAvailability(proxyServer) map { testedLiveProxyServer =>
               crawlerProxyServerRepo.insertOrUpdate(testedLiveProxyServer)
               if (testedLiveProxyServer.isLive) {
-                redisClient.sadd(cachedLiveProxySetKey, Json.toJson(testedLiveProxyServer).toString())
+                redisClient.sadd(LiveProxySetKey, Json.toJson(testedLiveProxyServer).toString())
                 CachedProxyServer(Some(testedLiveProxyServer))
               } else {
                 CachedProxyServer(None)
