@@ -69,7 +69,6 @@ class ProxyAssistantActor @Inject()(config: Config, proxyAssistantService: Proxy
 object ProxyAssistantActor extends NamedActor {
   override final val name     = "ProxyAssistantActor"
   override final val poolName = "ProxyAssistantActorPool"
-  final val poolThrottlerName = "ProxyAssistantActorPoolThrottler"
 
   sealed trait ProxyAssistantActorMessage
   case object CheckCache                                                          extends ProxyAssistantActorMessage

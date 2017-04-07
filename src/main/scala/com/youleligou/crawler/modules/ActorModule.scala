@@ -55,24 +55,6 @@ class ActorModule extends AbstractModule with ScalaModule with GuiceAkkaActorRef
     provideActorPoolRef(system, ProxyAssistantActor, roundRobinPool(1, config.getInt("crawler.actor.proxy-assistant.parallel")))
   }
 
-  @Provides
-  @Singleton
-  @Named(ProxyAssistantActor.poolThrottlerName)
-  def provideProxyAssistantActorPoolThrottlerRef(config: Config,
-                                                 system: ActorSystem,
-                                                 @Named(ProxyAssistantActor.poolName) proxyAssistantPoolActor: ActorRef): ActorRef = {
-    import akka.contrib.throttle.Throttler._
-    import scala.concurrent.duration._
-    val throttler = system.actorOf(
-      Props(
-        classOf[TimerBasedThrottler],
-        (config.getInt("crawler.actor.proxy-assistant.parallel") - config
-          .getInt("crawler.actor.fetch.parallel")) msgsPer config.getInt("crawler.actor.proxy-assistant.timeout").millis
-      ))
-    throttler ! SetTarget(Some(proxyAssistantPoolActor))
-    throttler
-  }
-
   /*
   index actor
    */

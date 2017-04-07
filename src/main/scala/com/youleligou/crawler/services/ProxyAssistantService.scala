@@ -25,9 +25,9 @@ trait ProxyAssistantService extends LazyLogging {
   val standaloneAhcWSClient: StandaloneAhcWSClient
   val crawlerProxyServerRepo: CrawlerProxyServerRepo
 
-  val cachedProxyQueueKey: String     = ProxyAssistantService.ProxyQueuePrefix
-  val cachedLiveProxyQueueKey: String = ProxyAssistantService.LiveProxyQueuePrefix
-  val timeout                         = Duration(config.getInt("crawler.actor.proxy-assistant.timeout"), MILLISECONDS)
+  val cachedProxyQueueKey: String   = ProxyAssistantService.ProxyQueueKey
+  val cachedLiveProxySetKey: String = ProxyAssistantService.LiveProxySetKey
+  val timeout                       = Duration(config.getInt("crawler.actor.proxy-assistant.timeout"), MILLISECONDS)
 
   def currentTimestamp = new Timestamp(System.currentTimeMillis())
 
@@ -76,8 +76,8 @@ trait ProxyAssistantService extends LazyLogging {
 }
 
 object ProxyAssistantService {
-  final val ProxyQueuePrefix     = "ProxyQueue"
-  final val LiveProxyQueuePrefix = "LiveProxyQueue"
+  final val ProxyQueueKey   = "ProxyQueue"
+  final val LiveProxySetKey = "LiveProxySet"
 }
 
 class DefaultProxyAssistantService @Inject()(val config: Config,
@@ -87,7 +87,7 @@ class DefaultProxyAssistantService @Inject()(val config: Config,
     extends ProxyAssistantService {
 
   def cacheSize()(implicit executor: ExecutionContext): Future[Cached] =
-    redisClient.llen(cachedLiveProxyQueueKey).map(_.toInt).map(Cached) recover {
+    redisClient.llen(cachedLiveProxySetKey).map(_.toInt).map(Cached) recover {
       case x: Throwable =>
         logger.warn(x.getMessage)
         Cached(0)
@@ -118,7 +118,7 @@ class DefaultProxyAssistantService @Inject()(val config: Config,
               val testedProxyServerString = Json.toJson(testedProxyServer).toString()
               redisClient.lpush(cachedProxyQueueKey, testedProxyServerString)
               if (testedProxyServer.isLive) {
-                redisClient.lpush(cachedLiveProxyQueueKey, testedProxyServerString)
+                redisClient.sadd(cachedLiveProxySetKey, testedProxyServerString)
               }
             }
           case _ => //failed to validate
@@ -130,7 +130,7 @@ class DefaultProxyAssistantService @Inject()(val config: Config,
     }
 
   def get()(implicit executor: ExecutionContext): Future[CachedProxyServer] =
-    redisClient.rpop[String](cachedLiveProxyQueueKey) flatMap {
+    redisClient.spop[String](cachedLiveProxySetKey) flatMap {
       case Some(proxyServerString) =>
         Json.parse(proxyServerString).validate[CrawlerProxyServer].asOpt match {
           case Some(proxyServer) =>
@@ -138,7 +138,7 @@ class DefaultProxyAssistantService @Inject()(val config: Config,
               crawlerProxyServerRepo.insertOrUpdate(testedLiveProxyServer)
               val testedProxyServerString = Json.toJson(testedLiveProxyServer).toString()
               if (testedLiveProxyServer.isLive) {
-                redisClient.lpush(cachedLiveProxyQueueKey, testedProxyServerString)
+                redisClient.sadd(cachedLiveProxySetKey, testedProxyServerString)
                 CachedProxyServer(Some(testedLiveProxyServer))
               } else {
                 CachedProxyServer(None)
