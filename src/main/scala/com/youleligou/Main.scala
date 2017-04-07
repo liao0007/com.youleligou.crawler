@@ -39,10 +39,10 @@ object Main extends App {
 
   import net.codingwell.scalaguice.InjectorExtensions._
 
-  injector.instance[ProxyAssistantBootstrap].start(FiniteDuration(1, HOURS))
+  injector.instance[ProxyAssistantBootstrap].start(FiniteDuration(3, MILLISECONDS))
 
   //min interval: 2000/100 = 20 milliseconds
-  injector.instance[ElemeCrawlerBootstrap].start(FiniteDuration(5, SECONDS), FiniteDuration(500, MILLISECONDS))
+//  injector.instance[ElemeCrawlerBootstrap].start(FiniteDuration(5, SECONDS), FiniteDuration(1000, MILLISECONDS))
 
 //  injector.instance[ProxyAssistantBootstrap].start(FiniteDuration(5000000, MILLISECONDS))
 //  injector.instance[ElemeCrawlerBootstrap].start(FiniteDuration(3, SECONDS), FiniteDuration(3, SECONDS))
