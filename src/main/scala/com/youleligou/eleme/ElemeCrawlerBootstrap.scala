@@ -5,7 +5,7 @@ import com.google.inject.Inject
 import com.google.inject.name.Named
 import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
-import com.youleligou.crawler.actors.AbstractInjectActor.GenerateFetch
+import com.youleligou.crawler.actors.AbstractInjectActor.{GenerateFetch, Init}
 import com.youleligou.eleme.actors.RestaurantInjectActor
 
 import scala.concurrent.duration._
@@ -25,6 +25,7 @@ class ElemeCrawlerBootstrap @Inject()(config: Config, system: ActorSystem, @Name
     * 爬虫启动函数
     */
   def start(delay: FiniteDuration): Unit = {
+    system.scheduler.scheduleOnce(FiniteDuration(0, MILLISECONDS), injectActor, Init)
     system.scheduler.schedule(delay, FiniteDuration(timeout / fetchParallel, MILLISECONDS), injectActor, GenerateFetch)
   }
 

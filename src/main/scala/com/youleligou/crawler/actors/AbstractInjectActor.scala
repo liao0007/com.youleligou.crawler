@@ -5,7 +5,6 @@ import akka.pattern.pipe
 import com.typesafe.config.Config
 import com.youleligou.crawler.actors.AbstractFetchActor.FetchUrl
 import com.youleligou.crawler.actors.AbstractInjectActor.{GenerateFetch, HashCheckResult, Init, Initialized}
-import com.youleligou.crawler.actors.ProxyAssistantActor.GetServer
 import com.youleligou.crawler.models._
 import com.youleligou.crawler.services.{CacheService, FilterService, HashService, InjectService}
 
@@ -42,9 +41,8 @@ abstract class AbstractInjectActor(config: Config,
 
   def active(seed: Int): Receive = {
     case GenerateFetch =>
-      proxyAssistantActor ! GetServer
-
       self ! injectService.generateFetch(seed)
+      unstashAll()
       context become active(seed + 1)
 
     case fetch @ FetchUrl(_, urlInfo: UrlInfo) if filterService.filter(urlInfo) =>

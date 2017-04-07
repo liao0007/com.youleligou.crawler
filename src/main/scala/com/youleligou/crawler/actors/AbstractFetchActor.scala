@@ -3,7 +3,7 @@ package com.youleligou.crawler.actors
 import akka.actor.{Actor, ActorLogging, ActorRef, Stash}
 import com.typesafe.config.Config
 import com.youleligou.crawler.actors.AbstractFetchActor._
-import com.youleligou.crawler.actors.ProxyAssistantActor.{GetServer, Server}
+import com.youleligou.crawler.actors.ProxyAssistantActor.{Init => _, _}
 import com.youleligou.crawler.daos.CrawlerProxyServer
 import com.youleligou.crawler.models.UrlInfo
 import com.youleligou.crawler.services.FetchService
@@ -29,24 +29,14 @@ abstract class AbstractFetchActor(config: Config,
   override def receive: Receive = standby
 
   def standby: Receive = {
-    case UpdateProxyServer =>
-      sender() ! UpdatingProxyServer
-      proxyAssistantActor ! GetServer
-      unstashAll()
-      context become updatingProxyServer(sender())
+    case Init =>
+      proxyAssistantActor ! GetProxyServer
 
-    case _ =>
-      stash()
-  }
-
-  def updatingProxyServer(ref: ActorRef): Receive = {
-    case Server(Some(server)) =>
-      sender ! UpdateProxyServerSuccess
+    case ProxyServer(server) =>
       unstashAll()
       context become proxyServerAvailable(server)
 
-    case Server(None) =>
-      sender ! UpdateProxyServerFailed
+    case ProxyServerUnavailable =>
       unstashAll()
       context become standby
 
@@ -102,10 +92,7 @@ object AbstractFetchActor extends NamedActor {
   override final val poolName = "FetchActor"
 
   sealed trait Event
-  object UpdateProxyServer                               extends Event
-  object UpdatingProxyServer                             extends Event
-  object UpdateProxyServerSuccess                        extends Event
-  object UpdateProxyServerFailed                         extends Event
+  object Init                                            extends Event
   case class FetchUrl(jobName: String, urlInfo: UrlInfo) extends Event
 
   sealed trait Data

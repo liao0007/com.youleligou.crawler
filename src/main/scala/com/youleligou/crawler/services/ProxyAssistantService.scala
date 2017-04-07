@@ -36,6 +36,11 @@ trait ProxyAssistantService extends LazyLogging {
   def init()(implicit executor: ExecutionContext): Future[Long]
 
   /*
+ check if any proxy available
+   */
+  def checkAvailable()(implicit executor: ExecutionContext): Future[Long]
+
+  /*
   clean up invalid
    */
   def clean()(implicit executor: ExecutionContext): Future[Any]
@@ -95,6 +100,10 @@ class DefaultProxyAssistantService @Inject()(val config: Config,
         logger.warn(x.getMessage)
         0L
     }
+
+  override def checkAvailable()(implicit executor: ExecutionContext): Future[Long] = {
+    redisClient.scard(LiveProxySetKey)
+  }
 
   def clean()(implicit executor: ExecutionContext): Future[Any] =
     redisClient.rpop[String](ProxyQueueKey) map {
