@@ -2,8 +2,9 @@ package com.youleligou.crawler.services.fetch
 
 import com.google.inject.Inject
 import com.typesafe.config.Config
+import com.youleligou.crawler.actors.AbstractFetchActor.FetchResult
 import com.youleligou.crawler.daos.{CrawlerJob, CrawlerJobRepo, CrawlerProxyServer}
-import com.youleligou.crawler.models.{FetchResult, UrlInfo}
+import com.youleligou.crawler.models.UrlInfo
 import com.youleligou.crawler.services.FetchService
 import play.api.libs.ws.ahc.StandaloneAhcWSClient
 import play.api.libs.ws.DefaultWSProxyServer
@@ -43,6 +44,15 @@ class HttpClientFetchService @Inject()(config: Config, standaloneAhcWSClient: St
           FetchResult(response.status, response.body, response.statusText, urlInfo)
         }
     } getOrElse {
+      crawlerJobRepo.create(
+        CrawlerJob(
+          url = urlInfo.url,
+          jobName = jobName,
+          proxy = Some(s"""${crawlerProxyServer.ip}:${crawlerProxyServer.port}"""),
+          statusCode = Some(FetchService.Timeout),
+          statusMessage = None
+        )
+      )
       Future.successful(FetchResult(FetchService.Timeout, "", "", urlInfo))
     }
   } recover {

@@ -1,7 +1,8 @@
 package com.youleligou.crawler.services
 
 import com.typesafe.scalalogging.LazyLogging
-import com.youleligou.crawler.models.{FetchResult, ParseResult}
+import com.youleligou.crawler.actors.AbstractFetchActor.FetchResult
+import com.youleligou.crawler.actors.AbstractParseActor.ParseResult
 
 /**
   * Created by young.yang on 2016/8/28.
@@ -12,7 +13,5 @@ trait ParseService extends LazyLogging {
 }
 
 object ParseService {
-  class ParseException(message: String, e: Throwable) extends Exception(message, e) {
-    def this(message: String) = this(message, new Exception(message))
-  }
+
 }

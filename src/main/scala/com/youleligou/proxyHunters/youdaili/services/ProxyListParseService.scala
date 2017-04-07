@@ -1,10 +1,10 @@
 package com.youleligou.proxyHunters.youdaili.services
 
-import java.sql.Timestamp
-
 import com.google.inject.Inject
 import com.youleligou.crawler.daos.CrawlerProxyServerRepo
-import com.youleligou.crawler.models.{FetchResult, ParseResult, UrlInfo}
+import com.youleligou.crawler.models.{ UrlInfo}
+import com.youleligou.crawler.actors.AbstractFetchActor.FetchResult
+import com.youleligou.crawler.actors.AbstractParseActor.ParseResult
 import com.youleligou.crawler.services.ParseService
 import com.youleligou.crawler.services.hash.Md5HashService
 import org.jsoup.Jsoup

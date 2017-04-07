@@ -2,10 +2,10 @@ package com.youleligou.crawler.actors
 
 import akka.actor.{Actor, ActorLogging, ActorRef, Stash}
 import com.typesafe.config.Config
-import com.youleligou.crawler.actors.AbstractFetchActor.Fetch
-import com.youleligou.crawler.actors.ProxyAssistantActor.{CachedProxyServer, GetProxyServer}
+import com.youleligou.crawler.actors.AbstractFetchActor._
+import com.youleligou.crawler.actors.ProxyAssistantActor.{GetServer, Server}
 import com.youleligou.crawler.daos.CrawlerProxyServer
-import com.youleligou.crawler.models.{FetchResult, UrlInfo}
+import com.youleligou.crawler.models.UrlInfo
 import com.youleligou.crawler.services.FetchService
 import akka.pattern.pipe
 
@@ -24,69 +24,59 @@ abstract class AbstractFetchActor(config: Config,
 
   import context.dispatcher
 
-  var proxyServer: CrawlerProxyServer = _
-  var retry                           = 1
-  val maxRetry                        = 20
+  final val maxRetry = 20
 
-  override def receive: Receive = proxyServerUnavailable
+  override def receive: Receive = standby
 
-  def proxyServerUnavailable: Receive = {
-    case _ =>
-      log.info("proxy server unavailable, getting")
-      stash()
-      proxyAssistantActor ! GetProxyServer
+  def standby: Receive = {
+    case UpdateProxyServer =>
+      sender() ! UpdatingProxyServer
+      proxyAssistantActor ! GetServer
       unstashAll()
-      context.become(gettingProxyServer)
-
-  }
-
-  def gettingProxyServer: Receive = {
-    case CachedProxyServer(Some(pendingProxyServer)) =>
-      log.info("proxy server got")
-      proxyServer = pendingProxyServer
-      unstashAll()
-      context.become(proxyServerAvailable)
-
-    case CachedProxyServer(None) =>
-      log.info("proxy server got None, retry")
-      unstashAll()
-      context.become(proxyServerUnavailable)
+      context become updatingProxyServer(sender())
 
     case _ =>
-      log.info("still getting proxy server")
       stash()
   }
 
-  def proxyServerAvailable: Receive = {
-    case Fetch(jobName, urlInfo) =>
-      log.info("fetch: " + urlInfo)
+  def updatingProxyServer(ref: ActorRef): Receive = {
+    case Server(Some(server)) =>
+      sender ! UpdateProxyServerSuccess
+      unstashAll()
+      context become proxyServerAvailable(server)
+
+    case Server(None) =>
+      sender ! UpdateProxyServerFailed
+      unstashAll()
+      context become standby
+
+    case _ =>
+      stash()
+  }
+
+  def proxyServerAvailable(proxyServer: CrawlerProxyServer): Receive = {
+    case FetchUrl(jobName, urlInfo) =>
       fetchService.fetch(jobName, urlInfo, proxyServer) pipeTo self
       unstashAll()
-      context.become(fetching)
+      context become fetching(proxyServer, 1)
 
     case _ =>
-      log.info("waiting for fetch job")
       stash()
-
   }
 
-  def fetching: Receive = {
+  def fetching(proxyServer: CrawlerProxyServer, retry: Int): Receive = {
     case fetchResult @ FetchResult(FetchService.Ok, _, _, urlInfo) =>
-      log.info("fetch success: " + urlInfo.url)
-      retry = 1
       parserActor ! fetchResult
       unstashAll()
       context.become(proxyServerUnavailable)
 
     case FetchResult(statusCode @ FetchService.NotFound, _, message, _) =>
       log.warning("fetch failed: " + statusCode + " " + message)
-      retry = 1
       unstashAll()
       context.become(proxyServerUnavailable)
 
     case FetchResult(statusCode @ FetchService.PaymentRequired, _, message, _) =>
       log.warning("fetch failed: " + statusCode + " " + message + ", system terminating")
-      retry = 1
       unstashAll()
       context.system.terminate()
 
@@ -99,7 +89,6 @@ abstract class AbstractFetchActor(config: Config,
 
     case FetchResult(statusCode @ _, _, message, _) if retry >= maxRetry =>
       log.warning("fetch failed: " + statusCode + " " + message, " retry limit hit, giving up")
-      retry = 1
       unstashAll()
       context.become(proxyServerUnavailable)
 
@@ -108,8 +97,20 @@ abstract class AbstractFetchActor(config: Config,
   }
 }
 
-object AbstractFetchActor {
+object AbstractFetchActor extends NamedActor {
+  override final val name     = "FetchActor"
+  override final val poolName = "FetchActor"
 
-  sealed trait FetchActorCommand
-  case class Fetch(jobName: String, urlInfo: UrlInfo) extends FetchActorCommand
+  sealed trait Event
+  object UpdateProxyServer                               extends Event
+  object UpdatingProxyServer                             extends Event
+  object UpdateProxyServerSuccess                        extends Event
+  object UpdateProxyServerFailed                         extends Event
+  case class FetchUrl(jobName: String, urlInfo: UrlInfo) extends Event
+
+  sealed trait Data
+  case class FetchResult(status: Int, content: String, message: String, urlInfo: UrlInfo) extends Data {
+    override def toString: String = "status=" + status + ",context length=" + content.length + ",url=" + urlInfo
+  }
+
 }

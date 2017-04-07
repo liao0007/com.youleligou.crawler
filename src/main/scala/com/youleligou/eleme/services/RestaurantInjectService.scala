@@ -1,8 +1,8 @@
 package com.youleligou.eleme.services
 
 import com.google.inject.Inject
-import com.youleligou.crawler.actors.AbstractFetchActor.Fetch
-import com.youleligou.crawler.actors.AbstractInjectActor.SeedInitialized
+import com.youleligou.crawler.actors.AbstractFetchActor.FetchUrl
+import com.youleligou.crawler.actors.AbstractInjectActor.Initialized
 import com.youleligou.crawler.daos.CrawlerJob.FetchJobType
 import com.youleligou.crawler.daos.CrawlerJobRepo
 import com.youleligou.crawler.models.UrlInfo
@@ -14,20 +14,20 @@ import scala.concurrent.Future
 
 class RestaurantInjectService @Inject()(crawlerJobRepo: CrawlerJobRepo) extends InjectService {
 
-  override def initSeed(): Future[SeedInitialized] = {
+  override def initSeed(): Future[Int] = {
     val idPattern = """[0-9]+""".r
     crawlerJobRepo.findWithMaxId(FetchJobType, RestaurantInjectService.fetchJobName) map {
       case Some(crawlerJob) => idPattern.findFirstIn(crawlerJob.url).map(_.toInt).getOrElse(0)
       case None             => 0
-    } map SeedInitialized
+    }
   } recover {
     case x: Throwable =>
       logger.warn(x.getMessage)
-      SeedInitialized(0)
+      0
   }
 
-  override def generateFetch(seed: Int): Fetch = {
-    Fetch(
+  override def generateFetch(seed: Int): FetchUrl = {
+    FetchUrl(
       RestaurantInjectService.fetchJobName,
       UrlInfo(
         s"http://mainsite-restapi.ele.me/shopping/restaurant/$seed",

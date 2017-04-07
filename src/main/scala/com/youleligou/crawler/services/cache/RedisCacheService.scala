@@ -3,8 +3,8 @@ package com.youleligou.crawler.services.cache
 import akka.actor.ActorSystem
 import com.google.inject.Inject
 import com.typesafe.config.Config
-import com.youleligou.crawler.actors.AbstractFetchActor.Fetch
-import com.youleligou.crawler.actors.AbstractInjectActor.HashNxResult
+import com.youleligou.crawler.actors.AbstractFetchActor.FetchUrl
+import com.youleligou.crawler.actors.AbstractInjectActor.HashCheckResult
 import com.youleligou.crawler.services.CacheService
 import redis.RedisClient
 
@@ -24,13 +24,11 @@ class RedisCacheService @Inject()(config: Config, redisClient: RedisClient)(impl
       false
   }
 
-  override def hsetnx(key: String, field: String, value: String, fetch: Fetch): Future[HashNxResult] =
-    redisClient.hsetnx(key, field, value) map { successful =>
-      HashNxResult(fetch, successful)
-    } recover {
+  override def hsetnx(key: String, field: String, value: String): Future[Boolean] =
+    redisClient.hsetnx(key, field, value) recover {
       case x: Throwable =>
         logger.warn(x.getMessage)
-        HashNxResult(fetch, successful = false)
+        false
     }
 
   override def hlength(key: String): Future[Long] = {

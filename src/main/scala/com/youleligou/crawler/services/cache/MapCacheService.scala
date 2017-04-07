@@ -1,7 +1,7 @@
 package com.youleligou.crawler.services.cache
 
-import com.youleligou.crawler.actors.AbstractFetchActor.Fetch
-import com.youleligou.crawler.actors.AbstractInjectActor.HashNxResult
+import com.youleligou.crawler.actors.AbstractFetchActor.FetchUrl
+import com.youleligou.crawler.actors.AbstractInjectActor.HashCheckResult
 import com.youleligou.crawler.services.CacheService
 
 import scala.collection.mutable
@@ -28,17 +28,17 @@ class MapCacheService extends CacheService {
         false
     }
 
-  def hsetnx(key: String, field: String, value: String, fetch: Fetch): Future[HashNxResult] =
+  def hsetnx(key: String, field: String, value: String): Future[Boolean] =
     hexists(key, field) map {
       case true =>
-        HashNxResult(fetch, successful = false)
+        false
       case _ =>
         map(key) = mutable.HashMap(field -> value)
-        HashNxResult(fetch, successful = true)
+        true
     } recover {
       case x: Throwable =>
         logger.warn(x.getMessage)
-        HashNxResult(fetch, successful = false)
+        false
     }
 
   def hlength(key: String): Future[Long] =

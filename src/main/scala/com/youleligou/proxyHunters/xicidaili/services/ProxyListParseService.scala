@@ -3,8 +3,10 @@ package com.youleligou.proxyHunters.xicidaili.services
 import java.sql.Timestamp
 
 import com.google.inject.Inject
+import com.youleligou.crawler.actors.AbstractFetchActor.FetchResult
+import com.youleligou.crawler.actors.AbstractParseActor.ParseResult
 import com.youleligou.crawler.daos.{CrawlerProxyServer, CrawlerProxyServerRepo}
-import com.youleligou.crawler.models.{FetchResult, ParseResult, UrlInfo}
+import com.youleligou.crawler.models.UrlInfo
 import com.youleligou.crawler.services.ParseService
 import com.youleligou.crawler.services.hash.Md5HashService
 import org.jsoup.Jsoup
@@ -21,7 +23,7 @@ class ProxyListParseService @Inject()(md5HashService: Md5HashService, crawlerPro
   private def persist(document: Document) = {
 
     val proxyServers = document.select("#ip_list tbody tr").asScala.drop(1).map { tr =>
-      val tds = tr.select("td").asScala
+      val tds                                                                             = tr.select("td").asScala
       val Seq(_, ip, port, location, isAnonymous, supportedType, _, _, _, lastVerifiedAt) = tds.map(_.text())
       CrawlerProxyServer(
         hash = md5HashService.hash(s"""$ip:$port"""),
@@ -55,6 +57,6 @@ class ProxyListParseService @Inject()(md5HashService: Md5HashService, crawlerPro
 }
 
 object ProxyListParseService {
-  val format = new java.text.SimpleDateFormat("yy-MM-dd hh:mm")
+  val format     = new java.text.SimpleDateFormat("yy-MM-dd hh:mm")
   final val name = "ProxyListParseService"
 }

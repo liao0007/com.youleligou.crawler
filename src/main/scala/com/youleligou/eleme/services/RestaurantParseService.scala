@@ -1,7 +1,9 @@
 package com.youleligou.eleme.services
 
 import com.google.inject.Inject
-import com.youleligou.crawler.models.{FetchResult, ParseResult, UrlInfo}
+import com.youleligou.crawler.models.{UrlInfo}
+import com.youleligou.crawler.actors.AbstractFetchActor.FetchResult
+import com.youleligou.crawler.actors.AbstractParseActor.ParseResult
 import com.youleligou.crawler.services.ParseService
 import com.youleligou.eleme.daos.{Restaurant, RestaurantRepo}
 import play.api.libs.json.Json

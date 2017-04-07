@@ -5,7 +5,6 @@ import java.sql.Timestamp
 import com.google.inject.Inject
 import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
-import com.youleligou.crawler.actors.ProxyAssistantActor.{CacheLoaded, Cached, CachedProxyServer}
 import com.youleligou.crawler.daos.{CrawlerProxyServer, CrawlerProxyServerRepo}
 import play.api.libs.json.Json
 import play.api.libs.ws.DefaultWSProxyServer
@@ -31,11 +30,10 @@ trait ProxyAssistantService extends LazyLogging {
 
   def currentTimestamp = new Timestamp(System.currentTimeMillis())
 
-  def cacheSize()(implicit executor: ExecutionContext): Future[Cached]
   /*
   load from database to redis
    */
-  def loadCache()(implicit executor: ExecutionContext): Future[CacheLoaded]
+  def init()(implicit executor: ExecutionContext): Future[Long]
 
   /*
   clean up invalid
@@ -45,7 +43,7 @@ trait ProxyAssistantService extends LazyLogging {
   /*
   get by FIFO
    */
-  def get()(implicit executor: ExecutionContext): Future[CachedProxyServer]
+  def get()(implicit executor: ExecutionContext): Future[Option[CrawlerProxyServer]]
 
   protected def testAvailability(proxyServer: CrawlerProxyServer)(implicit executor: ExecutionContext): Future[CrawlerProxyServer] = {
     Try {
@@ -86,25 +84,16 @@ class DefaultProxyAssistantService @Inject()(val config: Config,
                                              val standaloneAhcWSClient: StandaloneAhcWSClient)
     extends ProxyAssistantService {
 
-  def cacheSize()(implicit executor: ExecutionContext): Future[Cached] =
-    redisClient.scard(LiveProxySetKey).map(_.toInt).map(Cached) recover {
-      case x: Throwable =>
-        logger.warn(x.getMessage)
-        Cached(0)
-    }
-
-  def loadCache()(implicit executor: ExecutionContext): Future[CacheLoaded] =
+  def init()(implicit executor: ExecutionContext): Future[Long] =
     redisClient.del(ProxyQueueKey) flatMap { _ =>
       crawlerProxyServerRepo.all().flatMap { proxyServers =>
         redisClient
           .lpush[String](ProxyQueueKey, proxyServers map (Json.toJson(_).toString()): _*)
-          .map(_.toInt)
-          .map(CacheLoaded)
       }
     } recover {
       case x: Throwable =>
         logger.warn(x.getMessage)
-        CacheLoaded(0)
+        0L
     }
 
   def clean()(implicit executor: ExecutionContext): Future[Any] =
@@ -128,10 +117,12 @@ class DefaultProxyAssistantService @Inject()(val config: Config,
         logger.warn(x.getMessage)
     }
 
-  def get()(implicit executor: ExecutionContext): Future[CachedProxyServer] =
-    redisClient.spop[String](LiveProxySetKey) flatMap {
+  def get()(implicit executor: ExecutionContext): Future[Option[CrawlerProxyServer]] =
+    redisClient.srandmember[String](LiveProxySetKey) map {
       case Some(proxyServerString) =>
-        Json.parse(proxyServerString).validate[CrawlerProxyServer].asOpt match {
+        Json.parse(proxyServerString).validate[CrawlerProxyServer].asOpt
+      /*
+        match {
           case Some(proxyServer) =>
             testAvailability(proxyServer) map { testedLiveProxyServer =>
               crawlerProxyServerRepo.insertOrUpdate(testedLiveProxyServer)
@@ -145,11 +136,12 @@ class DefaultProxyAssistantService @Inject()(val config: Config,
           case _ =>
             Future.successful(CachedProxyServer(None))
         }
-      case _ => Future.successful(CachedProxyServer(None))
+       */
+      case _ => None
     } recover {
       case x: Throwable =>
         logger.error(x.getMessage)
-        CachedProxyServer(None)
+        None
     }
 
 }

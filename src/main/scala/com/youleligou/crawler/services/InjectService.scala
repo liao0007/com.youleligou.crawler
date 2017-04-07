@@ -1,12 +1,12 @@
 package com.youleligou.crawler.services
 
 import com.typesafe.scalalogging.LazyLogging
-import com.youleligou.crawler.actors.AbstractFetchActor.Fetch
-import com.youleligou.crawler.actors.AbstractInjectActor.SeedInitialized
+import com.youleligou.crawler.actors.AbstractFetchActor.FetchUrl
+import com.youleligou.crawler.actors.AbstractInjectActor.Initialized
 
 import scala.concurrent.Future
 
 trait InjectService extends LazyLogging {
-  def initSeed(): Future[SeedInitialized]
-  def generateFetch(seed: Int): Fetch
+  def initSeed(): Future[Int]
+  def generateFetch(seed: Int): FetchUrl
 }
