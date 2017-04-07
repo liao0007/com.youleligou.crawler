@@ -115,10 +115,9 @@ class DefaultProxyAssistantService @Inject()(val config: Config,
             testAvailability(proxyServer) map { testedProxyServer =>
               logger.info(s"tested proxy server ${testedProxyServer.ip}:${testedProxyServer.port}, isLive = ${testedProxyServer.isLive}")
               crawlerProxyServerRepo.insertOrUpdate(testedProxyServer)
-              val testedProxyServerString = Json.toJson(testedProxyServer).toString()
-              redisClient.lpush(cachedProxyQueueKey, testedProxyServerString)
+              redisClient.lpush(cachedProxyQueueKey, Json.toJson(testedProxyServer).toString())
               if (testedProxyServer.isLive) {
-                redisClient.sadd(cachedLiveProxySetKey, testedProxyServerString)
+                redisClient.sadd(cachedLiveProxySetKey, Json.toJson(testedProxyServer.copy(lastVerifiedAt = None)).toString())
               }
             }
           case _ => //failed to validate
@@ -136,9 +135,8 @@ class DefaultProxyAssistantService @Inject()(val config: Config,
           case Some(proxyServer) =>
             testAvailability(proxyServer) map { testedLiveProxyServer =>
               crawlerProxyServerRepo.insertOrUpdate(testedLiveProxyServer)
-              val testedProxyServerString = Json.toJson(testedLiveProxyServer).toString()
               if (testedLiveProxyServer.isLive) {
-                redisClient.sadd(cachedLiveProxySetKey, testedProxyServerString)
+                redisClient.sadd(cachedLiveProxySetKey, Json.toJson(testedLiveProxyServer).toString())
                 CachedProxyServer(Some(testedLiveProxyServer))
               } else {
                 CachedProxyServer(None)
