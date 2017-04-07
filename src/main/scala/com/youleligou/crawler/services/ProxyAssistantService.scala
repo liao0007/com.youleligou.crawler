@@ -130,7 +130,8 @@ class DefaultProxyAssistantService @Inject()(val redisClient: RedisClient,
       case Some(proxyServerString) =>
         Json.parse(proxyServerString).validate[CrawlerProxyServer].asOpt match {
           case Some(proxyServer) =>
-            redisClient.lpush(cachedLiveProxyQueueKey, proxyServer)
+            val proxyServerString = Json.toJson(testedLiveProxyServer).toString()
+            redisClient.lpush(cachedLiveProxyQueueKey, proxyServerString)
             CachedProxyServer(Some(proxyServer))
 
           //without test
