@@ -1,5 +1,7 @@
 package com.youleligou.crawler.modules
 
+import javax.inject.Singleton
+
 import com.google.inject.{AbstractModule, Provides}
 import com.typesafe.config.{Config, ConfigFactory}
 import net.codingwell.scalaguice.ScalaModule
@@ -16,6 +18,7 @@ import net.codingwell.scalaguice.ScalaModule
 class ConfigModule extends AbstractModule with ScalaModule {
 
   @Provides
+  @Singleton
   def provideConfig: Config = {
     ConfigFactory.load()
   }

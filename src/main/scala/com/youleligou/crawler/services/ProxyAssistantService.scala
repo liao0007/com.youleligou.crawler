@@ -126,32 +126,27 @@ class DefaultProxyAssistantService @Inject()(val redisClient: RedisClient,
     }
 
   def get()(implicit executor: ExecutionContext): Future[CachedProxyServer] =
-    redisClient.rpop[String](cachedLiveProxyQueueKey) map {
+    redisClient.rpop[String](cachedLiveProxyQueueKey) flatMap {
       case Some(proxyServerString) =>
         Json.parse(proxyServerString).validate[CrawlerProxyServer].asOpt match {
           case Some(proxyServer) =>
-            val proxyServerString = Json.toJson(proxyServer).toString()
-            redisClient.lpush(cachedLiveProxyQueueKey, proxyServerString)
-            CachedProxyServer(Some(proxyServer))
-
-          //without test
-//            testAvailability(proxyServer) map { testedLiveProxyServer =>
-//              crawlerProxyServerRepo.insertOrUpdate(testedLiveProxyServer)
-//              val testedProxyServerString = Json.toJson(testedLiveProxyServer).toString()
-//              if (testedLiveProxyServer.isLive) {
-//                redisClient.lpush(cachedLiveProxyQueueKey, testedProxyServerString)
-//                CachedProxyServer(Some(testedLiveProxyServer))
-//              } else {
-//                CachedProxyServer(None)
-//              }
-//            }
+            testAvailability(proxyServer) map { testedLiveProxyServer =>
+              crawlerProxyServerRepo.insertOrUpdate(testedLiveProxyServer)
+              val testedProxyServerString = Json.toJson(testedLiveProxyServer).toString()
+              if (testedLiveProxyServer.isLive) {
+                redisClient.lpush(cachedLiveProxyQueueKey, testedProxyServerString)
+                CachedProxyServer(Some(testedLiveProxyServer))
+              } else {
+                CachedProxyServer(None)
+              }
+            }
           case _ =>
-            CachedProxyServer(None)
+            Future.successful(CachedProxyServer(None))
         }
-      case _ => CachedProxyServer(None)
+      case _ => Future.successful(CachedProxyServer(None))
     } recover {
       case x: Throwable =>
-        logger.warn(x.getMessage)
+        logger.error(x.getMessage)
         CachedProxyServer(None)
     }
 
