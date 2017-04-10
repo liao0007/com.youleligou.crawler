@@ -39,11 +39,16 @@ abstract class AbstractFetchActor(config: Config,
   def gettingProxyServer(currentInjectActor: ActorRef): Receive = {
     case ProxyServerAvailable(server) =>
       currentInjectActor ! InitSucceed
+      unstashAll()
       context become proxyServerAvailable(server)
 
     case ProxyServerUnavailable =>
       currentInjectActor ! InitFailed
+      unstashAll()
       context become standby
+
+    case _ =>
+      stash()
   }
 
   def proxyServerAvailable(proxyServer: CrawlerProxyServer): Receive = {

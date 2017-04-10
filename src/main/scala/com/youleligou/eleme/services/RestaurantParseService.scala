@@ -8,12 +8,13 @@ import com.youleligou.eleme.daos.{Restaurant, RestaurantRepo}
 import play.api.libs.json._
 
 import scala.collection.immutable
+import scala.concurrent.Future
 import scala.util.Try
 import scala.util.control.NonFatal
 
 class RestaurantParseService @Inject()(restaurantRepo: RestaurantRepo) extends ParseService {
 
-  final val Length: Int      = 1
+  final val Length: Int      = 5
   final val Precision: Float = 100F
   final val LatitudeKey      = "latitude"
   final val LongitudeKey     = "longitude"
@@ -39,7 +40,7 @@ class RestaurantParseService @Inject()(restaurantRepo: RestaurantRepo) extends P
     Seq(urlInfo.copy(queryParameters = urlInfo.queryParameters + (OffsetKey -> (offset + 1).toString)))
   }
 
-  private def persist(restaurants: Seq[Restaurant]) = restaurantRepo.create(restaurants.toList)
+  private def persist(restaurants: Seq[Restaurant]): Future[Option[Int]] = restaurantRepo.create(restaurants.toList)
 
   /**
     * 解析具体实现

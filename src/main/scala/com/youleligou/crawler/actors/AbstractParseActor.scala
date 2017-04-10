@@ -17,6 +17,7 @@ abstract class AbstractParseActor(config: Config, parseService: ParseService, in
 
   override def receive: Receive = {
     case Parse(fetchResponse) =>
+      log.info("{} parse {}", self.path.name, fetchResponse.fetchRequest.urlInfo)
       val parseResult: ParseResult = parseService.parse(fetchResponse)
       parseResult.childLink.foreach { urlInfo =>
         injectActor ! Inject(parseResult.fetchResponse.fetchRequest.copy(urlInfo = urlInfo, retry = 0))
