@@ -3,8 +3,6 @@ package com.youleligou.crawler.services.cache
 import akka.actor.ActorSystem
 import com.google.inject.Inject
 import com.typesafe.config.Config
-import com.youleligou.crawler.actors.AbstractFetchActor.FetchUrl
-import com.youleligou.crawler.actors.AbstractInjectActor.HashCheckResult
 import com.youleligou.crawler.services.CacheService
 import redis.RedisClient
 

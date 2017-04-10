@@ -9,12 +9,12 @@ import com.youleligou.crawler.services.FetchService
 
 class RestaurantFetchActor @Inject()(config: Config,
                                      fetchService: FetchService,
-                                     @Named(RestaurantParseActor.poolName) parserActor: ActorRef,
-                                     @Named(CountActor.poolName) countActor: ActorRef,
+                                     @Named(RestaurantInjectActor.poolName) injectActor: ActorRef,
+                                     @Named(RestaurantParseActor.poolName) parseActor: ActorRef,
                                      @Named(ProxyAssistantActor.poolName) proxyAssistantActor: ActorRef)
-  extends AbstractFetchActor(config, fetchService, parserActor, countActor, proxyAssistantActor)
+    extends AbstractFetchActor(config, fetchService, injectActor, parseActor, proxyAssistantActor)
 
 object RestaurantFetchActor extends NamedActor {
-  final val name = "ElemeRestaurantFetchActor"
+  final val name     = "ElemeRestaurantFetchActor"
   final val poolName = "ElemeRestaurantFetchActorPool"
 }

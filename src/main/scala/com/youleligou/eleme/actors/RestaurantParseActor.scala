@@ -15,11 +15,10 @@ import com.youleligou.eleme.services.RestaurantParseService
 class RestaurantParseActor @Inject()(config: Config,
                                      @Named(RestaurantParseService.name) parseService: ParseService,
                                      @Named(IndexActor.poolName) indexActor: ActorRef,
-                                     @Named(RestaurantInjectActor.poolName) injectActor: ActorRef,
-                                     @Named(CountActor.poolName) countActor: ActorRef)
-  extends AbstractParseActor(config, parseService, indexActor, injectActor, countActor)
+                                     @Named(RestaurantInjectActor.poolName) injectActor: ActorRef)
+    extends AbstractParseActor(config, parseService, indexActor, injectActor)
 
 object RestaurantParseActor extends NamedActor {
-  final val name = "ElemeRestaurantParseActor"
+  final val name     = "ElemeRestaurantParseActor"
   final val poolName = "ElemeRestaurantParseActorPool"
 }

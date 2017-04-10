@@ -3,10 +3,10 @@ package com.youleligou.crawler.actors
 import akka.actor.{Actor, ActorLogging, ActorRef, Stash}
 import akka.pattern.pipe
 import com.typesafe.config.Config
-import com.youleligou.crawler.actors.AbstractFetchActor.FetchUrl
-import com.youleligou.crawler.actors.AbstractInjectActor.{GenerateFetch, HashCheckResult, Init, Initialized}
+import com.youleligou.crawler.actors.AbstractFetchActor.{Fetch, Init, InitFailed, InitSucceed}
+import com.youleligou.crawler.actors.AbstractInjectActor._
 import com.youleligou.crawler.models._
-import com.youleligou.crawler.services.{CacheService, FilterService, HashService, InjectService}
+import com.youleligou.crawler.services.{CacheService, HashService, InjectService}
 
 import scala.concurrent.ExecutionContext.Implicits._
 
@@ -16,11 +16,8 @@ import scala.concurrent.ExecutionContext.Implicits._
 abstract class AbstractInjectActor(config: Config,
                                    cacheService: CacheService,
                                    hashService: HashService,
-                                   filterService: FilterService,
                                    injectService: InjectService,
-                                   fetchActor: ActorRef,
-                                   proxyAssistantActor: ProxyAssistantActor,
-                                   countActor: ActorRef)
+                                   fetchActor: ActorRef)
     extends Actor
     with Stash
     with ActorLogging {
@@ -28,41 +25,44 @@ abstract class AbstractInjectActor(config: Config,
   override def receive: Receive = standby
 
   def standby: Receive = {
-    case Init =>
-      injectService.initSeed().map(Initialized) pipeTo self
-
-    case Initialized(seed) =>
+    case Inject(fetchRequest) =>
+      val md5 = hashService.hash(fetchRequest.urlInfo.host)
+      cacheService.hsetnx(AbstractInjectActor.InjectActorUrlHashKey, md5, "1").map(HashChecked) pipeTo self
       unstashAll()
-      context become active(seed)
-
-    case _ =>
-      stash()
+      context become checkingHash(fetchRequest)
   }
 
-  def active(seed: Int): Receive = {
-    case GenerateFetch =>
-      self ! injectService.generateFetch(seed)
+  def checkingHash(fetchRequest: FetchRequest): Receive = {
+    case HashChecked(true) =>
+      fetchActor ! Init
+
+    case HashChecked(false) =>
+      log.warning("cache hit, ignoring")
       unstashAll()
-      context become active(seed + 1)
+      context become standby
 
-    case fetch @ FetchUrl(_, urlInfo: UrlInfo) if filterService.filter(urlInfo) =>
-      val md5 = hashService.hash(urlInfo.url)
-      cacheService.hsetnx(AbstractInjectActor.InjectActorUrlHashKey, md5, "1").map(HashCheckResult(_, fetch)) pipeTo self
+    case InitSucceed =>
+      fetchActor ! Fetch(fetchRequest)
+      unstashAll()
+      context become standby
 
-    case HashCheckResult(true, fetch) =>
-      fetchActor ! fetch
+    case InitFailed =>
+      self ! Inject(fetchRequest)
+      unstashAll()
+      context become standby
+
+    case _ => stash()
   }
+
 }
 
 object AbstractInjectActor {
 
+  sealed trait Command
   sealed trait Event
-  case object Init          extends Event
-  case object GenerateFetch extends Event
 
-  sealed trait Data
-  case class Initialized(seed: Int)                                  extends Event
-  case class HashCheckResult(isDuplicated: Boolean, fetch: FetchUrl) extends Event
+  case class Inject(fetchRequest: FetchRequest) extends Command
+  case class HashChecked(notCahced: Boolean)    extends Event
 
   final val InjectActorUrlHashKey: String = "InjectActorUrlHashKey"
 }

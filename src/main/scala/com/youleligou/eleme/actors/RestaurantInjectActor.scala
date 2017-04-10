@@ -11,12 +11,9 @@ import com.youleligou.eleme.services.RestaurantInjectService
 class RestaurantInjectActor @Inject()(config: Config,
                                       cacheService: CacheService,
                                       hashService: HashService,
-                                      filterService: FilterService,
                                       @Named(RestaurantInjectService.name) injectService: InjectService,
-                                      @Named(RestaurantFetchActor.poolName) fetchActor: ActorRef,
-                                      @Named(ProxyAssistantActor.poolName) proxyAssistantActor: ActorRef,
-                                      @Named(CountActor.poolName) countActor: ActorRef)
-    extends AbstractInjectActor(config, cacheService, hashService, filterService, injectService, fetchActor, proxyAssistantActor, countActor)
+                                      @Named(RestaurantFetchActor.poolName) fetchActor: ActorRef)
+    extends AbstractInjectActor(config, cacheService, hashService, injectService, fetchActor)
 
 object RestaurantInjectActor extends NamedActor {
   final val name     = "ElemeRestaurantInjectActor"

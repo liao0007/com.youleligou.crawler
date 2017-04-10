@@ -3,10 +3,9 @@ package com.youleligou.proxyHunters.xicidaili.services
 import java.sql.Timestamp
 
 import com.google.inject.Inject
-import com.youleligou.crawler.actors.AbstractFetchActor.FetchResult
-import com.youleligou.crawler.actors.AbstractParseActor.ParseResult
+import com.youleligou.crawler.actors.AbstractFetchActor.Fetched
 import com.youleligou.crawler.daos.{CrawlerProxyServer, CrawlerProxyServerRepo}
-import com.youleligou.crawler.models.UrlInfo
+import com.youleligou.crawler.models.{FetchResponse, ParseResult, UrlInfo}
 import com.youleligou.crawler.services.ParseService
 import com.youleligou.crawler.services.hash.Md5HashService
 import org.jsoup.Jsoup
@@ -20,9 +19,20 @@ import scala.collection.JavaConverters._
   */
 class ProxyListParseService @Inject()(md5HashService: Md5HashService, crawlerProxyServerRepo: CrawlerProxyServerRepo) extends ParseService {
 
-  private def persist(document: Document) = {
+  private def getChildLinks(fetchResponse: FetchResponse) = {
+    val UrlInfo(host, queryParameters, urlType, deep) = fetchResponse.fetchRequest.urlInfo
+    val originalPage                                  = """[0-9]+""".r.findFirstIn(host).map(_.toInt).getOrElse(1)
+    Seq(UrlInfo(host = s"http://www.xicidaili.com/nt/${originalPage + 1}", deep = deep + 1))
+  }
 
-    val proxyServers = document.select("#ip_list tbody tr").asScala.drop(1).map { tr =>
+  private def persist(proxyServers: Seq[CrawlerProxyServer]) = crawlerProxyServerRepo.create(proxyServers.toList)
+
+  /**
+    * 解析具体实现
+    */
+  override def parse(fetchResponse: FetchResponse): ParseResult = {
+
+    val proxyServers = Jsoup.parse(fetchResponse.content).select("#ip_list tbody tr").asScala.toSeq.drop(1).map { tr =>
       val tds                                                                             = tr.select("td").asScala
       val Seq(_, ip, port, location, isAnonymous, supportedType, _, _, _, lastVerifiedAt) = tds.map(_.text())
       CrawlerProxyServer(
@@ -36,22 +46,12 @@ class ProxyListParseService @Inject()(md5HashService: Md5HashService, crawlerPro
         lastVerifiedAt = Some(new Timestamp(ProxyListParseService.format.parse(lastVerifiedAt).getTime))
       )
     }
-    crawlerProxyServerRepo.create(proxyServers.toList)
-  }
 
-  /**
-    * 解析具体实现
-    */
-  override def parse(fetchResult: FetchResult): ParseResult = {
-    val document: Document = Jsoup.parse(fetchResult.content)
-    persist(document)
+    persist(proxyServers)
+
     ParseResult(
-      urlInfo = fetchResult.urlInfo,
-      title = Some(document.title()),
-      content = document.text(),
-      publishTime = System.currentTimeMillis(),
-      updateTime = System.currentTimeMillis(),
-      childLink = List.empty[UrlInfo]
+      childLink = if (proxyServers.nonEmpty) getChildLinks(fetchResponse) else Seq.empty[UrlInfo],
+      fetchResponse = fetchResponse
     )
   }
 }

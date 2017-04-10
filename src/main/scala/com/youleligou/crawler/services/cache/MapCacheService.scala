@@ -1,12 +1,10 @@
 package com.youleligou.crawler.services.cache
 
-import com.youleligou.crawler.actors.AbstractFetchActor.FetchUrl
-import com.youleligou.crawler.actors.AbstractInjectActor.HashCheckResult
 import com.youleligou.crawler.services.CacheService
 
 import scala.collection.mutable
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits._
+import scala.concurrent.Future
 
 /**
   * 采用本地Map实现的缓存

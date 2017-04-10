@@ -9,12 +9,12 @@ import com.youleligou.crawler.services.FetchService
 
 class ProxyListFetchActor @Inject()(config: Config,
                                     fetchService: FetchService,
-                                    @Named(ProxyListParseActor.poolName) parserActor: ActorRef,
-                                    @Named(CountActor.poolName) countActor: ActorRef,
+                                    @Named(ProxyListInjectActor.poolName) injectActor: ActorRef,
+                                    @Named(ProxyListParseActor.poolName) parseActor: ActorRef,
                                     @Named(ProxyAssistantActor.poolName) proxyAssistantActor: ActorRef)
-  extends AbstractFetchActor(config, fetchService, parserActor, countActor, proxyAssistantActor)
+    extends AbstractFetchActor(config, fetchService, injectActor, parseActor, proxyAssistantActor)
 
 object ProxyListFetchActor extends NamedActor {
-  final val name = "XiCiDaiLiProxyListFetchActor"
+  final val name     = "XiCiDaiLiProxyListFetchActor"
   final val poolName = "XiCiDaiLiProxyListFetchActorPool"
 }

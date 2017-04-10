@@ -1,9 +1,8 @@
 package com.youleligou.crawler.services
 
 import com.typesafe.scalalogging.LazyLogging
-import com.youleligou.crawler.actors.AbstractFetchActor.FetchResult
 import com.youleligou.crawler.daos.CrawlerProxyServer
-import com.youleligou.crawler.models.UrlInfo
+import com.youleligou.crawler.models.{FetchRequest, FetchResponse}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -11,7 +10,7 @@ import scala.concurrent.{ExecutionContext, Future}
   * Created by liangliao on 31/3/17.
   */
 trait FetchService extends LazyLogging {
-  def fetch(jobName: String, urlInfo: UrlInfo, crawlerProxyServer: CrawlerProxyServer)(implicit executor: ExecutionContext): Future[FetchResult]
+  def fetch(fetchRequest: FetchRequest, crawlerProxyServer: CrawlerProxyServer)(implicit executor: ExecutionContext): Future[FetchResponse]
 }
 
 object FetchService {

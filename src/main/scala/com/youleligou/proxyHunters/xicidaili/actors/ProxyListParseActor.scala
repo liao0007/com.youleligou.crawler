@@ -15,11 +15,10 @@ import com.youleligou.proxyHunters.xicidaili.services.ProxyListParseService
 class ProxyListParseActor @Inject()(config: Config,
                                     @Named(ProxyListParseService.name) parseService: ParseService,
                                     @Named(IndexActor.poolName) indexActor: ActorRef,
-                                    @Named(ProxyListInjectActor.poolName) injectActor: ActorRef,
-                                    @Named(CountActor.poolName) countActor: ActorRef)
-  extends AbstractParseActor(config, parseService, indexActor, injectActor, countActor)
+                                    @Named(ProxyListInjectActor.poolName) injectActor: ActorRef)
+    extends AbstractParseActor(config, parseService, indexActor, injectActor)
 
 object ProxyListParseActor extends NamedActor {
-  final val name = "XiCiDaiLiProxyListParseActor"
+  final val name     = "XiCiDaiLiProxyListParseActor"
   final val poolName = "XiCiDaiLiProxyListParseActorPool"
 }

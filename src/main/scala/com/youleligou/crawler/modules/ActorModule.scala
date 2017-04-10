@@ -3,9 +3,7 @@ package com.youleligou.crawler.modules
 import javax.inject.Singleton
 
 import akka.actor.SupervisorStrategy.Restart
-import akka.actor.{Actor, ActorRef, ActorSystem, OneForOneStrategy, Props}
-import akka.contrib.throttle.Throttler.SetTarget
-import akka.contrib.throttle.TimerBasedThrottler
+import akka.actor.{Actor, ActorRef, ActorSystem, OneForOneStrategy}
 import akka.routing.{DefaultResizer, RoundRobinPool}
 import com.google.inject.name.{Named, Names}
 import com.google.inject.{AbstractModule, Provides}

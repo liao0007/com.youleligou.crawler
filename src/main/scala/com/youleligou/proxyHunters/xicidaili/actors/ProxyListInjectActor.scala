@@ -11,13 +11,11 @@ import com.youleligou.proxyHunters.xicidaili.services.ProxyListInjectService
 class ProxyListInjectActor @Inject()(config: Config,
                                      cacheService: CacheService,
                                      hashService: HashService,
-                                     filterService: FilterService,
                                      @Named(ProxyListInjectService.name) injectService: InjectService,
-                                     @Named(ProxyListFetchActor.poolName) fetchActor: ActorRef,
-                                     @Named(CountActor.poolName) countActor: ActorRef)
-  extends AbstractInjectActor(config, cacheService, hashService, filterService, injectService, fetchActor, countActor)
+                                     @Named(ProxyListFetchActor.poolName) fetchActor: ActorRef)
+    extends AbstractInjectActor(config, cacheService, hashService, injectService, fetchActor)
 
 object ProxyListInjectActor extends NamedActor {
-  final val name = "XiCiDaiLiProxyListInjectActor"
+  final val name     = "XiCiDaiLiProxyListInjectActor"
   final val poolName = "XiCiDaiLiProxyListInjectActorPool"
 }

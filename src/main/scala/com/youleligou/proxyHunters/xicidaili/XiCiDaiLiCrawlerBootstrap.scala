@@ -5,18 +5,23 @@ import com.google.inject.Inject
 import com.google.inject.name.Named
 import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
-import com.youleligou.crawler.actors.AbstractInjectActor.GenerateFetch
+import com.youleligou.crawler.actors.AbstractInjectActor
+import com.youleligou.crawler.models.UrlInfo.UrlType
+import com.youleligou.crawler.models.{FetchRequest, UrlInfo}
 import com.youleligou.proxyHunters.xicidaili.actors.ProxyListInjectActor
 
-import scala.concurrent.duration._
+class XiCiDaiLiCrawlerBootstrap @Inject()(config: Config, @Named(ProxyListInjectActor.poolName) injectActor: ActorRef) extends LazyLogging {
 
-class XiCiDaiLiCrawlerBootstrap @Inject()(config: Config, system: ActorSystem, @Named(ProxyListInjectActor.poolName) injectActor: ActorRef)
-  extends LazyLogging {
+  def start(): Unit = {
+    injectActor ! AbstractInjectActor.Inject(
+      FetchRequest(
+        requestName = "fetch_xicidaili_list",
+        urlInfo = UrlInfo(
+          host = "http://www.xicidaili.com/nt/1",
+          urlType = UrlType.Seed
+        )
+      ))
 
-  import system.dispatcher
-
-  def start(interval: FiniteDuration): Unit = {
-    system.scheduler.schedule(FiniteDuration(2, SECONDS), interval, injectActor, GenerateFetch)
   }
 
 }

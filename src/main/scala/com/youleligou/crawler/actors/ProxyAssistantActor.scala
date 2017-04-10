@@ -13,21 +13,14 @@ class ProxyAssistantActor @Inject()(config: Config, proxyAssistantService: Proxy
 
   override def receive: Receive = {
     case Init =>
-      proxyAssistantService.init().map { result =>
-        if (result > 0) InitSuccess else InitFailed
-      } pipeTo sender()
+      proxyAssistantService.init()
 
     case Clean =>
-      proxyAssistantService.clean() map (_ => Cleaned) pipeTo sender()
-
-    case CheckAvailable =>
-      proxyAssistantService.checkAvailable() map { result =>
-        if (result > 0) ProxyServerAvailable else ProxyServerUnavailable
-      } pipeTo sender()
+      proxyAssistantService.clean()
 
     case GetProxyServer =>
       proxyAssistantService.get.map {
-        case Some(proxyServer) => ProxyServer(proxyServer)
+        case Some(proxyServer) => ProxyServerAvailable(proxyServer)
         case _                 => ProxyServerUnavailable
       } pipeTo sender()
   }
@@ -37,20 +30,13 @@ object ProxyAssistantActor extends NamedActor {
   override final val name     = "ProxyAssistantActor"
   override final val poolName = "ProxyAssistantActorPool"
 
+  sealed trait Command
   sealed trait Event
-  sealed trait Data
 
-  case object Init        extends Event
-  case object InitSuccess extends Event
-  case object InitFailed  extends Event
+  case object Init  extends Command
+  case object Clean extends Command
 
-  case object Clean   extends Event
-  case object Cleaned extends Event
-
-  case object CheckAvailable     extends Event
-  case object ProxyServerAvailable    extends Event
-  case object ProxyServerUnavailable extends Event
-
-  case object GetProxyServer                         extends Event
-  case class ProxyServer(server: CrawlerProxyServer) extends Data
+  case object GetProxyServer                                  extends Command
+  case class ProxyServerAvailable(server: CrawlerProxyServer) extends Event
+  case object ProxyServerUnavailable                          extends Event
 }
