@@ -5,18 +5,10 @@ import com.google.inject.Inject
 import com.google.inject.name.Named
 import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
-import com.youleligou.crawler.actors.AbstractFetchActor.Fetch
 import com.youleligou.crawler.actors.AbstractInjectActor
-import com.youleligou.crawler.daos.CrawlerJob.FetchJobType
-import com.youleligou.crawler.daos.CrawlerJobRepo
-import com.youleligou.crawler.models.{FetchRequest, UrlInfo}
 import com.youleligou.crawler.models.UrlInfo.UrlType
+import com.youleligou.crawler.models.{FetchRequest, UrlInfo}
 import com.youleligou.eleme.actors.RestaurantInjectActor
-import com.youleligou.eleme.services.RestaurantInjectService
-import com.youleligou.proxyHunters.xicidaili.services.ProxyListInjectService
-
-import scala.concurrent.Future
-import scala.concurrent.duration._
 
 /**
   * Created by dell on 2016/8/29.

@@ -9,9 +9,9 @@ import com.google.inject.name.{Named, Names}
 import com.google.inject.{AbstractModule, Provides}
 import com.typesafe.config.Config
 import com.youleligou.crawler.modules._
-import com.youleligou.crawler.services.{InjectService, ParseService}
+import com.youleligou.crawler.services.ParseService
 import com.youleligou.eleme.actors.{RestaurantFetchActor, RestaurantInjectActor, RestaurantParseActor}
-import com.youleligou.eleme.services.{RestaurantInjectService, RestaurantParseService}
+import com.youleligou.eleme.services.RestaurantParseService
 import net.codingwell.scalaguice.ScalaModule
 
 /**
@@ -76,7 +76,6 @@ class ElemeModule extends AbstractModule with ScalaModule with GuiceAkkaActorRef
     bind[Actor].annotatedWith(Names.named(RestaurantParseActor.name)).to[RestaurantParseActor]
 
     bind[ParseService].annotatedWithName(RestaurantParseService.name).to[RestaurantParseService]
-    bind[InjectService].annotatedWithName(RestaurantInjectService.name).to[RestaurantInjectService]
   }
 
 }

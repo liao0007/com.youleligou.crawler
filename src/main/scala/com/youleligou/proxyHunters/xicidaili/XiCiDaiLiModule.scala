@@ -9,9 +9,9 @@ import com.google.inject.name.{Named, Names}
 import com.google.inject.{AbstractModule, Provides}
 import com.typesafe.config.Config
 import com.youleligou.crawler.modules._
-import com.youleligou.crawler.services.{InjectService, ParseService}
+import com.youleligou.crawler.services.ParseService
 import com.youleligou.proxyHunters.xicidaili.actors.{ProxyListFetchActor, ProxyListInjectActor, ProxyListParseActor}
-import com.youleligou.proxyHunters.xicidaili.services.{ProxyListInjectService, ProxyListParseService}
+import com.youleligou.proxyHunters.xicidaili.services.ProxyListParseService
 import net.codingwell.scalaguice.ScalaModule
 
 /**
@@ -76,6 +76,5 @@ class XiCiDaiLiModule extends AbstractModule with ScalaModule with GuiceAkkaActo
     bind[Actor].annotatedWith(Names.named(ProxyListParseActor.name)).to[ProxyListParseActor]
 
     bind[ParseService].annotatedWithName(ProxyListParseService.name).to[ProxyListParseService]
-    bind[InjectService].annotatedWithName(ProxyListInjectService.name).to[ProxyListInjectService]
   }
 }

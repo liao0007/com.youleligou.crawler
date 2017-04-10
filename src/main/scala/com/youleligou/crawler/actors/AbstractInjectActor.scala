@@ -6,18 +6,14 @@ import com.typesafe.config.Config
 import com.youleligou.crawler.actors.AbstractFetchActor.{Fetch, Init, InitFailed, InitSucceed}
 import com.youleligou.crawler.actors.AbstractInjectActor._
 import com.youleligou.crawler.models._
-import com.youleligou.crawler.services.{CacheService, HashService, InjectService}
+import com.youleligou.crawler.services.{CacheService, HashService}
 
 import scala.concurrent.ExecutionContext.Implicits._
 
 /**
   * 抓取种子注入任务,将需要抓取的任务注入到该任务中
   */
-abstract class AbstractInjectActor(config: Config,
-                                   cacheService: CacheService,
-                                   hashService: HashService,
-                                   injectService: InjectService,
-                                   fetchActor: ActorRef)
+abstract class AbstractInjectActor(config: Config, cacheService: CacheService, hashService: HashService, fetchActor: ActorRef)
     extends Actor
     with Stash
     with ActorLogging {
