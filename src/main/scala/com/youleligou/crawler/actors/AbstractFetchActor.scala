@@ -5,6 +5,7 @@ import akka.pattern.pipe
 import com.typesafe.config.Config
 import com.youleligou.crawler.actors.AbstractFetchActor._
 import com.youleligou.crawler.actors.AbstractInjectActor.Inject
+import com.youleligou.crawler.actors.AbstractParseActor.Parse
 import com.youleligou.crawler.actors.ProxyAssistantActor.{GetProxyServer, ProxyServerAvailable, ProxyServerUnavailable}
 import com.youleligou.crawler.daos.CrawlerProxyServer
 import com.youleligou.crawler.models.{FetchRequest, FetchResponse}
@@ -32,46 +33,52 @@ abstract class AbstractFetchActor(config: Config,
   def standby: Receive = {
     case Init =>
       proxyAssistantActor ! GetProxyServer
-      context become gettingProxyServer(sender())
+      context become gettingProxyServer(sender)
   }
 
-  def gettingProxyServer(injectActor: ActorRef): Receive = {
+  def gettingProxyServer(currentInjectActor: ActorRef): Receive = {
     case ProxyServerAvailable(server) =>
-      injectActor ! InitSucceed
+      currentInjectActor ! InitSucceed
       context become proxyServerAvailable(server)
 
     case ProxyServerUnavailable =>
-      injectActor ! InitFailed
+      currentInjectActor ! InitFailed
       context become standby
   }
 
   def proxyServerAvailable(proxyServer: CrawlerProxyServer): Receive = {
+
     case Fetch(fetchRequest) =>
       fetchService.fetch(fetchRequest, proxyServer).map(Fetched) pipeTo self
-      context become fetching
-  }
 
-  def fetching(): Receive = {
-    case fetchResult @ Fetched(FetchResponse(FetchService.Ok, _, _, _)) =>
-      parseActor ! fetchResult
+    case Fetched(fetchResponse @ FetchResponse(FetchService.Ok, _, _, _)) =>
+      log.info("{} fetch succeed", self.path.name)
+      parseActor ! Parse(fetchResponse)
+      unstashAll()
       context become standby
 
     case Fetched(FetchResponse(statusCode @ FetchService.NotFound, _, message, _)) =>
-      log.warning("fetch failed: " + statusCode + " " + message)
+      log.info("{} fetch failed {} {}", self.path.name, statusCode, message)
+      unstashAll()
       context become standby
 
     case Fetched(FetchResponse(statusCode @ FetchService.PaymentRequired, _, message, _)) =>
-      log.warning("fetch failed: " + statusCode + " " + message + ", system terminating")
+      log.info("{} fetch failed {} {}", self.path.name, statusCode, message)
+      unstashAll()
       context.system.terminate()
 
     case Fetched(FetchResponse(statusCode @ _, _, message, fetchRequest)) if fetchRequest.retry < MaxRetry =>
-      log.warning("fetch failed: " + statusCode + " " + message, " retrying")
+      log.info("{} fetch failed {} {}, retry", self.path.name, statusCode, message)
       injectActor ! Inject(fetchRequest.copy(retry = fetchRequest.retry + 1))
+      unstashAll()
       context become standby
 
     case Fetched(FetchResponse(statusCode @ _, _, message, fetchRequest)) if fetchRequest.retry >= MaxRetry =>
-      log.warning("fetch failed: " + statusCode + " " + message, " retry limit hit, giving up")
+      log.info("{} fetch failed {} {}, retry limit reached, give up", self.path.name, statusCode, message)
       context become standby
+
+    case _ =>
+      stash()
   }
 }
 

@@ -2,7 +2,7 @@ package com.youleligou.proxyHunters.xicidaili
 
 import javax.inject.Singleton
 
-import akka.actor.SupervisorStrategy.Restart
+import akka.actor.SupervisorStrategy.{Escalate, Restart}
 import akka.actor.{Actor, ActorRef, ActorSystem, OneForOneStrategy}
 import akka.routing.{DefaultResizer, RoundRobinPool}
 import com.google.inject.name.{Named, Names}
@@ -18,16 +18,6 @@ import net.codingwell.scalaguice.ScalaModule
   * Created by liangliao on 31/3/17.
   */
 class XiCiDaiLiModule extends AbstractModule with ScalaModule with GuiceAkkaActorRefProvider {
-
-  private val restartSupervisorStrategy: OneForOneStrategy = OneForOneStrategy() {
-    case _ => Restart
-  }
-
-  private def roundRobinPool(lowerBound: Int, upperBound: Int): RoundRobinPool =
-    RoundRobinPool(nrOfInstances = lowerBound,
-      resizer = Some(DefaultResizer(lowerBound, upperBound)),
-      supervisorStrategy = restartSupervisorStrategy)
-
   /*
   inject actor
    */
@@ -38,9 +28,7 @@ class XiCiDaiLiModule extends AbstractModule with ScalaModule with GuiceAkkaActo
   @Provides
   @Singleton
   @Named(ProxyListInjectActor.poolName)
-  def provideInjectActorPoolRef(config: Config, system: ActorSystem): ActorRef = {
-    provideActorPoolRef(system, ProxyListInjectActor, roundRobinPool(1, config.getInt("crawler.actor.inject.parallel")))
-  }
+  def provideInjectActorPoolRef(config: Config, system: ActorSystem): ActorRef = provideActorPoolRef(system, ProxyListInjectActor)
 
   /*
   fetch actor
@@ -52,9 +40,7 @@ class XiCiDaiLiModule extends AbstractModule with ScalaModule with GuiceAkkaActo
   @Provides
   @Singleton
   @Named(ProxyListFetchActor.poolName)
-  def provideFetchActorPoolRef(config: Config, system: ActorSystem): ActorRef = {
-    provideActorPoolRef(system, ProxyListFetchActor, roundRobinPool(1, config.getInt("crawler.actor.fetch.parallel")))
-  }
+  def provideFetchActorPoolRef(config: Config, system: ActorSystem): ActorRef = provideActorPoolRef(system, ProxyListFetchActor)
 
   /*
   parse actor
@@ -66,9 +52,7 @@ class XiCiDaiLiModule extends AbstractModule with ScalaModule with GuiceAkkaActo
   @Provides
   @Singleton
   @Named(ProxyListParseActor.poolName)
-  def provideParseActorPoolRef(config: Config, system: ActorSystem): ActorRef = {
-    provideActorPoolRef(system, ProxyListParseActor, roundRobinPool(1, config.getInt("crawler.actor.parse.parallel")))
-  }
+  def provideParseActorPoolRef(config: Config, system: ActorSystem): ActorRef = provideActorPoolRef(system, ProxyListParseActor)
 
   override def configure() {
     bind[Actor].annotatedWith(Names.named(ProxyListInjectActor.name)).to[ProxyListInjectActor]

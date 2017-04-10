@@ -18,14 +18,10 @@ import scala.concurrent.duration._
   */
 class ProxyAssistantBootstrap @Inject()(config: Config, system: ActorSystem, @Named(ProxyAssistantActor.poolName) proxyAssistantActor: ActorRef)
     extends LazyLogging {
-  import system.dispatcher
-
-  val timeout        = config.getInt("crawler.actor.proxy-assistant.timeout")
-  val assistantDelta = config.getInt("crawler.actor.proxy-assistant.parallel") - config.getInt("crawler.actor.fetch.parallel")
 
   def start(): Unit = {
-    system.scheduler.scheduleOnce(FiniteDuration(0, MILLISECONDS), proxyAssistantActor, Init)
-    system.scheduler.schedule(FiniteDuration(10, SECONDS), FiniteDuration(timeout / assistantDelta, MILLISECONDS), proxyAssistantActor, Clean)
+//    system.scheduler.scheduleOnce(FiniteDuration(0, MILLISECONDS), proxyAssistantActor, Init)
+//    system.scheduler.schedule(FiniteDuration(10, SECONDS), FiniteDuration(timeout / assistantDelta, MILLISECONDS), proxyAssistantActor, Clean)
   }
 }
 

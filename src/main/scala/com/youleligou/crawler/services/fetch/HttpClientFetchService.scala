@@ -23,18 +23,17 @@ class HttpClientFetchService @Inject()(config: Config, standaloneAhcWSClient: St
     val FetchRequest(requestName, urlInfo, retry) = fetchRequest
     Try {
       standaloneAhcWSClient
-        .url(urlInfo.host)
+        .url(urlInfo.url)
         .withHeaders("User-Agent" -> config.getString("crawler.actor.fetch.userAgent"))
         .withRequestTimeout(Duration(config.getInt("crawler.actor.proxy-assistant.timeout"), MILLISECONDS))
         //      .withAuth(config.getString("proxy.user"), config.getString("proxy.password"), WSAuthScheme.BASIC)
         //      .withProxyServer(DefaultWSProxyServer(host = config.getString("proxy.host"), port = config.getInt("proxy.port")))
-        .withProxyServer(DefaultWSProxyServer(host = crawlerProxyServer.ip, port = crawlerProxyServer.port))
+//        .withProxyServer(DefaultWSProxyServer(host = crawlerProxyServer.ip, port = crawlerProxyServer.port))
         .get()
         .map { response =>
-          logger.info("fetching " + urlInfo + ", cost time: " + (System.currentTimeMillis() - start) + " content length: " + response.body.length)
           crawlerJobRepo.create(
             CrawlerJob(
-              url = urlInfo.host,
+              url = urlInfo.url,
               jobName = requestName,
               proxy = Some(s"""${crawlerProxyServer.ip}:${crawlerProxyServer.port}"""),
               statusCode = Some(response.status),
@@ -58,6 +57,6 @@ class HttpClientFetchService @Inject()(config: Config, standaloneAhcWSClient: St
   } recover {
     case x: Throwable =>
       logger.warn(x.getMessage)
-      FetchResponse(FetchService.NotFound, "", "", fetchRequest)
+      FetchResponse(FetchService.Timeout, "", "", fetchRequest)
   }
 }

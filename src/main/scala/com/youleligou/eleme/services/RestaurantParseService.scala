@@ -13,9 +13,11 @@ import scala.util.control.NonFatal
 
 class RestaurantParseService @Inject()(restaurantRepo: RestaurantRepo) extends ParseService {
 
-  final val Precision: Float = 1000F
+  final val Length: Int      = 1
+  final val Precision: Float = 100F
   final val LatitudeKey      = "latitude"
-  final val LongitudeKey     = "latitude"
+  final val LongitudeKey     = "longitude"
+  final val OffsetKey        = "offset"
 
   private def getChildLinksByLocation(fetchResponse: FetchResponse): Seq[UrlInfo] = {
     val UrlInfo(host, queryParameters, urlType, deep) = fetchResponse.fetchRequest.urlInfo
@@ -23,18 +25,18 @@ class RestaurantParseService @Inject()(restaurantRepo: RestaurantRepo) extends P
     val originalLongitude                             = queryParameters.getOrElse(LongitudeKey, "116").toFloat
 
     for {
-      latitudeSteps  <- -5 to 5 if latitudeSteps != 0; latitudeDelta   = latitudeSteps / Precision
-      longitudeSteps <- -5 to 5 if longitudeSteps != 0; longitudeDelta = longitudeSteps / Precision
+      latitudeSteps  <- -Length to Length if latitudeSteps != 0; latitudeDelta   = latitudeSteps / Precision
+      longitudeSteps <- -Length to Length if longitudeSteps != 0; longitudeDelta = longitudeSteps / Precision
     } yield {
-      val updatedQueryParameters = queryParameters + (LatitudeKey -> (originalLatitude + latitudeDelta).toString) + (LongitudeKey -> (originalLongitude + longitudeDelta).toString)
+      val updatedQueryParameters = queryParameters + (LatitudeKey -> (originalLatitude + latitudeDelta).toString) + (LongitudeKey -> (originalLongitude + longitudeDelta).toString) + (OffsetKey -> "0")
       fetchResponse.fetchRequest.urlInfo.copy(queryParameters = updatedQueryParameters, deep = deep + 1)
     }
   }
 
   private def getChildLinksByOffset(fetchResponse: FetchResponse): Seq[UrlInfo] = {
     val urlInfo = fetchResponse.fetchRequest.urlInfo
-    val offset  = urlInfo.queryParameters.getOrElse("offset", "0").toInt
-    Seq(urlInfo.copy(queryParameters = urlInfo.queryParameters + ("offset" -> (offset + 1).toString)))
+    val offset  = urlInfo.queryParameters.getOrElse(OffsetKey, "0").toInt
+    Seq(urlInfo.copy(queryParameters = urlInfo.queryParameters + (OffsetKey -> (offset + 1).toString)))
   }
 
   private def persist(restaurants: Seq[Restaurant]) = restaurantRepo.create(restaurants.toList)
