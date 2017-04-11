@@ -12,7 +12,7 @@ import scala.util.Try
 class RestaurantParseService @Inject()(restaurantRepo: RestaurantRepo) extends ParseService {
 
   final val Length: Int      = 5
-  final val Precision: Float = 100F
+  final val Precision: Float = 10F
   final val LatitudeKey      = "latitude"
   final val LongitudeKey     = "longitude"
   final val OffsetKey        = "offset"
