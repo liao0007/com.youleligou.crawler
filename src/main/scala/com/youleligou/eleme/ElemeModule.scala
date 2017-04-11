@@ -2,9 +2,7 @@ package com.youleligou.eleme
 
 import javax.inject.Singleton
 
-import akka.actor.SupervisorStrategy.{Escalate, Restart}
-import akka.actor.{Actor, ActorRef, ActorSystem, OneForOneStrategy}
-import akka.routing.{DefaultResizer, RoundRobinPool}
+import akka.actor.{Actor, ActorRef, ActorSystem}
 import com.google.inject.name.{Named, Names}
 import com.google.inject.{AbstractModule, Provides}
 import com.typesafe.config.Config
@@ -30,29 +28,6 @@ class ElemeModule extends AbstractModule with ScalaModule with GuiceAkkaActorRef
   @Named(RestaurantInjectActor.poolName)
   def provideInjectActorPoolRef(config: Config, system: ActorSystem): ActorRef = provideActorPoolRef(system, RestaurantInjectActor)
 
-  /*
-  fetch actor
-   */
-  @Provides
-  @Named(RestaurantFetchActor.name)
-  def provideFetchActorRef(system: ActorSystem): ActorRef = provideActorRef(system, RestaurantFetchActor)
-
-  @Provides
-  @Singleton
-  @Named(RestaurantFetchActor.poolName)
-  def provideFetchActorPoolRef(config: Config, system: ActorSystem): ActorRef = provideActorPoolRef(system, RestaurantFetchActor)
-
-  /*
-  parse actor
-   */
-  @Provides
-  @Named(RestaurantParseActor.name)
-  def provideParseActorRef(system: ActorSystem): ActorRef = provideActorRef(system, RestaurantParseActor)
-
-  @Provides
-  @Singleton
-  @Named(RestaurantParseActor.poolName)
-  def provideParseActorPoolRef(config: Config, system: ActorSystem): ActorRef = provideActorPoolRef(system, RestaurantParseActor)
 
   override def configure() {
     bind[Actor].annotatedWith(Names.named(RestaurantInjectActor.name)).to[RestaurantInjectActor]

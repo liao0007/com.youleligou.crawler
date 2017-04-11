@@ -11,7 +11,7 @@ import com.youleligou.crawler.services.ParseService
   * Created by young.yang on 2016/8/28.
   * 解析任务
   */
-abstract class AbstractParseActor(config: Config, parseService: ParseService, indexActor: ActorRef, injectActor: ActorRef)
+abstract class AbstractParseActor(config: Config, parseService: ParseService, indexerPool: ActorRef, injectorPool: ActorRef)
     extends Actor
     with ActorLogging {
 
@@ -20,7 +20,7 @@ abstract class AbstractParseActor(config: Config, parseService: ParseService, in
       log.info("{} parse {}", self.path.name, fetchResponse.fetchRequest.urlInfo)
       val parseResult: ParseResult = parseService.parse(fetchResponse)
       parseResult.childLink.foreach { urlInfo =>
-        injectActor ! Inject(parseResult.fetchResponse.fetchRequest.copy(urlInfo = urlInfo, retry = 0))
+        injectorPool ! Inject(parseResult.fetchResponse.fetchRequest.copy(urlInfo = urlInfo, retry = 0))
       }
   }
 }

@@ -1,7 +1,8 @@
 package com.youleligou.crawler.modules
 
+import akka.actor.ActorContext
 import akka.actor.{Actor, ActorRef, ActorSystem, ExtendedActorSystem, Extension, ExtensionId, ExtensionIdProvider, IndirectActorProducer, Props}
-import akka.routing.{FromConfig, Pool}
+import akka.routing.FromConfig
 import com.google.inject._
 import com.google.inject.name.Names
 import com.typesafe.config.Config
@@ -39,10 +40,14 @@ object GuiceAkkaExtension extends ExtensionId[GuiceAkkaExtensionImpl] with Exten
   * Mix in with Guice Modules that contain providers for top-level actor refs.
   */
 trait GuiceAkkaActorRefProvider {
-  def propsFor(system: ActorSystem, namedActor: NamedActor): Props      = GuiceAkkaExtension(system).props(namedActor.name)
-  def provideActorRef(system: ActorSystem, actor: NamedActor): ActorRef = system.actorOf(propsFor(system, actor))
-  def provideActorPoolRef(system: ActorSystem, actor: NamedActor): ActorRef =
-    system.actorOf(FromConfig.props(GuiceAkkaExtension(system).props(actor.name)), actor.poolName)
+  def propsFor(system: ActorSystem, namedActor: NamedActor): Props =
+    GuiceAkkaExtension(system).props(namedActor.name)
+
+  def provideActorRef(system: ActorSystem, actorCompanion: NamedActor, actorContextOpt: Option[ActorContext] = None): ActorRef =
+    actorContextOpt.getOrElse(system).actorOf(propsFor(system, actorCompanion))
+
+  def provideActorPoolRef(system: ActorSystem, actorCompanion: NamedActor, actorContextOpt: Option[ActorContext] = None): ActorRef =
+    actorContextOpt.getOrElse(system).actorOf(FromConfig.props(GuiceAkkaExtension(system).props(actorCompanion.name)), actorCompanion.poolName)
 }
 
 /**

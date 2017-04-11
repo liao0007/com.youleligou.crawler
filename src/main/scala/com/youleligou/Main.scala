@@ -9,7 +9,6 @@ import com.youleligou.crawler.actors.ProxyAssistantActor
 import com.youleligou.crawler.actors.ProxyAssistantActor.{Clean, Init}
 import com.youleligou.crawler.modules.{ActorModule, AkkaModule, ConfigModule, ServiceModule}
 import com.youleligou.eleme.{ElemeCrawlerBootstrap, ElemeModule}
-import com.youleligou.proxyHunters.xicidaili.XiCiDaiLiModule
 
 import scala.concurrent.duration._
 
@@ -31,8 +30,7 @@ object Main extends App {
     new AkkaModule,
     new ServiceModule,
     new ActorModule,
-    new ElemeModule,
-    new XiCiDaiLiModule
+    new ElemeModule
   )
 
   import net.codingwell.scalaguice.InjectorExtensions._

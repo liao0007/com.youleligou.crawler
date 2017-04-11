@@ -2,12 +2,14 @@ package com.youleligou.crawler.actors
 
 import akka.actor.{Actor, ActorLogging, ActorRef, Stash}
 import com.typesafe.config.Config
-import com.youleligou.crawler.actors.AbstractFetchActor.{Fetch, Init, InitFailed, InitSucceed}
+import com.youleligou.crawler.actors.AbstractFetchActor._
 import com.youleligou.crawler.actors.AbstractInjectActor._
 import com.youleligou.crawler.models._
+import com.youleligou.crawler.modules.GuiceAkkaActorRefProvider
 import com.youleligou.crawler.services.HashService
 import play.api.libs.json.Json
 import redis.RedisClient
+import akka.pattern.pipe
 
 import scala.concurrent.ExecutionContext.Implicits._
 import scala.concurrent.Future
@@ -16,23 +18,26 @@ import scala.util.control.NonFatal
 /**
   * 抓取种子注入任务,将需要抓取的任务注入到该任务中
   */
-abstract class AbstractInjectActor(config: Config, redisClient: RedisClient, hashService: HashService, fetchActor: ActorRef)
+abstract class AbstractInjectActor(config: Config, redisClient: RedisClient, hashService: HashService, fetcherCompanion: NamedActor)
     extends Actor
     with Stash
-    with ActorLogging {
+    with ActorLogging
+    with GuiceAkkaActorRefProvider {
+
+  val fetcher: ActorRef = provideActorRef(context.system, fetcherCompanion, Some(context))
 
   override def receive: Receive = standby
 
   def standby: Receive = {
     case Inject(fetchRequest) =>
-      log.info("{} hash check {}", self.path.name, fetchRequest)
+      log.info("{} hash check {}", self.path, fetchRequest)
       val md5 = hashService.hash(fetchRequest.urlInfo.url)
       redisClient.hsetnx(AbstractInjectActor.InjectActorInjectedUrlHashKey, md5, "1") flatMap {
         case true =>
-          log.info("{} injected {}", self.path.name, fetchRequest)
+          log.info("{} injected {}", self.path, fetchRequest)
           redisClient.lpush(InjectActorPendingUrlQueueKey, Json.toJson(fetchRequest).toString())
         case _ =>
-          log.info("{} rejected {}", self.path.name, fetchRequest)
+          log.info("{} rejected {}", self.path, fetchRequest)
           Future.successful(0L)
       } recover {
         case NonFatal(x) =>
@@ -41,38 +46,42 @@ abstract class AbstractInjectActor(config: Config, redisClient: RedisClient, has
       }
 
     case Tick =>
-      log.info("{} tick", self.path.name)
-      redisClient.rpop[String](InjectActorPendingUrlQueueKey) map {
-        case Some(fetchRequestString) =>
-          Json.parse(fetchRequestString).validate[FetchRequest].asOpt
-        case _ =>
-          None
-      } map {
-        case Some(fetchRequest) =>
-          fetchActor ! Init
-          context become fetching(fetchRequest)
-        case _ =>
-      } recover {
+      log.info("{} tick", self.path)
+      redisClient.rpop[String](InjectActorPendingUrlQueueKey) recover {
         case NonFatal(x) =>
           log.warning(x.getMessage)
+          None
+      } pipeTo self
+
+    case Some(fetchRequestString: String) =>
+      Json.parse(fetchRequestString).validate[FetchRequest].asOpt match {
+        case Some(fetchRequest) =>
+          fetcher ! InitProxyServer
+          context become (fetching(fetchRequest), discardOld = false)
+        case _ =>
+          self ! Tick
       }
+
+    case _ =>
   }
 
   def fetching(fetchRequest: FetchRequest): Receive = {
-    case InitSucceed =>
-      log.info("{} fetch init succeed {}", self.path.name, fetchRequest)
+    case InitProxyServerSucceed =>
+      log.info("{} fetch init succeed {}", self.path, fetchRequest)
       sender ! Fetch(fetchRequest)
-      unstashAll()
-      context become standby
 
-    case InitFailed =>
-      log.info("{} fetch init failed {}", self.path.name, fetchRequest)
+    case InitProxyServerFailed =>
+      log.info("{} fetch init failed {}", self.path, fetchRequest)
       self ! Inject(fetchRequest)
       unstashAll()
-      context become standby
+      context unbecome ()
 
-    case Tick =>
-    //ignore ticks
+    case WorkFinished =>
+      self ! Tick
+      unstashAll()
+      context unbecome ()
+
+    case Tick => //ignore ticks
 
     case _ => stash()
   }

@@ -41,7 +41,12 @@ class ElemeCrawlerBootstrap @Inject()(config: Config, system: ActorSystem, @Name
         )
       ))
 
-    system.scheduler.schedule(0.seconds, 10.millis, injectActor, Tick)
+//    system.scheduler.schedule(0.seconds, 10.millis, injectActor, Tick)
+    system.scheduler.scheduleOnce(1.seconds, injectActor, Tick)
+    system.scheduler.scheduleOnce(10.seconds, injectActor, Tick)
+    system.scheduler.scheduleOnce(10.seconds, injectActor, Tick)
+    system.scheduler.scheduleOnce(10.seconds, injectActor, Tick)
+    system.scheduler.scheduleOnce(10.seconds, injectActor, Tick)
 
   }
 

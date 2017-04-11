@@ -41,6 +41,5 @@ class ServiceModule extends AbstractModule with ScalaModule {
     bind[IndexService].to[ElasticIndexService].asEagerSingleton()
     bind[CacheService].to[RedisCacheService].asEagerSingleton()
     bind[FilterService].to[DefaultFilterService].asEagerSingleton()
-    bind[ProxyAssistantService].to[DefaultProxyAssistantService].asEagerSingleton()
   }
 }
