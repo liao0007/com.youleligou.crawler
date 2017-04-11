@@ -10,7 +10,7 @@ import com.youleligou.crawler.actors.ProxyAssistantActor.{Clean, Init}
 import com.youleligou.crawler.modules.{ActorModule, AkkaModule, ConfigModule, ServiceModule}
 import com.youleligou.eleme.{ElemeCrawlerBootstrap, ElemeModule}
 import com.youleligou.proxyHunters.xicidaili.XiCiDaiLiModule
-import com.youleligou.proxyHunters.youdaili.{YouDaiLiCrawlerBootstrap, YouDaiLiModule}
+import com.youleligou.proxyHunters.youdaili.YouDaiLiModule
 
 import scala.concurrent.duration._
 

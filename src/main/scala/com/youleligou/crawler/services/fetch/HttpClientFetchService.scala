@@ -5,8 +5,8 @@ import com.typesafe.config.Config
 import com.youleligou.crawler.daos.{CrawlerJob, CrawlerJobRepo, CrawlerProxyServer}
 import com.youleligou.crawler.models.{FetchRequest, FetchResponse}
 import com.youleligou.crawler.services.FetchService
-import play.api.libs.ws.{DefaultWSProxyServer, WSAuthScheme}
 import play.api.libs.ws.ahc.StandaloneAhcWSClient
+import play.api.libs.ws.{DefaultWSProxyServer, WSAuthScheme}
 
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
