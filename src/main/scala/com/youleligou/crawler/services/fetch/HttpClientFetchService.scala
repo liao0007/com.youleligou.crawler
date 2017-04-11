@@ -19,11 +19,12 @@ import scala.util.Try
 class HttpClientFetchService @Inject()(config: Config, standaloneAhcWSClient: StandaloneAhcWSClient, crawlerJobRepo: CrawlerJobRepo)
     extends FetchService {
 
-  val useProxy = config.getBoolean("crawler.fetch.useProxy")
+  def fetch(fetchRequest: FetchRequest, crawlerProxyServerOpt: Option[CrawlerProxyServer])(
+      implicit executor: ExecutionContext): Future[FetchResponse] = {
 
-  def fetch(fetchRequest: FetchRequest, crawlerProxyServer: CrawlerProxyServer)(implicit executor: ExecutionContext): Future[FetchResponse] = {
     val start                                     = System.currentTimeMillis()
     val FetchRequest(requestName, urlInfo, retry) = fetchRequest
+
     Try {
       val client = standaloneAhcWSClient
         .url(urlInfo.url)
@@ -31,11 +32,13 @@ class HttpClientFetchService @Inject()(config: Config, standaloneAhcWSClient: St
         .withRequestTimeout(Duration(config.getInt("crawler.fetch.timeout"), MILLISECONDS))
 
       val proxyClient =
-        if (useProxy && crawlerProxyServer.username.nonEmpty) {
+        if (crawlerProxyServerOpt.isDefined && crawlerProxyServerOpt.get.username.nonEmpty) {
+          val crawlerProxyServer = crawlerProxyServerOpt.get
           client
             .withAuth(crawlerProxyServer.username.get, crawlerProxyServer.password.get, WSAuthScheme.BASIC)
             .withProxyServer(DefaultWSProxyServer(host = crawlerProxyServer.ip, port = crawlerProxyServer.port))
-        } else if (useProxy && crawlerProxyServer.username.isEmpty) {
+        } else if (crawlerProxyServerOpt.isDefined && crawlerProxyServerOpt.get.username.isEmpty) {
+          val crawlerProxyServer = crawlerProxyServerOpt.get
           client
             .withProxyServer(DefaultWSProxyServer(host = crawlerProxyServer.ip, port = crawlerProxyServer.port))
         } else
@@ -48,7 +51,7 @@ class HttpClientFetchService @Inject()(config: Config, standaloneAhcWSClient: St
             CrawlerJob(
               url = urlInfo.url,
               jobName = requestName,
-              proxy = Some(s"""${crawlerProxyServer.ip}:${crawlerProxyServer.port}"""),
+              proxy = crawlerProxyServerOpt.map(crawlerProxyServer => s"""${crawlerProxyServer.ip}:${crawlerProxyServer.port}"""),
               statusCode = Some(response.status),
               statusMessage = Some(response.statusText)
             )
@@ -60,7 +63,7 @@ class HttpClientFetchService @Inject()(config: Config, standaloneAhcWSClient: St
         CrawlerJob(
           url = urlInfo.host,
           jobName = requestName,
-          proxy = Some(s"""${crawlerProxyServer.ip}:${crawlerProxyServer.port}"""),
+          proxy = crawlerProxyServerOpt.map(crawlerProxyServer => s"""${crawlerProxyServer.ip}:${crawlerProxyServer.port}"""),
           statusCode = Some(FetchService.Timeout),
           statusMessage = None
         )

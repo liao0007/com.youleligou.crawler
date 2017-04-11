@@ -18,7 +18,7 @@ class ProxyListParseService @Inject()(md5HashService: Md5HashService, crawlerPro
 
   private def getChildLinks(fetchResponse: FetchResponse) = {
     val UrlInfo(host, queryParameters, urlType, deep) = fetchResponse.fetchRequest.urlInfo
-    Jsoup.parse(fetchResponse.content).select(".pagebreak li").not(".thisclass").asScala.toSeq.drop(2).dropRight(1).flatMap { li =>
+    Jsoup.parse(fetchResponse.content).select(".pagebreak li").not(".thisclass").asScala.toSeq.flatMap { li =>
       li.select("a").asScala.toSeq.headOption.map { a =>
         UrlInfo(host = "http://www.youdaili.net/Daili/guonei/" + a.attr("href"), deep = deep + 1)
       }
@@ -31,21 +31,23 @@ class ProxyListParseService @Inject()(md5HashService: Md5HashService, crawlerPro
     * 解析具体实现
     */
   override def parse(fetchResponse: FetchResponse): ParseResult = {
-    val proxyServers: Seq[CrawlerProxyServer] =
-      Jsoup.parse(fetchResponse.content).select("p").asScala.toSeq.drop(1).flatMap { p =>
+    val content = Jsoup.parse(fetchResponse.content).select(".content").html()
+
+    val proxyServers
+      : Seq[CrawlerProxyServer] = Jsoup.parse(content.replaceAll("</p><p>", "~~").replaceAll("<br>", "~~")).text().split("~~").toSeq flatMap {
+      urlsString =>
         val pattern = """(.*):([0-9]+)@(.*)#(.*)""".r
         Try {
-          val pattern(ip, port, supportedType, location) = p.text()
+          val pattern(ip, port, supportedType, location) = urlsString.trim
           Some(
             CrawlerProxyServer(
               hash = md5HashService.hash(s"""$ip:$port"""),
               ip = ip,
               port = port.toInt,
-              supportedType = Some(supportedType),
-              location = Some(location)
+              supportedType = Some(supportedType)
             ))
         } getOrElse None
-      }
+    }
 
     persist(proxyServers)
 

@@ -45,8 +45,8 @@ class YouDaiLiModule extends AbstractModule with ScalaModule with GuiceAkkaActor
     bind[ParseService].annotatedWithName(ProxyListParseService.name).to[ProxyListParseService]
 
     bind[Actor].annotatedWith(Names.named(ProxyPageInjectActor.name)).toProvider(classOf[YouDaiLiModule.ProxyPageInjectActorProvider])
-    bind[Actor].annotatedWith(Names.named(ProxyPageFetchActor.name)).toProvider(classOf[YouDaiLiModule.ProxyPageInjectActorProvider])
-    bind[Actor].annotatedWith(Names.named(ProxyPageParseActor.name)).toProvider(classOf[YouDaiLiModule.ProxyPageInjectActorProvider])
+    bind[Actor].annotatedWith(Names.named(ProxyPageFetchActor.name)).toProvider(classOf[YouDaiLiModule.ProxyPageFetchActorProvider])
+    bind[Actor].annotatedWith(Names.named(ProxyPageParseActor.name)).toProvider(classOf[YouDaiLiModule.ProxyPageParseActorProvider])
     bind[ParseService].annotatedWithName(ProxyPageParseService.name).to[ProxyPageParseService]
   }
 }
@@ -55,7 +55,7 @@ object YouDaiLiModule {
   class ProxyListInjectActorProvider @Inject()(config: Config, redisClient: RedisClient, hashService: HashService) extends Provider[Actor] {
     override def get(): Actor = {
       new AbstractInjectActor(config, redisClient, hashService, ProxyListFetchActor) {
-        override val Prefix: String = "ElemeProxyList"
+        override val Prefix: String = "YouDaiLiProxyList"
       }
     }
   }
@@ -99,9 +99,9 @@ object YouDaiLiModule {
   }
 
   class ProxyPageParseActorProvider @Inject()(config: Config,
-                                              @Named(ProxyListParseService.name) parseService: ParseService,
+                                              @Named(ProxyPageParseService.name) parseService: ParseService,
                                               @Named(IndexActor.poolName) indexerPool: ActorRef,
-                                              @Named(ProxyListInjectActor.poolName) injectorPool: ActorRef)
+                                              @Named(ProxyPageInjectActor.poolName) injectorPool: ActorRef)
       extends Provider[Actor] {
     override def get(): Actor = {
       new AbstractParseActor(config, parseService, indexerPool, injectorPool) {}

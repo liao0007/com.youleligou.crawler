@@ -10,7 +10,7 @@ import scala.concurrent.{ExecutionContext, Future}
   * Created by liangliao on 31/3/17.
   */
 trait FetchService extends LazyLogging {
-  def fetch(fetchRequest: FetchRequest, crawlerProxyServer: CrawlerProxyServer)(implicit executor: ExecutionContext): Future[FetchResponse]
+  def fetch(fetchRequest: FetchRequest, crawlerProxyServerOpt: Option[CrawlerProxyServer])(implicit executor: ExecutionContext): Future[FetchResponse]
 }
 
 object FetchService {

@@ -50,7 +50,10 @@ abstract class AbstractInjectActor(config: Config, redisClient: RedisClient, has
         case NonFatal(x) =>
           log.warning(x.getMessage)
           0L
-      }
+      } map Injected pipeTo self
+
+    case Injected(count) =>
+//      self ! Tick
 
     case Tick =>
       log.info("{} tick", self.path)
@@ -101,5 +104,7 @@ object AbstractInjectActor {
   sealed trait Event
 
   case class Inject(fetchRequest: FetchRequest, force: Boolean = false) extends Command
-  case object Tick                                                      extends Command
+  case class Injected(count: Long)                                      extends Event
+
+  case object Tick extends Command
 }

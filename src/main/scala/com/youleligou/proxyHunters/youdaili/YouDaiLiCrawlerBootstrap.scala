@@ -17,17 +17,16 @@ class YouDaiLiCrawlerBootstrap @Inject()(config: Config, system: ActorSystem, @N
 
   def start(): Unit = {
     import com.github.andr83.scalaconfig._
-    val seeds = config.as[Seq[UrlInfo]]("crawler.seed.youdaili.proxy-list")
-    seeds.foreach { seed =>
-      injectorPool ! AbstractInjectActor.Inject(
-        FetchRequest(
-          requestName = "fetch_youdaili_proxy_list",
-          urlInfo = seed
-        ))
-    }
+//    val seeds = config.as[Seq[UrlInfo]]("crawler.seed.youdaili.proxy-page")
+//    seeds.foreach { seed =>
+//      injectorPool ! AbstractInjectActor.Inject(FetchRequest(
+//                                                  requestName = "fetch_youdaili_proxy_page",
+//                                                  urlInfo = seed
+//                                                ),
+//                                                force = true)
+//    }
 
-    system.scheduler.schedule(0.seconds, 200.millis, injectorPool, Tick)
-
+    system.scheduler.schedule(1.seconds, 500.millis, injectorPool, Tick)
   }
 
 }

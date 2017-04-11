@@ -19,14 +19,12 @@ class XiCiDaiLiCrawlerBootstrap @Inject()(config: Config, system: ActorSystem, @
     import com.github.andr83.scalaconfig._
     val seeds = config.as[Seq[UrlInfo]]("crawler.seed.xicidaili.proxy-list")
     seeds.foreach { seed =>
-      injectorPool ! AbstractInjectActor.Inject(
-        FetchRequest(
-          requestName = "fetch_xici_proxy_list",
-          urlInfo = seed
-        ))
+      injectorPool ! AbstractInjectActor.Inject(FetchRequest(
+                                                  requestName = "fetch_xici_proxy_list",
+                                                  urlInfo = seed
+                                                ),
+                                                force = true)
     }
-
-    system.scheduler.schedule(0.seconds, 200.millis, injectorPool, Tick)
 
   }
 

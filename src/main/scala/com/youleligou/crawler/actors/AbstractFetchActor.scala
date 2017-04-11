@@ -22,7 +22,6 @@ abstract class AbstractFetchActor(config: Config,
                                   proxyAssistantPool: ActorRef,
                                   parserCompanion: NamedActor)
     extends Actor
-    with Stash
     with ActorLogging
     with GuiceAkkaActorRefProvider {
 
@@ -30,20 +29,31 @@ abstract class AbstractFetchActor(config: Config,
 
   import context.dispatcher
 
-  final val Retry = config.getInt("crawler.fetch.retry")
+  final val Retry    = config.getInt("crawler.fetch.retry")
+  final val useProxy = config.getBoolean("crawler.fetch.useProxy")
 
   override def receive: Receive = standby
 
   def standby: Receive = {
     case InitProxyServer =>
-      proxyAssistantPool ! GetProxyServer
-      context become (initializing(sender), discardOld = false)
+      if (useProxy) {
+        proxyAssistantPool ! GetProxyServer
+        context become (initializing(sender), discardOld = false)
+      } else {
+        self ! ByPassProxyServer
+        context become (initializing(sender), discardOld = false)
+      }
+
   }
 
   def initializing(injector: ActorRef): Receive = {
     case ProxyServerAvailable(server) =>
       injector ! InitProxyServerSucceed
-      context become (proxyServerAvailable(server), discardOld = false)
+      context become (proxyServerAvailable(Some(server)), discardOld = false)
+
+    case ByPassProxyServer =>
+      injector ! InitProxyServerSucceed
+      context become (proxyServerAvailable(None), discardOld = false)
 
     case ProxyServerUnavailable =>
       injector ! InitProxyServerFailed
@@ -78,9 +88,9 @@ abstract class AbstractFetchActor(config: Config,
 
   }
 
-  def proxyServerAvailable(proxyServer: CrawlerProxyServer): Receive = {
+  def proxyServerAvailable(proxyServerOpt: Option[CrawlerProxyServer]): Receive = {
     case Fetch(fetchRequest) =>
-      fetchService.fetch(fetchRequest, proxyServer).map(Fetched) pipeTo self
+      fetchService.fetch(fetchRequest, proxyServerOpt).map(Fetched) pipeTo self
       context unbecome ()
   }
 }
@@ -93,6 +103,7 @@ object AbstractFetchActor extends NamedActor {
   sealed trait Event
 
   object InitProxyServer        extends Command
+  object ByPassProxyServer      extends Command
   object InitProxyServerSucceed extends Event
   object InitProxyServerFailed  extends Event
 

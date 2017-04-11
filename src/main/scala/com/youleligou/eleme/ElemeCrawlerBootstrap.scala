@@ -6,7 +6,10 @@ import com.google.inject.name.Named
 import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
 import com.youleligou.crawler.actors.AbstractInjectActor
+import com.youleligou.crawler.actors.AbstractInjectActor.Tick
 import com.youleligou.crawler.models.{FetchRequest, UrlInfo}
+
+import scala.concurrent.duration._
 
 /**
   * Created by dell on 2016/8/29.
@@ -15,6 +18,8 @@ import com.youleligou.crawler.models.{FetchRequest, UrlInfo}
 class ElemeCrawlerBootstrap @Inject()(config: Config, system: ActorSystem, @Named(RestaurantInjectActor.poolName) injectActor: ActorRef)
     extends LazyLogging {
 
+  import system.dispatcher
+
   /**
     * 爬虫启动函数
     */
@@ -22,20 +27,13 @@ class ElemeCrawlerBootstrap @Inject()(config: Config, system: ActorSystem, @Name
     import com.github.andr83.scalaconfig._
     val seeds = config.as[Seq[UrlInfo]]("crawler.seed.eleme.restaurant-list")
     seeds.foreach { seed =>
-      injectActor ! AbstractInjectActor.Inject(
-        FetchRequest(
-          requestName = "fetch_eleme_restaurant",
-          urlInfo = seed
-        ))
+      injectActor ! AbstractInjectActor.Inject(FetchRequest(
+                                                 requestName = "fetch_eleme_restaurant",
+                                                 urlInfo = seed
+                                               ),
+                                               force = true)
     }
-
-//    system.scheduler.schedule(0.seconds, 10.millis, injectActor, Tick)
-//    system.scheduler.scheduleOnce(1.seconds, injectActor, Tick)
-//    system.scheduler.scheduleOnce(10.seconds, injectActor, Tick)
-//    system.scheduler.scheduleOnce(10.seconds, injectActor, Tick)
-//    system.scheduler.scheduleOnce(10.seconds, injectActor, Tick)
-//    system.scheduler.scheduleOnce(10.seconds, injectActor, Tick)
-
   }
 
+  system.scheduler.schedule(5.seconds, 50.millis, injectActor, Tick)
 }
