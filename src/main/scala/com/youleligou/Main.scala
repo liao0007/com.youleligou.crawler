@@ -8,8 +8,9 @@ import com.typesafe.scalalogging.LazyLogging
 import com.youleligou.crawler.actors.ProxyAssistantActor
 import com.youleligou.crawler.actors.ProxyAssistantActor.{Clean, Init}
 import com.youleligou.crawler.modules.{ActorModule, AkkaModule, ConfigModule, ServiceModule}
-import com.youleligou.eleme.ElemeModule
-import com.youleligou.proxyHunters.xicidaili.{XiCiDaiLiCrawlerBootstrap, XiCiDaiLiModule}
+import com.youleligou.eleme.{ElemeCrawlerBootstrap, ElemeModule}
+import com.youleligou.proxyHunters.xicidaili.XiCiDaiLiModule
+import com.youleligou.proxyHunters.youdaili.{YouDaiLiCrawlerBootstrap, YouDaiLiModule}
 
 import scala.concurrent.duration._
 
@@ -32,13 +33,14 @@ object Main extends App {
     new ServiceModule,
     new ActorModule,
     new ElemeModule,
-    new XiCiDaiLiModule
+    new XiCiDaiLiModule,
+    new YouDaiLiModule
   )
 
   import net.codingwell.scalaguice.InjectorExtensions._
 
 //  injector.instance[ProxyAssistantBootstrap].start()
-//  injector.instance[ElemeCrawlerBootstrap].start()
-  injector.instance[XiCiDaiLiCrawlerBootstrap].start()
+  injector.instance[ElemeCrawlerBootstrap].start()
+//  injector.instance[YouDaiLiCrawlerBootstrap].start()
 
 }

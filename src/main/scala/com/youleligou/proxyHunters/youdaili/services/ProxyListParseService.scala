@@ -1,6 +1,4 @@
-package com.youleligou.proxyHunters.xicidaili.services
-
-import java.sql.Timestamp
+package com.youleligou.proxyHunters.youdaili.services
 
 import com.google.inject.Inject
 import com.youleligou.crawler.daos.{CrawlerProxyServer, CrawlerProxyServerRepo}
@@ -20,8 +18,11 @@ class ProxyListParseService @Inject()(md5HashService: Md5HashService, crawlerPro
 
   private def getChildLinks(fetchResponse: FetchResponse) = {
     val UrlInfo(host, queryParameters, urlType, deep) = fetchResponse.fetchRequest.urlInfo
-    val originalPage                                  = """[0-9]+""".r.findFirstIn(host).map(_.toInt).getOrElse(1)
-    Seq(UrlInfo(host = s"http://www.xicidaili.com/nt/${originalPage + 1}", deep = deep + 1))
+    Jsoup.parse(fetchResponse.content).select(".pagebreak li").not(".thisclass").asScala.toSeq.drop(2).dropRight(1).flatMap { li =>
+      li.select("a").asScala.toSeq.headOption.map { a =>
+        UrlInfo(host = "http://www.youdaili.net/Daili/guonei/" + a.attr("href"), deep = deep + 1)
+      }
+    }
   }
 
   private def persist(proxyServers: Seq[CrawlerProxyServer]) = crawlerProxyServerRepo.create(proxyServers.toList)
@@ -30,22 +31,19 @@ class ProxyListParseService @Inject()(md5HashService: Md5HashService, crawlerPro
     * 解析具体实现
     */
   override def parse(fetchResponse: FetchResponse): ParseResult = {
-
     val proxyServers: Seq[CrawlerProxyServer] =
-      Jsoup.parse(fetchResponse.content).select("#ip_list tbody tr").asScala.toSeq.drop(1).flatMap { tr =>
-        val tds = tr.select("td").asScala
+      Jsoup.parse(fetchResponse.content).select("p").asScala.toSeq.drop(1).flatMap { p =>
+        val pattern = """(.*):([0-9]+)@(.*)#(.*)""".r
         Try {
-          val Seq(_, ip, port, location, isAnonymous, supportedType, _, _, _, lastVerifiedAt) = tds.map(_.text())
-          Some(CrawlerProxyServer(
-            hash = md5HashService.hash(s"""$ip:$port"""),
-            ip = ip,
-            port = port.toInt,
-            isAnonymous = Some(isAnonymous contains "匿名"),
-            supportedType = Some(supportedType),
-            location = Some(location),
-            reactTime = """[1-9]+""".r.findFirstIn(tds(6).select(".bar").attr("title")).map(_.toFloat),
-            lastVerifiedAt = Some(new Timestamp(ProxyListParseService.format.parse(lastVerifiedAt).getTime))
-          ))
+          val pattern(ip, port, supportedType, location) = p.text()
+          Some(
+            CrawlerProxyServer(
+              hash = md5HashService.hash(s"""$ip:$port"""),
+              ip = ip,
+              port = port.toInt,
+              supportedType = Some(supportedType),
+              location = Some(location)
+            ))
         } getOrElse None
       }
 
@@ -60,5 +58,5 @@ class ProxyListParseService @Inject()(md5HashService: Md5HashService, crawlerPro
 
 object ProxyListParseService {
   val format     = new java.text.SimpleDateFormat("yy-MM-dd hh:mm")
-  final val name = "XiCiDaiLiProxyListParseService"
+  final val name = "YouDaiLiProxyListParseService"
 }

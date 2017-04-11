@@ -7,7 +7,6 @@ import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
 import com.youleligou.crawler.actors.AbstractInjectActor
 import com.youleligou.crawler.models.{FetchRequest, UrlInfo}
-import com.youleligou.eleme.actors.RestaurantInjectActor
 
 /**
   * Created by dell on 2016/8/29.

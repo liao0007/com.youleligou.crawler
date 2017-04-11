@@ -24,8 +24,9 @@ abstract class AbstractInjectActor(config: Config, redisClient: RedisClient, has
     with ActorLogging
     with GuiceAkkaActorRefProvider {
 
-  val PendingInjectingUrlQueueKey: String = "InjectorPendingInjectingUrlQueueKey"
-  val InjectedUrlHashKey: String          = "InjectorInjectedUrlHashKey"
+  val Prefix: String
+  lazy val PendingInjectingUrlQueueKey: String = Prefix + "InjectorPendingInjectingUrlQueueKey"
+  lazy val InjectedUrlHashKey: String          = Prefix + "InjectorInjectedUrlHashKey"
 
   val fetcher: ActorRef = provideActorRef(context.system, fetcherCompanion, Some(context))
 
