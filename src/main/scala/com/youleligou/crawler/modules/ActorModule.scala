@@ -2,9 +2,7 @@ package com.youleligou.crawler.modules
 
 import javax.inject.Singleton
 
-import akka.actor.SupervisorStrategy.{Escalate, Restart}
-import akka.actor.{Actor, ActorRef, ActorSystem, OneForOneStrategy}
-import akka.routing.{DefaultResizer, RoundRobinPool}
+import akka.actor.{Actor, ActorRef, ActorSystem}
 import com.google.inject.name.{Named, Names}
 import com.google.inject.{AbstractModule, Provides}
 import com.typesafe.config.Config

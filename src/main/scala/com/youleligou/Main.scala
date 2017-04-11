@@ -6,11 +6,8 @@ import com.google.inject.{Guice, Inject}
 import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
 import com.youleligou.crawler.actors.ProxyAssistantActor
-import com.youleligou.crawler.actors.ProxyAssistantActor.{Clean, Init}
 import com.youleligou.crawler.modules.{ActorModule, AkkaModule, ConfigModule, ServiceModule}
 import com.youleligou.eleme.{ElemeCrawlerBootstrap, ElemeModule}
-
-import scala.concurrent.duration._
 
 /**
   * Created by liangliao on 31/3/17.

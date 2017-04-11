@@ -4,7 +4,7 @@ import akka.actor.ActorRef
 import com.google.inject.Inject
 import com.google.inject.name.Named
 import com.typesafe.config.Config
-import com.youleligou.crawler.actors.{AbstractParseActor, CountActor, IndexActor, NamedActor}
+import com.youleligou.crawler.actors.{AbstractParseActor, IndexActor, NamedActor}
 import com.youleligou.crawler.services.ParseService
 import com.youleligou.eleme.services.RestaurantParseService
 

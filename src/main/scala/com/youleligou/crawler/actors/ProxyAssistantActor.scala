@@ -13,8 +13,8 @@ import play.api.libs.ws.DefaultWSProxyServer
 import play.api.libs.ws.ahc.StandaloneAhcWSClient
 import redis.RedisClient
 
-import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration.{Duration, MILLISECONDS}
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 import scala.util.control.NonFatal
 
@@ -27,9 +27,9 @@ class ProxyAssistantActor @Inject()(config: Config,
     with ActorLogging {
   import context.dispatcher
 
-  val ProxyQueueKey: String    = "ProxyQueueKey"
-  val LiveProxySetKey: String  = "LiveProxySetKey"
-  val timeout                  = Duration(config.getInt("crawler.actor.proxy-assistant.timeout"), MILLISECONDS)
+  val ProxyQueueKey: String    = "ProxyQueue"
+  val LiveProxySetKey: String  = "LiveProxySet"
+  val timeout                  = Duration(config.getInt("crawler.proxy-assistant.timeout"), MILLISECONDS)
   private def currentTimestamp = new Timestamp(System.currentTimeMillis())
 
   override def receive: Receive = {

@@ -30,7 +30,7 @@ abstract class AbstractFetchActor(config: Config,
 
   import context.dispatcher
 
-  final val MaxRetry = 10
+  final val Retry = config.getInt("crawler.fetch.retry")
 
   override def receive: Receive = standby
 
@@ -65,13 +65,13 @@ abstract class AbstractFetchActor(config: Config,
       injector ! WorkFinished
       context.system.terminate()
 
-    case Fetched(FetchResponse(statusCode @ _, _, message, fetchRequest)) if fetchRequest.retry < MaxRetry =>
+    case Fetched(FetchResponse(statusCode @ _, _, message, fetchRequest)) if fetchRequest.retry < Retry =>
       log.info("{} fetch failed {} {}, retry", self.path.name, statusCode, message)
       injectorPool ! Inject(fetchRequest.copy(retry = fetchRequest.retry + 1))
       injector ! WorkFinished
       context unbecome ()
 
-    case Fetched(FetchResponse(statusCode @ _, _, message, fetchRequest)) if fetchRequest.retry >= MaxRetry =>
+    case Fetched(FetchResponse(statusCode @ _, _, message, fetchRequest)) if fetchRequest.retry >= Retry =>
       log.info("{} fetch failed {} {}, retry limit reached, give up", self.path.name, statusCode, message)
       injector ! WorkFinished
       context unbecome ()
@@ -87,7 +87,7 @@ abstract class AbstractFetchActor(config: Config,
 
 object AbstractFetchActor extends NamedActor {
   override final val name     = "FetchActor"
-  override final val poolName = "FetchActor"
+  override final val poolName = "FetchActorPool"
 
   sealed trait Command
   sealed trait Event

@@ -2,15 +2,12 @@ package com.youleligou.eleme.services
 
 import com.google.inject.Inject
 import com.youleligou.crawler.models.{FetchResponse, ParseResult, UrlInfo}
-import com.youleligou.crawler.actors.AbstractFetchActor.Fetched
 import com.youleligou.crawler.services.ParseService
 import com.youleligou.eleme.daos.{Restaurant, RestaurantRepo}
 import play.api.libs.json._
 
-import scala.collection.immutable
 import scala.concurrent.Future
 import scala.util.Try
-import scala.util.control.NonFatal
 
 class RestaurantParseService @Inject()(restaurantRepo: RestaurantRepo) extends ParseService {
 

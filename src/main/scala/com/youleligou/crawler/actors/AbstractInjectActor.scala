@@ -1,6 +1,7 @@
 package com.youleligou.crawler.actors
 
 import akka.actor.{Actor, ActorLogging, ActorRef, Stash}
+import akka.pattern.pipe
 import com.typesafe.config.Config
 import com.youleligou.crawler.actors.AbstractFetchActor._
 import com.youleligou.crawler.actors.AbstractInjectActor._
@@ -9,7 +10,6 @@ import com.youleligou.crawler.modules.GuiceAkkaActorRefProvider
 import com.youleligou.crawler.services.HashService
 import play.api.libs.json.Json
 import redis.RedisClient
-import akka.pattern.pipe
 
 import scala.concurrent.ExecutionContext.Implicits._
 import scala.concurrent.Future

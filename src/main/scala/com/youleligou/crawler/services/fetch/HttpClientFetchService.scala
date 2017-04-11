@@ -5,7 +5,6 @@ import com.typesafe.config.Config
 import com.youleligou.crawler.daos.{CrawlerJob, CrawlerJobRepo, CrawlerProxyServer}
 import com.youleligou.crawler.models.{FetchRequest, FetchResponse}
 import com.youleligou.crawler.services.FetchService
-import play.api.libs.ws.DefaultWSProxyServer
 import play.api.libs.ws.ahc.StandaloneAhcWSClient
 
 import scala.concurrent.duration._
@@ -24,8 +23,8 @@ class HttpClientFetchService @Inject()(config: Config, standaloneAhcWSClient: St
     Try {
       standaloneAhcWSClient
         .url(urlInfo.url)
-        .withHeaders("User-Agent" -> config.getString("crawler.actor.fetch.userAgent"))
-        .withRequestTimeout(Duration(config.getInt("crawler.actor.proxy-assistant.timeout"), MILLISECONDS))
+        .withHeaders("User-Agent" -> config.getString("crawler.fetch.userAgent"))
+        .withRequestTimeout(Duration(config.getInt("crawler.fetch.timeout"), MILLISECONDS))
         //      .withAuth(config.getString("proxy.user"), config.getString("proxy.password"), WSAuthScheme.BASIC)
         //      .withProxyServer(DefaultWSProxyServer(host = config.getString("proxy.host"), port = config.getInt("proxy.port")))
 //        .withProxyServer(DefaultWSProxyServer(host = crawlerProxyServer.ip, port = crawlerProxyServer.port))

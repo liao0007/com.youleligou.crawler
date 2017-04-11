@@ -1,6 +1,6 @@
 package com.youleligou.eleme.actors
 
-import akka.actor.{ActorRef, Props}
+import akka.actor.ActorRef
 import com.google.inject.Inject
 import com.google.inject.name.Named
 import com.typesafe.config.Config

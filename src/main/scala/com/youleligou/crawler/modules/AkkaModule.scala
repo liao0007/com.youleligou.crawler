@@ -1,7 +1,6 @@
 package com.youleligou.crawler.modules
 
-import akka.actor.ActorContext
-import akka.actor.{Actor, ActorRef, ActorSystem, ExtendedActorSystem, Extension, ExtensionId, ExtensionIdProvider, IndirectActorProducer, Props}
+import akka.actor.{Actor, ActorContext, ActorRef, ActorSystem, ExtendedActorSystem, Extension, ExtensionId, ExtensionIdProvider, IndirectActorProducer, Props}
 import akka.routing.FromConfig
 import com.google.inject._
 import com.google.inject.name.Names

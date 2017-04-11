@@ -1,6 +1,6 @@
 package com.youleligou.crawler.models
 
-import com.youleligou.crawler.models.UrlInfo.{UrlInfoType, UrlType}
+import com.youleligou.crawler.models.UrlInfo.UrlInfoType
 import play.api.libs.json.Json
 
 /**

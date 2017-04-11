@@ -1,6 +1,5 @@
 package com.youleligou.eleme.actors
 
-import akka.actor.{ActorRef, Props}
 import com.google.inject.Inject
 import com.typesafe.config.Config
 import com.youleligou.crawler.actors.{AbstractInjectActor, NamedActor}
