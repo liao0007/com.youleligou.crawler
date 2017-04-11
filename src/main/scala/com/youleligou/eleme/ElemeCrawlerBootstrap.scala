@@ -20,10 +20,8 @@ class ElemeCrawlerBootstrap @Inject()(config: Config, system: ActorSystem, @Name
     * 爬虫启动函数
     */
   def start(): Unit = {
-
     import com.github.andr83.scalaconfig._
-
-    val seeds = config.as[Seq[UrlInfo]]("crawler.seed")
+    val seeds = config.as[Seq[UrlInfo]]("crawler.seed.eleme.restaurant-list")
     seeds.foreach { seed =>
       injectActor ! AbstractInjectActor.Inject(
         FetchRequest(

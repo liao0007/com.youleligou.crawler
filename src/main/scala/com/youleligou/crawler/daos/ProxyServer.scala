@@ -8,7 +8,6 @@ import com.youleligou.crawler.daos.schema.CanCan
 import play.api.libs.json._
 import slick.jdbc.MySQLProfile.api._
 import slick.lifted.Tag
-import slick.sql.SqlProfile.ColumnOption.SqlType
 
 import scala.concurrent.ExecutionContext.Implicits._
 import scala.concurrent.Future
@@ -123,7 +122,7 @@ class CrawlerProxyServerTable(tag: Tag) extends Table[CrawlerProxyServer](tag, "
 
   def lastVerifiedAt = column[Timestamp]("last_verified_at")
 
-  def createdAt = column[Timestamp]("created_at", SqlType("timestamp not null default CURRENT_TIMESTAMP"))
+  def createdAt = column[Timestamp]("created_at")
 
   def * =
     (id, hash, ip, port, isAnonymous.?, supportedType.?, location.?, reactTime.?, isLive, lastVerifiedAt.?, createdAt) <> ((CrawlerProxyServer.apply _).tupled, CrawlerProxyServer.unapply)

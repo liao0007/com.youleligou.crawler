@@ -8,7 +8,8 @@ import com.typesafe.scalalogging.LazyLogging
 import com.youleligou.crawler.actors.ProxyAssistantActor
 import com.youleligou.crawler.actors.ProxyAssistantActor.{Clean, Init}
 import com.youleligou.crawler.modules.{ActorModule, AkkaModule, ConfigModule, ServiceModule}
-import com.youleligou.eleme.{ElemeCrawlerBootstrap, ElemeModule}
+import com.youleligou.eleme.ElemeModule
+import com.youleligou.proxyHunters.xicidaili.{XiCiDaiLiCrawlerBootstrap, XiCiDaiLiModule}
 
 import scala.concurrent.duration._
 
@@ -30,15 +31,14 @@ object Main extends App {
     new AkkaModule,
     new ServiceModule,
     new ActorModule,
-    new ElemeModule
+    new ElemeModule,
+    new XiCiDaiLiModule
   )
 
   import net.codingwell.scalaguice.InjectorExtensions._
 
-  injector.instance[ProxyAssistantBootstrap].start()
-  //min interval: 2000/100 = 20 milliseconds
-  injector.instance[ElemeCrawlerBootstrap].start()
+//  injector.instance[ProxyAssistantBootstrap].start()
+//  injector.instance[ElemeCrawlerBootstrap].start()
+  injector.instance[XiCiDaiLiCrawlerBootstrap].start()
 
-//  injector.instance[ProxyAssistantBootstrap].start(FiniteDuration(5000000, MILLISECONDS))
-//  injector.instance[ElemeCrawlerBootstrap].start(FiniteDuration(3, SECONDS), FiniteDuration(3, SECONDS))
 }

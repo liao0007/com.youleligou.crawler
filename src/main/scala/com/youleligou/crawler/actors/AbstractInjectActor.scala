@@ -24,6 +24,9 @@ abstract class AbstractInjectActor(config: Config, redisClient: RedisClient, has
     with ActorLogging
     with GuiceAkkaActorRefProvider {
 
+  val PendingInjectingUrlQueueKey: String = "InjectorPendingInjectingUrlQueueKey"
+  val InjectedUrlHashKey: String          = "InjectorInjectedUrlHashKey"
+
   val fetcher: ActorRef = provideActorRef(context.system, fetcherCompanion, Some(context))
 
   override def receive: Receive = standby
@@ -32,10 +35,10 @@ abstract class AbstractInjectActor(config: Config, redisClient: RedisClient, has
     case Inject(fetchRequest) =>
       log.info("{} hash check {}", self.path, fetchRequest)
       val md5 = hashService.hash(fetchRequest.urlInfo.url)
-      redisClient.hsetnx(AbstractInjectActor.InjectActorInjectedUrlHashKey, md5, "1") flatMap {
+      redisClient.hsetnx(InjectedUrlHashKey, md5, "1") flatMap {
         case true =>
           log.info("{} injected {}", self.path, fetchRequest)
-          redisClient.lpush(InjectActorPendingUrlQueueKey, Json.toJson(fetchRequest).toString())
+          redisClient.lpush(PendingInjectingUrlQueueKey, Json.toJson(fetchRequest).toString())
         case _ =>
           log.info("{} rejected {}", self.path, fetchRequest)
           Future.successful(0L)
@@ -47,7 +50,7 @@ abstract class AbstractInjectActor(config: Config, redisClient: RedisClient, has
 
     case Tick =>
       log.info("{} tick", self.path)
-      redisClient.rpop[String](InjectActorPendingUrlQueueKey) recover {
+      redisClient.rpop[String](PendingInjectingUrlQueueKey) recover {
         case NonFatal(x) =>
           log.warning(x.getMessage)
           None
@@ -95,7 +98,4 @@ object AbstractInjectActor {
 
   case class Inject(fetchRequest: FetchRequest) extends Command
   case object Tick                              extends Command
-
-  final val InjectActorPendingUrlQueueKey: String = "InjectActorPendingUrlQueueKey"
-  final val InjectActorInjectedUrlHashKey: String = "InjectActorInjectedUrlHashKey"
 }

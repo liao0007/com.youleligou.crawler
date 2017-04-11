@@ -14,9 +14,9 @@ import com.youleligou.eleme.services.RestaurantParseService
   */
 class RestaurantParseActor @Inject()(config: Config,
                                      @Named(RestaurantParseService.name) parseService: ParseService,
-                                     @Named(IndexActor.poolName) indexActor: ActorRef,
-                                     @Named(RestaurantInjectActor.poolName) injectActor: ActorRef)
-    extends AbstractParseActor(config, parseService, indexActor, injectActor)
+                                     @Named(IndexActor.poolName) indexerPool: ActorRef,
+                                     @Named(RestaurantInjectActor.poolName) injectorPool: ActorRef)
+    extends AbstractParseActor(config, parseService, indexerPool, injectorPool)
 
 object RestaurantParseActor extends NamedActor {
   final val name     = "ElemeRestaurantParseActor"

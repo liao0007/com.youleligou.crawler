@@ -50,29 +50,29 @@ abstract class AbstractFetchActor(config: Config,
       context unbecome ()
 
     case Fetched(fetchResponse @ FetchResponse(FetchService.Ok, _, _, _)) =>
-      log.info("{} fetch succeed", self.path.name)
+      log.info("{} fetch succeed", self.path)
       parser ! Parse(fetchResponse)
       injector ! WorkFinished
       context unbecome ()
 
     case Fetched(FetchResponse(statusCode @ FetchService.NotFound, _, message, _)) =>
-      log.info("{} fetch failed {} {}", self.path.name, statusCode, message)
+      log.info("{} fetch failed {} {}", self.path, statusCode, message)
       injector ! WorkFinished
       context unbecome ()
 
     case Fetched(FetchResponse(statusCode @ FetchService.PaymentRequired, _, message, _)) =>
-      log.info("{} fetch failed {} {}", self.path.name, statusCode, message)
+      log.info("{} fetch failed {} {}", self.path, statusCode, message)
       injector ! WorkFinished
       context.system.terminate()
 
     case Fetched(FetchResponse(statusCode @ _, _, message, fetchRequest)) if fetchRequest.retry < Retry =>
-      log.info("{} fetch failed {} {}, retry", self.path.name, statusCode, message)
+      log.info("{} fetch failed {} {}, retry", self.path, statusCode, message)
       injectorPool ! Inject(fetchRequest.copy(retry = fetchRequest.retry + 1))
       injector ! WorkFinished
       context unbecome ()
 
     case Fetched(FetchResponse(statusCode @ _, _, message, fetchRequest)) if fetchRequest.retry >= Retry =>
-      log.info("{} fetch failed {} {}, retry limit reached, give up", self.path.name, statusCode, message)
+      log.info("{} fetch failed {} {}, retry limit reached, give up", self.path, statusCode, message)
       injector ! WorkFinished
       context unbecome ()
 
