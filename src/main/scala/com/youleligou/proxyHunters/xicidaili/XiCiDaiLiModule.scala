@@ -31,15 +31,15 @@ class XiCiDaiLiModule extends AbstractModule with ScalaModule with GuiceAkkaActo
 
   //bind actor and service
   override def configure() {
-    bind[Actor].annotatedWith(Names.named(ProxyListInjectActor.name)).toProvider(classOf[XiCiDailiModule.ProxyListInjectActorProvider])
-    bind[Actor].annotatedWith(Names.named(ProxyListFetchActor.name)).toProvider(classOf[XiCiDailiModule.ProxyListFetchActorProvider])
-    bind[Actor].annotatedWith(Names.named(ProxyListParseActor.name)).toProvider(classOf[XiCiDailiModule.ProxyListParseActorProvider])
+    bind[Actor].annotatedWith(Names.named(ProxyListInjectActor.name)).toProvider(classOf[XiCiDaiLiModule.ProxyListInjectActorProvider])
+    bind[Actor].annotatedWith(Names.named(ProxyListFetchActor.name)).toProvider(classOf[XiCiDaiLiModule.ProxyListFetchActorProvider])
+    bind[Actor].annotatedWith(Names.named(ProxyListParseActor.name)).toProvider(classOf[XiCiDaiLiModule.ProxyListParseActorProvider])
 
     bind[ParseService].annotatedWithName(ProxyListParseService.name).to[ProxyListParseService]
   }
 }
 
-object XiCiDailiModule {
+object XiCiDaiLiModule {
   class ProxyListInjectActorProvider @Inject()(config: Config, redisClient: RedisClient, hashService: HashService) extends Provider[Actor] {
     override def get(): Actor = {
       new AbstractInjectActor(config, redisClient, hashService, ProxyListFetchActor) {
