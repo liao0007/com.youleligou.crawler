@@ -67,7 +67,7 @@ abstract class AbstractFetchActor(config: Config,
 
     case Fetched(FetchResponse(statusCode @ _, _, message, fetchRequest)) if fetchRequest.retry < Retry =>
       log.info("{} fetch failed {} {}, retry", self.path, statusCode, message)
-      injectorPool ! Inject(fetchRequest.copy(retry = fetchRequest.retry + 1))
+      injectorPool ! Inject(fetchRequest.copy(retry = fetchRequest.retry + 1), force = true)
       injector ! WorkFinished
       context unbecome ()
 

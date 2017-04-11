@@ -17,12 +17,14 @@ case class CrawlerProxyServer(
     hash: String,
     ip: String,
     port: Int,
-    isAnonymous: Option[Boolean],
-    supportedType: Option[String],
-    location: Option[String],
-    reactTime: Option[Float],
+    username: Option[String] = None,
+    password: Option[String] = None,
+    isAnonymous: Option[Boolean] = None,
+    supportedType: Option[String] = None,
+    location: Option[String] = None,
+    reactTime: Option[Float] = None,
     isLive: Boolean = false,
-    lastVerifiedAt: Option[Timestamp],
+    lastVerifiedAt: Option[Timestamp] = None,
     createdAt: Timestamp = new Timestamp(System.currentTimeMillis())
 )
 
@@ -110,6 +112,10 @@ class CrawlerProxyServerTable(tag: Tag) extends Table[CrawlerProxyServer](tag, "
 
   def port = column[Int]("port")
 
+  def username = column[String]("username")
+
+  def password = column[String]("password")
+
   def isAnonymous = column[Boolean]("is_anonymous")
 
   def supportedType = column[String]("supported_type")
@@ -125,6 +131,6 @@ class CrawlerProxyServerTable(tag: Tag) extends Table[CrawlerProxyServer](tag, "
   def createdAt = column[Timestamp]("created_at")
 
   def * =
-    (id, hash, ip, port, isAnonymous.?, supportedType.?, location.?, reactTime.?, isLive, lastVerifiedAt.?, createdAt) <> ((CrawlerProxyServer.apply _).tupled, CrawlerProxyServer.unapply)
+    (id, hash, ip, port, username.?, password.?, isAnonymous.?, supportedType.?, location.?, reactTime.?, isLive, lastVerifiedAt.?, createdAt) <> ((CrawlerProxyServer.apply _).tupled, CrawlerProxyServer.unapply)
 
 }

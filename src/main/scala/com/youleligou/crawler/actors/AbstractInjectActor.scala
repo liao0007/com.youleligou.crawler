@@ -32,10 +32,13 @@ abstract class AbstractInjectActor(config: Config, redisClient: RedisClient, has
   override def receive: Receive = standby
 
   def standby: Receive = {
-    case Inject(fetchRequest) =>
+    case Inject(fetchRequest, force) =>
       log.info("{} hash check {}", self.path, fetchRequest)
       val md5 = hashService.hash(fetchRequest.urlInfo.url)
-      redisClient.hsetnx(InjectedUrlHashKey, md5, "1") flatMap {
+
+      redisClient.hsetnx(InjectedUrlHashKey, md5, "1") map { result =>
+        if (force) true else result
+      } flatMap {
         case true =>
           log.info("{} injected {}", self.path, fetchRequest)
           redisClient.lpush(PendingInjectingUrlQueueKey, Json.toJson(fetchRequest).toString())
@@ -96,6 +99,6 @@ object AbstractInjectActor {
   sealed trait Command
   sealed trait Event
 
-  case class Inject(fetchRequest: FetchRequest) extends Command
-  case object Tick                              extends Command
+  case class Inject(fetchRequest: FetchRequest, force: Boolean = false) extends Command
+  case object Tick                                                      extends Command
 }

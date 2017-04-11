@@ -29,6 +29,7 @@ class ProxyAssistantActor @Inject()(config: Config,
   val ProxyQueueKey: String    = "ProxyQueue"
   val LiveProxySetKey: String  = "LiveProxySet"
   val timeout                  = Duration(config.getInt("crawler.proxy-assistant.timeout"), MILLISECONDS)
+  val useAbuyun                = config.getBoolean("crawler.proxy-assistant.useAbuyun")
   private def currentTimestamp = new Timestamp(System.currentTimeMillis())
 
   override def receive: Receive = {
@@ -77,17 +78,29 @@ class ProxyAssistantActor @Inject()(config: Config,
 
     case GetProxyServer =>
       Try {
-        redisClient.srandmember[String](LiveProxySetKey) map {
-          case Some(proxyServerString) =>
-            Json.parse(proxyServerString).validate[CrawlerProxyServer].asOpt
-          case _ => None
-        } map {
-          case Some(proxyServer) => ProxyServerAvailable(proxyServer)
-          case _                 => ProxyServerUnavailable
-        } recover {
-          case NonFatal(x) =>
-            log.warning("{} {}", self.path, x.getMessage)
-            ProxyServerUnavailable
+        if (useAbuyun) {
+          val abuyunConfig = config.getConfig("proxy.abuyun")
+          Future.successful(
+            ProxyServerAvailable(CrawlerProxyServer(
+              hash = "",
+              ip = abuyunConfig.getString("host"),
+              port = abuyunConfig.getInt("port"),
+              username = Some(abuyunConfig.getString("username")),
+              password = Some(abuyunConfig.getString("password"))
+            )))
+        } else {
+          redisClient.srandmember[String](LiveProxySetKey) map {
+            case Some(proxyServerString) =>
+              Json.parse(proxyServerString).validate[CrawlerProxyServer].asOpt
+            case _ => None
+          } map {
+            case Some(proxyServer) => ProxyServerAvailable(proxyServer)
+            case _                 => ProxyServerUnavailable
+          } recover {
+            case NonFatal(x) =>
+              log.warning("{} {}", self.path, x.getMessage)
+              ProxyServerUnavailable
+          }
         }
       } getOrElse Future.successful(ProxyServerUnavailable) pipeTo sender()
 

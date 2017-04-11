@@ -5,6 +5,7 @@ import com.typesafe.config.Config
 import com.youleligou.crawler.daos.{CrawlerJob, CrawlerJobRepo, CrawlerProxyServer}
 import com.youleligou.crawler.models.{FetchRequest, FetchResponse}
 import com.youleligou.crawler.services.FetchService
+import play.api.libs.ws.{DefaultWSProxyServer, WSAuthScheme}
 import play.api.libs.ws.ahc.StandaloneAhcWSClient
 
 import scala.concurrent.duration._
@@ -17,17 +18,30 @@ import scala.util.Try
   */
 class HttpClientFetchService @Inject()(config: Config, standaloneAhcWSClient: StandaloneAhcWSClient, crawlerJobRepo: CrawlerJobRepo)
     extends FetchService {
+
+  val useProxy = config.getBoolean("crawler.fetch.useProxy")
+
   def fetch(fetchRequest: FetchRequest, crawlerProxyServer: CrawlerProxyServer)(implicit executor: ExecutionContext): Future[FetchResponse] = {
     val start                                     = System.currentTimeMillis()
     val FetchRequest(requestName, urlInfo, retry) = fetchRequest
     Try {
-      standaloneAhcWSClient
+      val client = standaloneAhcWSClient
         .url(urlInfo.url)
         .withHeaders("User-Agent" -> config.getString("crawler.fetch.userAgent"))
         .withRequestTimeout(Duration(config.getInt("crawler.fetch.timeout"), MILLISECONDS))
-        //      .withAuth(config.getString("proxy.user"), config.getString("proxy.password"), WSAuthScheme.BASIC)
-        //      .withProxyServer(DefaultWSProxyServer(host = config.getString("proxy.host"), port = config.getInt("proxy.port")))
-//        .withProxyServer(DefaultWSProxyServer(host = crawlerProxyServer.ip, port = crawlerProxyServer.port))
+
+      val proxyClient =
+        if (useProxy && crawlerProxyServer.username.nonEmpty) {
+          client
+            .withAuth(crawlerProxyServer.username.get, crawlerProxyServer.password.get, WSAuthScheme.BASIC)
+            .withProxyServer(DefaultWSProxyServer(host = crawlerProxyServer.ip, port = crawlerProxyServer.port))
+        } else if (useProxy && crawlerProxyServer.username.isEmpty) {
+          client
+            .withProxyServer(DefaultWSProxyServer(host = crawlerProxyServer.ip, port = crawlerProxyServer.port))
+        } else
+          client
+
+      proxyClient
         .get()
         .map { response =>
           crawlerJobRepo.create(
