@@ -9,7 +9,7 @@ import com.youleligou.crawler.services.FilterService
   * Created by liangliao on 1/4/17.
   */
 class DefaultFilterService @Inject()(config: Config) extends FilterService {
-  private val fetchDeep = config.getInt("crawler.actor.fetch.deep")
+  private val deep = config.getInt("crawler.fetch.deep")
 
   override def filter(urlInfo: UrlInfo): Boolean = {
     urlInfo.host.startsWith(urlInfo.host) && urlInfo.host.startsWith("http") //&& urlInfo.deep < fetchDeep

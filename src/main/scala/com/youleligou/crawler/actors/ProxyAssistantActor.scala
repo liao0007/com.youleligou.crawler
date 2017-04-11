@@ -2,7 +2,7 @@ package com.youleligou.crawler.actors
 
 import java.sql.Timestamp
 
-import akka.actor.{Actor, ActorLogging, Stash}
+import akka.actor.{Actor, ActorLogging}
 import akka.pattern.pipe
 import com.google.inject.Inject
 import com.typesafe.config.Config
@@ -23,7 +23,6 @@ class ProxyAssistantActor @Inject()(config: Config,
                                     standaloneAhcWSClient: StandaloneAhcWSClient,
                                     crawlerProxyServerRepo: CrawlerProxyServerRepo)
     extends Actor
-    with Stash
     with ActorLogging {
   import context.dispatcher
 
@@ -34,6 +33,7 @@ class ProxyAssistantActor @Inject()(config: Config,
 
   override def receive: Receive = {
     case Init =>
+      log.info("{} Init", self.path)
       Try {
         redisClient.del(ProxyQueueKey) flatMap { _ =>
           crawlerProxyServerRepo.all().flatMap { proxyServers =>
@@ -48,6 +48,7 @@ class ProxyAssistantActor @Inject()(config: Config,
       } getOrElse 0L
 
     case Clean =>
+      log.info("{} Clean", self.path)
       Try {
         redisClient.rpop[String](ProxyQueueKey) flatMap {
           case Some(proxyServerString) =>
