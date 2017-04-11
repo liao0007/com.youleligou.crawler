@@ -39,8 +39,15 @@ object Main extends App {
 
   import net.codingwell.scalaguice.InjectorExtensions._
 
-//  injector.instance[ProxyAssistantBootstrap].start()
-  injector.instance[ElemeCrawlerBootstrap].start()
-//  injector.instance[YouDaiLiCrawlerBootstrap].start()
+  if (args.contains("proxy"))
+    injector.instance[ProxyAssistantBootstrap].start()
 
+  if (args.contains("eleme"))
+    injector.instance[ElemeCrawlerBootstrap].start()
+
+  if (args.contains("youdaili"))
+    injector.instance[YouDaiLiCrawlerBootstrap].start()
+
+  if (args.contains("xicidaili"))
+    injector.instance[YouDaiLiCrawlerBootstrap].start()
 }
