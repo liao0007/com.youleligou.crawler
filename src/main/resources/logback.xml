@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <target>System.out</target>
         <withJansi>true</withJansi>
@@ -15,16 +14,10 @@
         <encoder>
             <pattern>%date{yyyy-MM-dd} %X{akkaTimestamp} %-5level[%thread] %logger{1} - %msg%n</pattern>
         </encoder>
-        <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
-            <maxIndex>10</maxIndex>
-            <FileNamePattern>logs/akka.log.%i.gz</FileNamePattern>
-        </rollingPolicy>
-        <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
-            <maxFileSize>20MB</maxFileSize>
-        </triggeringPolicy>
     </appender>
 
-    <logger name="akka" level="WARN"/>
+    <logger name="akka" level="INFO"/>
+    <logger name="slick" level="INFO"/>
 
     <root level="WARN">
         <appender-ref ref="CONSOLE"/>
