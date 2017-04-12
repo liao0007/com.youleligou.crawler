@@ -53,7 +53,6 @@ abstract class AbstractInjectActor(config: Config, redisClient: RedisClient, has
       } map Injected pipeTo self
 
     case Injected(count) =>
-//      self ! Tick
 
     case Tick =>
       log.info("{} tick", self.path)
@@ -69,7 +68,6 @@ abstract class AbstractInjectActor(config: Config, redisClient: RedisClient, has
           fetcher ! InitProxyServer
           context become (fetching(fetchRequest), discardOld = false)
         case _ =>
-          self ! Tick
       }
 
     case _ =>
@@ -87,7 +85,6 @@ abstract class AbstractInjectActor(config: Config, redisClient: RedisClient, has
       context unbecome ()
 
     case WorkFinished =>
-      self ! Tick
       unstashAll()
       context unbecome ()
 
