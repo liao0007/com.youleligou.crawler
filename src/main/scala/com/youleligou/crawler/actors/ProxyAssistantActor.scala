@@ -48,8 +48,8 @@ class ProxyAssistantActor @Inject()(config: Config,
         }
       } getOrElse 0L
 
-    case Clean =>
-      log.info("{} Clean", self.path)
+    case Replenish =>
+      log.info("{} replenish", self.path)
       Try {
         redisClient.rpop[String](ProxyQueueKey) flatMap {
           case Some(proxyServerString) =>
@@ -89,10 +89,21 @@ class ProxyAssistantActor @Inject()(config: Config,
               password = Some(abuyunConfig.getString("password"))
             )))
         } else {
-          redisClient.srandmember[String](LiveProxySetKey) map {
+          redisClient.spop[String](LiveProxySetKey) map {
             case Some(proxyServerString) =>
               Json.parse(proxyServerString).validate[CrawlerProxyServer].asOpt
             case _ => None
+          } flatMap {
+            case Some(proxyServer) =>
+              testAvailability(proxyServer) map { testedProxyServer =>
+                if (testedProxyServer.isLive) {
+                  redisClient.sadd(LiveProxySetKey, Json.toJson(testedProxyServer).toString())
+                  Some(proxyServer)
+                } else {
+                  None
+                }
+              }
+            case None => Future.successful(None)
           } map {
             case Some(proxyServer) => ProxyServerAvailable(proxyServer)
             case _                 => ProxyServerUnavailable
@@ -140,8 +151,8 @@ object ProxyAssistantActor extends NamedActor {
   sealed trait Command
   sealed trait Event
 
-  case object Init  extends Command
-  case object Clean extends Command
+  case object Init      extends Command
+  case object Replenish extends Command
 
   case object GetProxyServer                                  extends Command
   case class ProxyServerAvailable(server: CrawlerProxyServer) extends Event
