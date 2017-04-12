@@ -71,7 +71,7 @@ abstract class AbstractFetchActor(config: Config,
       context unbecome ()
 
     case Fetched(FetchResponse(statusCode @ FetchService.PaymentRequired, _, message, _)) =>
-      log.info("{} fetch failed {} {}", self.path, statusCode, message)
+      log.warning("{} fetch failed {} {}", self.path, statusCode, message)
       injector ! WorkFinished
       context.system.terminate()
 
@@ -82,7 +82,7 @@ abstract class AbstractFetchActor(config: Config,
       context unbecome ()
 
     case Fetched(FetchResponse(statusCode @ _, _, message, fetchRequest)) if fetchRequest.retry >= Retry =>
-      log.info("{} fetch failed {} {}, retry limit reached, give up", self.path, statusCode, message)
+      log.warning("{} fetch failed {} {}, retry limit reached, give up", self.path, statusCode, message)
       injector ! WorkFinished
       context unbecome ()
 
