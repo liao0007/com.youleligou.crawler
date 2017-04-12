@@ -37,7 +37,7 @@ class RestaurantParseService @Inject()(restaurantRepo: RestaurantRepo) extends P
     Seq(urlInfo.copy(queryParameters = urlInfo.queryParameters + (OffsetKey -> (offset + 1).toString)))
   }
 
-  private def persist(restaurants: Seq[Restaurant]): Future[Option[Int]] = restaurantRepo.create(restaurants.toList)
+  private def persist(restaurants: Seq[Restaurant]): Unit = restaurants.foreach(restaurantRepo.insertOrUpdate)
 
   /**
     * 解析具体实现
