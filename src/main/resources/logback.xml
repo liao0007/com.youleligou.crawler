@@ -19,7 +19,7 @@
     <logger name="akka" level="WARN"/>
     <logger name="slick" level="WARN"/>
 
-    <root level="OFF">
+    <root level="WARN">
         <appender-ref ref="CONSOLE"/>
         <appender-ref ref="FILE"/>
     </root>
