@@ -15,7 +15,8 @@ import scala.concurrent.Future
 import scala.util.control.NonFatal
 
 case class Food(
-    id: Long = 0,
+    id: Option[Long],
+    itemId: Long = 0,
     restaurantId: Long,
     categoryId: Long,
     name: String,
@@ -29,7 +30,8 @@ case class Food(
 
 object Food {
   implicit val restaurantReads: Reads[Food] = (
-    (JsPath \ "item_id").read[String].map(_.toLong) and
+    (JsPath \ "id").readNullable[Long] and
+      (JsPath \ "item_id").read[String].map(_.toLong) and
       (JsPath \ "restaurant_id").read[Long] and
       (JsPath \ "category_id").read[Long] and
       (JsPath \ "name").read[String] and
@@ -91,6 +93,7 @@ class FoodRepo @Inject()(@Named(CanCan) database: Database) extends LazyLogging 
 
 class FoodTable(tag: Tag) extends Table[Food](tag, "food") {
   def id           = column[Long]("id", O.PrimaryKey)
+  def itemId       = column[Long]("item_id")
   def restaurantId = column[Long]("restaurant_id")
   def categoryId   = column[Long]("category_id")
   def name         = column[String]("name")
@@ -102,6 +105,6 @@ class FoodTable(tag: Tag) extends Table[Food](tag, "food") {
   def satisfyRate  = column[Float]("satisfy_rate")
 
   def * =
-    (id, restaurantId, categoryId, name, description, monthSales, rating, ratingCount, satisfyCount, satisfyRate) <> ((Food.apply _).tupled, Food.unapply)
+    (id.?, itemId, restaurantId, categoryId, name, description, monthSales, rating, ratingCount, satisfyCount, satisfyRate) <> ((Food.apply _).tupled, Food.unapply)
 
 }
