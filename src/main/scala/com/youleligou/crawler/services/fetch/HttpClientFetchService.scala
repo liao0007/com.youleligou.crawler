@@ -10,7 +10,7 @@ import play.api.libs.ws.{DefaultWSProxyServer, WSAuthScheme}
 
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.Try
+import scala.util.{Random, Try}
 
 /**
   * Created by young.yang on 2016/8/28.
@@ -19,17 +19,24 @@ import scala.util.Try
 class HttpClientFetchService @Inject()(config: Config, standaloneAhcWSClient: StandaloneAhcWSClient, crawlerJobRepo: CrawlerJobRepo)
     extends FetchService {
 
+  import com.github.andr83.scalaconfig._
+  val userAgents     = config.as[Seq[String]]("crawler.fetch.userAgents")
+  val userAgentsSize = userAgents.length
+
+  val timeout = Duration(config.getInt("crawler.fetch.timeout"), MILLISECONDS)
+
   def fetch(fetchRequest: FetchRequest, crawlerProxyServerOpt: Option[CrawlerProxyServer])(
       implicit executor: ExecutionContext): Future[FetchResponse] = {
 
     val start                                     = System.currentTimeMillis()
     val FetchRequest(requestName, urlInfo, retry) = fetchRequest
+    val rand                                      = new Random(System.currentTimeMillis())
 
     Try {
       val client = standaloneAhcWSClient
         .url(urlInfo.url)
-        .withHeaders("User-Agent" -> config.getString("crawler.fetch.userAgent"))
-        .withRequestTimeout(Duration(config.getInt("crawler.fetch.timeout"), MILLISECONDS))
+        .withHeaders("User-Agent" -> userAgents(rand.nextInt(userAgentsSize)))
+        .withRequestTimeout(timeout)
 
       val proxyClient =
         if (crawlerProxyServerOpt.isDefined && crawlerProxyServerOpt.get.username.nonEmpty) {
