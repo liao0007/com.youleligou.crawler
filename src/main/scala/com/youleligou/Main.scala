@@ -3,7 +3,7 @@ package com.youleligou
 import akka.actor.{ActorRef, ActorSystem}
 import com.google.inject.name.Named
 import com.google.inject.{Guice, Inject}
-import com.typesafe.config.Config
+import com.typesafe.config.{Config, ConfigFactory}
 import com.typesafe.scalalogging.LazyLogging
 import com.youleligou.crawler.actors.ProxyAssistantActor.{Init, Replenish}
 import com.youleligou.crawler.actors.ProxyReplenishmentAssistantActor
@@ -52,4 +52,11 @@ object Main extends App {
 
   if (args.contains("xicidaili"))
     injector.instance[YouDaiLiCrawlerBootstrap].start()
+}
+
+object Main2 extends App {
+  val config = ConfigFactory.load()
+
+  val system = ActorSystem(config.getString("appName"), config)
+
 }

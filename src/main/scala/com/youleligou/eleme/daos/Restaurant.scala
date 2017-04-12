@@ -1,5 +1,7 @@
 package com.youleligou.eleme.daos
 
+import com.google.inject.Inject
+import com.google.inject.name.Named
 import com.typesafe.scalalogging.LazyLogging
 import com.youleligou.crawler.daos.schema.CanCan
 import play.api.libs.functional.syntax._
@@ -56,38 +58,38 @@ object Restaurant {
   )(Restaurant.apply _)
 }
 
-class RestaurantRepo extends LazyLogging {
+class RestaurantRepo @Inject()(@Named(CanCan) database: Database) extends LazyLogging {
   val Restaurants: TableQuery[RestaurantTable] = TableQuery[RestaurantTable]
 
   def find(id: Long): Future[Option[Restaurant]] =
-    CanCan.db.run(Restaurants.filter(_.id === id).result.headOption) recover {
+    database.run(Restaurants.filter(_.id === id).result.headOption) recover {
       case NonFatal(x) =>
         logger.warn(x.getMessage)
         None
     }
 
   def delete(id: Long): Future[Int] =
-    CanCan.db.run(Restaurants.filter(_.id === id).delete) recover {
+    database.run(Restaurants.filter(_.id === id).delete) recover {
       case NonFatal(x) =>
         logger.warn(x.getMessage)
         0
     }
 
   def all(): Future[List[Restaurant]] =
-    CanCan.db.run(Restaurants.to[List].result) recover {
+    database.run(Restaurants.to[List].result) recover {
       case NonFatal(x) =>
         logger.warn(x.getMessage)
         List.empty[Restaurant]
     }
 
   def create(restaurant: Restaurant): Future[Any] =
-    CanCan.db.run(Restaurants += restaurant) recover {
+    database.run(Restaurants += restaurant) recover {
       case NonFatal(x) =>
         logger.warn(x.getMessage)
     }
 
   def create(restaurants: List[Restaurant]): Future[Option[Int]] =
-    CanCan.db.run(Restaurants ++= restaurants) recover {
+    database.run(Restaurants ++= restaurants) recover {
       case NonFatal(x) =>
         logger.warn(x.getMessage)
         None

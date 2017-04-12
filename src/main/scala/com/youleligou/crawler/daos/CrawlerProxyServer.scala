@@ -3,6 +3,8 @@ package com.youleligou.crawler.daos
 import java.sql.Timestamp
 import java.text.SimpleDateFormat
 
+import com.google.inject.Inject
+import com.google.inject.name.Named
 import com.typesafe.scalalogging.LazyLogging
 import com.youleligou.crawler.daos.schema.CanCan
 import play.api.libs.json._
@@ -45,39 +47,39 @@ object CrawlerProxyServer {
   implicit val jsonFormat: OFormat[CrawlerProxyServer] = Json.format[CrawlerProxyServer]
 }
 
-class CrawlerProxyServerRepo extends LazyLogging {
+class CrawlerProxyServerRepo @Inject()(@Named(CanCan) database: Database) extends LazyLogging {
   val CrawlerProxyServers: TableQuery[CrawlerProxyServerTable] = TableQuery[CrawlerProxyServerTable]
 
   def find(id: Long): Future[Option[CrawlerProxyServer]] =
-    CanCan.db.run(CrawlerProxyServers.filter(_.id === id).result.headOption) recover {
+    database.run(CrawlerProxyServers.filter(_.id === id).result.headOption) recover {
       case NonFatal(x) =>
         logger.warn(x.getMessage)
         None
     }
 
   def delete(id: Long): Future[Int] =
-    CanCan.db.run(CrawlerProxyServers.filter(_.id === id).delete) recover {
+    database.run(CrawlerProxyServers.filter(_.id === id).delete) recover {
       case NonFatal(x) =>
         logger.warn(x.getMessage)
         0
     }
 
   def all(): Future[List[CrawlerProxyServer]] =
-    CanCan.db.run(CrawlerProxyServers.to[List].result) recover {
+    database.run(CrawlerProxyServers.to[List].result) recover {
       case NonFatal(x) =>
         logger.warn(x.getMessage)
         List.empty[CrawlerProxyServer]
     }
 
   def all(limit: Int): Future[List[CrawlerProxyServer]] =
-    CanCan.db.run(CrawlerProxyServers.to[List].sortBy(_.lastVerifiedAt.desc).take(limit).result) recover {
+    database.run(CrawlerProxyServers.to[List].sortBy(_.lastVerifiedAt.desc).take(limit).result) recover {
       case NonFatal(x) =>
         logger.warn(x.getMessage)
         List.empty[CrawlerProxyServer]
     }
 
   def create(crawlerProxyServer: CrawlerProxyServer): Future[Long] =
-    CanCan.db.run(CrawlerProxyServers returning CrawlerProxyServers.map(_.id) += crawlerProxyServer).recover {
+    database.run(CrawlerProxyServers returning CrawlerProxyServers.map(_.id) += crawlerProxyServer).recover {
       case t: Throwable =>
         logger.warn(t.getMessage)
         0L
@@ -88,14 +90,14 @@ class CrawlerProxyServerRepo extends LazyLogging {
     }
 
   def create(crawlerProxyServers: List[CrawlerProxyServer]): Future[Option[Int]] =
-    CanCan.db.run(CrawlerProxyServers ++= crawlerProxyServers) recover {
+    database.run(CrawlerProxyServers ++= crawlerProxyServers) recover {
       case NonFatal(x) =>
         logger.warn(x.getMessage)
         None
     }
 
   def insertOrUpdate(crawlerProxyServer: CrawlerProxyServer): Future[Int] =
-    CanCan.db.run {
+    database.run {
       CrawlerProxyServers.insertOrUpdate(crawlerProxyServer)
     } recover {
       case NonFatal(x) =>

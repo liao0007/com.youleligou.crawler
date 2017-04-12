@@ -2,6 +2,8 @@ package com.youleligou.crawler.daos
 
 import java.sql.Timestamp
 
+import com.google.inject.Inject
+import com.google.inject.name.Named
 import com.typesafe.scalalogging.LazyLogging
 import com.youleligou.crawler.daos.CrawlerJob.{FetchJobType, JobType}
 import com.youleligou.crawler.daos.schema.CanCan
@@ -38,18 +40,18 @@ object CrawlerJob {
 
 }
 
-class CrawlerJobRepo extends LazyLogging {
+class CrawlerJobRepo @Inject()(@Named(CanCan) database: Database) extends LazyLogging {
   val CrawlerJobs: TableQuery[CrawlerJobTable] = TableQuery[CrawlerJobTable]
 
   def find(id: Long): Future[Option[CrawlerJob]] =
-    CanCan.db.run(CrawlerJobs.filter(_.id === id).result.headOption) recover {
+    database.run(CrawlerJobs.filter(_.id === id).result.headOption) recover {
       case NonFatal(x) =>
         logger.warn(x.getMessage)
         None
     }
 
   def findWithMaxId(jobType: JobType, jobName: String): Future[Option[CrawlerJob]] =
-    CanCan.db.run(
+    database.run(
       CrawlerJobs
         .filter(job => job.jobType === jobType.toString && job.jobName === jobName)
         .sortBy(_.id.desc)
@@ -62,21 +64,21 @@ class CrawlerJobRepo extends LazyLogging {
     }
 
   def delete(id: Long): Future[Int] =
-    CanCan.db.run(CrawlerJobs.filter(_.id === id).delete) recover {
+    database.run(CrawlerJobs.filter(_.id === id).delete) recover {
       case NonFatal(x) =>
         logger.warn(x.getMessage)
         0
     }
 
   def all(): Future[List[CrawlerJob]] =
-    CanCan.db.run(CrawlerJobs.to[List].result) recover {
+    database.run(CrawlerJobs.to[List].result) recover {
       case NonFatal(x) =>
         logger.warn(x.getMessage)
         List.empty[CrawlerJob]
     }
 
   def create(job: CrawlerJob): Future[Long] =
-    CanCan.db.run(CrawlerJobs returning CrawlerJobs.map(_.id) += job).recover {
+    database.run(CrawlerJobs returning CrawlerJobs.map(_.id) += job).recover {
       case NonFatal(x) =>
         logger.warn(x.getMessage)
         0L
@@ -87,7 +89,7 @@ class CrawlerJobRepo extends LazyLogging {
     }
 
   def create(jobs: List[CrawlerJob]): Future[Option[Int]] =
-    CanCan.db.run(CrawlerJobs ++= jobs) recover {
+    database.run(CrawlerJobs ++= jobs) recover {
       case NonFatal(x) =>
         logger.warn(x.getMessage)
         None
