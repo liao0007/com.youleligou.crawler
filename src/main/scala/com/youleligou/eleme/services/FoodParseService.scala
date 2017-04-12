@@ -6,9 +6,11 @@ import com.youleligou.crawler.services.ParseService
 import com.youleligou.eleme.daos.{Food, FoodRepo}
 import play.api.libs.json._
 
+import scala.concurrent.Future
+
 class FoodParseService @Inject()(foodRepo: FoodRepo) extends ParseService {
 
-  private def persist(food: Seq[Food]) = food.foreach(foodRepo.insertOrUpdate)
+  private def persist(food: Seq[Food]): Future[Option[Int]] = foodRepo.create(food.toList)
 
   /**
     * 解析具体实现

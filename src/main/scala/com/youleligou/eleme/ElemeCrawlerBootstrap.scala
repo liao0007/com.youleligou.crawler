@@ -41,7 +41,7 @@ class ElemeCrawlerBootstrap @Inject()(config: Config,
                                                           ),
                                                           force = true)
     }
-    system.scheduler.schedule(5.seconds, 100.millis, restaurantInjectorPool, Tick)
+    system.scheduler.schedule(5.seconds, 20.millis, restaurantInjectorPool, Tick)
   }
 
   def startFood(): Unit = {
@@ -58,7 +58,7 @@ class ElemeCrawlerBootstrap @Inject()(config: Config,
                                                         force = true)
         }
       }
-      system.scheduler.schedule(5.seconds, 100.millis, foodInjectorPool, Tick)
+      system.scheduler.schedule(5.seconds, 20.millis, foodInjectorPool, Tick)
     }
   }
 }
