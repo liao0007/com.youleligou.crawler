@@ -16,8 +16,8 @@
         </encoder>
     </appender>
 
-    <logger name="akka" level="INFO"/>
-    <logger name="slick" level="INFO"/>
+    <logger name="akka" level="WARN"/>
+    <logger name="slick" level="WARN"/>
 
     <root level="OFF">
         <appender-ref ref="CONSOLE"/>
