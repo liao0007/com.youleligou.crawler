@@ -96,6 +96,7 @@ class ProxyAssistantActor @Inject()(config: Config,
           } flatMap {
             case Some(proxyServer) =>
               testAvailability(proxyServer) map { testedProxyServer =>
+                crawlerProxyServerRepo.insertOrUpdate(testedProxyServer)
                 if (testedProxyServer.isLive) {
                   redisClient.sadd(LiveProxySetKey, Json.toJson(testedProxyServer).toString())
                   Some(proxyServer)
@@ -126,28 +127,27 @@ class ProxyAssistantActor @Inject()(config: Config,
         .get()
         .map { response =>
           if (response.status == 200 && response.body.contains("百度一下，你就知道")) {
-            proxyServer.copy(isLive = true, lastVerifiedAt = Some(currentTimestamp))
+            proxyServer.copy(isLive = true, lastVerifiedAt = Some(currentTimestamp), checkCount = 0)
           } else {
-            proxyServer.copy(isLive = false, lastVerifiedAt = Some(currentTimestamp))
+            proxyServer.copy(isLive = false, lastVerifiedAt = Some(currentTimestamp), checkCount = proxyServer.checkCount + 1)
           }
         } recover {
         case NonFatal(_) =>
-          proxyServer.copy(isLive = false, lastVerifiedAt = Some(currentTimestamp))
+          proxyServer.copy(isLive = false, lastVerifiedAt = Some(currentTimestamp), checkCount = proxyServer.checkCount + 1)
       }
     } getOrElse {
-      Future.successful(proxyServer.copy(isLive = false, lastVerifiedAt = Some(currentTimestamp)))
+      Future.successful(proxyServer.copy(isLive = false, lastVerifiedAt = Some(currentTimestamp), checkCount = proxyServer.checkCount + 1))
     }
   } recover {
     case NonFatal(x) =>
       log.warning("{} {}", self.path, x.getMessage)
-      proxyServer.copy(isLive = false, lastVerifiedAt = Some(currentTimestamp))
+      proxyServer.copy(isLive = false, lastVerifiedAt = Some(currentTimestamp), checkCount = proxyServer.checkCount + 1)
   }
 }
 
 object ProxyAssistantActor extends NamedActor {
-  override final val name         = "ProxyAssistantActor"
-  override final val poolName     = "ProxyAssistantActorPool"
-  final val replenishmentPoolName = "ProxyReplenishmentAssistantActorPool"
+  override final val name     = "ProxyAssistantActor"
+  override final val poolName = "ProxyAssistantActorPool"
 
   sealed trait Command
   sealed trait Event
@@ -158,4 +158,9 @@ object ProxyAssistantActor extends NamedActor {
   case object GetProxyServer                                  extends Command
   case class ProxyServerAvailable(server: CrawlerProxyServer) extends Event
   case object ProxyServerUnavailable                          extends Event
+}
+
+object ProxyReplenishmentAssistantActor extends NamedActor {
+  final val name     = "ProxyReplenishmentAssistantActor"
+  final val poolName = "ProxyReplenishmentAssistantActorPool"
 }

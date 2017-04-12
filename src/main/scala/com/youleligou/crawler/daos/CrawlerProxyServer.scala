@@ -25,6 +25,7 @@ case class CrawlerProxyServer(
     reactTime: Option[Float] = None,
     isLive: Boolean = false,
     lastVerifiedAt: Option[Timestamp] = None,
+    checkCount: Int = 0,
     createdAt: Timestamp = new Timestamp(System.currentTimeMillis())
 )
 
@@ -128,9 +129,24 @@ class CrawlerProxyServerTable(tag: Tag) extends Table[CrawlerProxyServer](tag, "
 
   def lastVerifiedAt = column[Timestamp]("last_verified_at")
 
+  def checkCount = column[Int]("check_count")
+
   def createdAt = column[Timestamp]("created_at")
 
   def * =
-    (id, hash, ip, port, username.?, password.?, isAnonymous.?, supportedType.?, location.?, reactTime.?, isLive, lastVerifiedAt.?, createdAt) <> ((CrawlerProxyServer.apply _).tupled, CrawlerProxyServer.unapply)
+    (id,
+     hash,
+     ip,
+     port,
+     username.?,
+     password.?,
+     isAnonymous.?,
+     supportedType.?,
+     location.?,
+     reactTime.?,
+     isLive,
+     lastVerifiedAt.?,
+     checkCount,
+     createdAt) <> ((CrawlerProxyServer.apply _).tupled, CrawlerProxyServer.unapply)
 
 }

@@ -38,9 +38,14 @@ class ActorModule extends AbstractModule with ScalaModule with GuiceAkkaActorRef
   def provideProxyAssistantActorPoolRef(config: Config, system: ActorSystem): ActorRef = provideActorPoolRef(system, ProxyAssistantActor)
 
   @Provides
+  @Named(ProxyReplenishmentAssistantActor.name)
+  def provideProxyReplenishmentAssistantActorRef(system: ActorSystem): ActorRef = provideActorRef(system, ProxyReplenishmentAssistantActor)
+
+  @Provides
   @Singleton
-  @Named(ProxyAssistantActor.replenishmentPoolName)
-  def provideProxyReplenishmentAssistantActorPoolRef(config: Config, system: ActorSystem): ActorRef = provideActorPoolRef(system, ProxyAssistantActor)
+  @Named(ProxyReplenishmentAssistantActor.poolName)
+  def provideProxyReplenishmentAssistantActorPoolRef(config: Config, system: ActorSystem): ActorRef =
+    provideActorPoolRef(system, ProxyReplenishmentAssistantActor)
 
   /*
   index actor
@@ -56,7 +61,8 @@ class ActorModule extends AbstractModule with ScalaModule with GuiceAkkaActorRef
 
   override def configure() {
     bind[Actor].annotatedWith(Names.named(CountActor.name)).to[CountActor]
-    bind[Actor].annotatedWith(Names.named(ProxyAssistantActor.name)).to[ProxyAssistantActor]
     bind[Actor].annotatedWith(Names.named(IndexActor.name)).to[IndexActor]
+    bind[Actor].annotatedWith(Names.named(ProxyAssistantActor.name)).to[ProxyAssistantActor]
+    bind[Actor].annotatedWith(Names.named(ProxyReplenishmentAssistantActor.name)).to[ProxyAssistantActor]
   }
 }
