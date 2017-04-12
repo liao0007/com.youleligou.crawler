@@ -17,7 +17,7 @@ import scala.concurrent.duration._
 /**
   * Created by liangliao on 31/3/17.
   */
-class ProxyAssistantBootstrap @Inject()(config: Config, system: ActorSystem, @Named(ProxyAssistantActor.name) proxyAssistantActor: ActorRef)
+class ProxyAssistantBootstrap @Inject()(config: Config, system: ActorSystem, @Named(ProxyAssistantActor.replenishmentPoolName) proxyAssistantActor: ActorRef)
     extends LazyLogging {
   import system.dispatcher
   def start(): Unit = {

@@ -145,8 +145,9 @@ class ProxyAssistantActor @Inject()(config: Config,
 }
 
 object ProxyAssistantActor extends NamedActor {
-  override final val name     = "ProxyAssistantActor"
-  override final val poolName = "ProxyAssistantActorPool"
+  override final val name         = "ProxyAssistantActor"
+  override final val poolName     = "ProxyAssistantActorPool"
+  final val replenishmentPoolName = "ProxyReplenishmentAssistantActorPool"
 
   sealed trait Command
   sealed trait Event
