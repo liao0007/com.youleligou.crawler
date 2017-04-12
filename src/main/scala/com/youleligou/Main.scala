@@ -41,11 +41,14 @@ object Main extends App {
 
   import net.codingwell.scalaguice.InjectorExtensions._
 
+  if (args.contains("eleme/restaurant"))
+    injector.instance[ElemeCrawlerBootstrap].startRestaurant()
+
+  if (args.contains("eleme/food"))
+    injector.instance[ElemeCrawlerBootstrap].startFood()
+
   if (args.contains("proxy"))
     injector.instance[ProxyReplenishmentAssistantBootstrap].start()
-
-  if (args.contains("eleme"))
-    injector.instance[ElemeCrawlerBootstrap].start()
 
   if (args.contains("youdaili"))
     injector.instance[YouDaiLiCrawlerBootstrap].start()
@@ -54,9 +57,9 @@ object Main extends App {
     injector.instance[YouDaiLiCrawlerBootstrap].start()
 }
 
-object Main2 extends App {
-  val config = ConfigFactory.load()
-
-  val system = ActorSystem(config.getString("appName"), config)
-
-}
+//object Main2 extends App {
+//  val config = ConfigFactory.load()
+//
+//  val system = ActorSystem(config.getString("appName"), config)
+//
+//}

@@ -12,7 +12,9 @@ case class UrlInfo(host: String,
                    queryParameters: Map[String, String] = Map.empty[String, String],
                    urlType: String = UrlInfoType.Generated,
                    deep: Int = 0) {
-  val url: String               = host + queryParameters.map(queryParameter => queryParameter._1 + "=" + queryParameter._2).mkString("?", "&", "")
+  val url: String = host + (if (host.contains("?")) "&" else "?") + queryParameters
+    .map(queryParameter => queryParameter._1 + "=" + queryParameter._2)
+    .mkString("&")
   override def toString: String = url
 }
 

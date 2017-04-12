@@ -9,7 +9,7 @@ import com.typesafe.config.Config
 import com.youleligou.crawler.actors._
 import com.youleligou.crawler.modules._
 import com.youleligou.crawler.services.{FetchService, HashService, ParseService}
-import com.youleligou.eleme.services.RestaurantParseService
+import com.youleligou.eleme.services.{FoodParseService, RestaurantParseService}
 import net.codingwell.scalaguice.ScalaModule
 import redis.RedisClient
 
@@ -20,26 +20,42 @@ class ElemeModule extends AbstractModule with ScalaModule with GuiceAkkaActorRef
   /*
   bind actor refs
    */
+//  restaurant
   @Provides
   @Named(RestaurantInjectActor.name)
-  def injectActorRef(system: ActorSystem): ActorRef = provideActorRef(system, RestaurantInjectActor)
+  def restaurantInjectActorRef(system: ActorSystem): ActorRef = provideActorRef(system, RestaurantInjectActor)
 
   @Provides
   @Singleton
   @Named(RestaurantInjectActor.poolName)
-  def injectActorPoolRef(config: Config, system: ActorSystem): ActorRef = provideActorPoolRef(system, RestaurantInjectActor)
+  def restaurantInjectActorPoolRef(config: Config, system: ActorSystem): ActorRef = provideActorPoolRef(system, RestaurantInjectActor)
+
+//  food
+  @Provides
+  @Named(FoodInjectActor.name)
+  def foodInjectActorRef(system: ActorSystem): ActorRef = provideActorRef(system, FoodInjectActor)
+
+  @Provides
+  @Singleton
+  @Named(FoodInjectActor.poolName)
+  def foodInjectActorPoolRef(config: Config, system: ActorSystem): ActorRef = provideActorPoolRef(system, FoodInjectActor)
 
   //bind actors and services
   override def configure() {
     bind[Actor].annotatedWith(Names.named(RestaurantInjectActor.name)).toProvider(classOf[ElemeModule.RestaurantInjectActorProvider])
     bind[Actor].annotatedWith(Names.named(RestaurantFetchActor.name)).toProvider[ElemeModule.RestaurantFetchActorProvider]
     bind[Actor].annotatedWith(Names.named(RestaurantParseActor.name)).toProvider[ElemeModule.RestaurantParseActorProvider]
-
     bind[ParseService].annotatedWithName(RestaurantParseService.name).to[RestaurantParseService]
+
+    bind[Actor].annotatedWith(Names.named(FoodInjectActor.name)).toProvider(classOf[ElemeModule.FoodInjectActorProvider])
+    bind[Actor].annotatedWith(Names.named(FoodFetchActor.name)).toProvider[ElemeModule.FoodFetchActorProvider]
+    bind[Actor].annotatedWith(Names.named(FoodParseActor.name)).toProvider[ElemeModule.FoodParseActorProvider]
+    bind[ParseService].annotatedWithName(FoodParseService.name).to[FoodParseService]
   }
 }
 
 object ElemeModule {
+//  restaurant
   class RestaurantInjectActorProvider @Inject()(config: Config, redisClient: RedisClient, hashService: HashService) extends Provider[Actor] {
     override def get(): Actor = {
       new AbstractInjectActor(config, redisClient, hashService, RestaurantFetchActor) {
@@ -62,6 +78,35 @@ object ElemeModule {
                                                @Named(RestaurantParseService.name) parseService: ParseService,
                                                @Named(IndexActor.poolName) indexerPool: ActorRef,
                                                @Named(RestaurantInjectActor.poolName) injectorPool: ActorRef)
+      extends Provider[Actor] {
+    override def get(): Actor = {
+      new AbstractParseActor(config, parseService, indexerPool, injectorPool) {}
+    }
+  }
+
+//  food
+  class FoodInjectActorProvider @Inject()(config: Config, redisClient: RedisClient, hashService: HashService) extends Provider[Actor] {
+    override def get(): Actor = {
+      new AbstractInjectActor(config, redisClient, hashService, FoodFetchActor) {
+        override val Prefix: String = "ElemeFood"
+      }
+    }
+  }
+
+  class FoodFetchActorProvider @Inject()(config: Config,
+                                         fetchService: FetchService,
+                                         @Named(FoodInjectActor.poolName) injectorPool: ActorRef,
+                                         @Named(ProxyAssistantActor.poolName) proxyAssistantPool: ActorRef)
+      extends Provider[Actor] {
+    override def get(): Actor = {
+      new AbstractFetchActor(config, fetchService, injectorPool, proxyAssistantPool, FoodParseActor) {}
+    }
+  }
+
+  class FoodParseActorProvider @Inject()(config: Config,
+                                         @Named(FoodParseService.name) parseService: ParseService,
+                                         @Named(IndexActor.poolName) indexerPool: ActorRef,
+                                         @Named(FoodInjectActor.poolName) injectorPool: ActorRef)
       extends Provider[Actor] {
     override def get(): Actor = {
       new AbstractParseActor(config, parseService, indexerPool, injectorPool) {}

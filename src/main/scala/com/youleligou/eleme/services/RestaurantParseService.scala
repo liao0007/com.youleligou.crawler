@@ -65,5 +65,5 @@ class RestaurantParseService @Inject()(restaurantRepo: RestaurantRepo) extends P
 }
 
 object RestaurantParseService {
-  final val name = "RestaurantParseService"
+  final val name = "ElemeRestaurantParseService"
 }
