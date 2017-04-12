@@ -11,6 +11,7 @@ import slick.lifted.Tag
 
 import scala.concurrent.ExecutionContext.Implicits._
 import scala.concurrent.Future
+import scala.util.control.NonFatal
 
 case class CrawlerProxyServer(
     id: Long = 0,
@@ -49,28 +50,28 @@ class CrawlerProxyServerRepo extends LazyLogging {
 
   def find(id: Long): Future[Option[CrawlerProxyServer]] =
     CanCan.db.run(CrawlerProxyServers.filter(_.id === id).result.headOption) recover {
-      case x: Throwable =>
+      case NonFatal(x) =>
         logger.warn(x.getMessage)
         None
     }
 
   def delete(id: Long): Future[Int] =
     CanCan.db.run(CrawlerProxyServers.filter(_.id === id).delete) recover {
-      case x: Throwable =>
+      case NonFatal(x) =>
         logger.warn(x.getMessage)
         0
     }
 
   def all(): Future[List[CrawlerProxyServer]] =
     CanCan.db.run(CrawlerProxyServers.to[List].result) recover {
-      case x: Throwable =>
+      case NonFatal(x) =>
         logger.warn(x.getMessage)
         List.empty[CrawlerProxyServer]
     }
 
   def all(limit: Int): Future[List[CrawlerProxyServer]] =
     CanCan.db.run(CrawlerProxyServers.to[List].sortBy(_.lastVerifiedAt.desc).take(limit).result) recover {
-      case x: Throwable =>
+      case NonFatal(x) =>
         logger.warn(x.getMessage)
         List.empty[CrawlerProxyServer]
     }
@@ -81,14 +82,14 @@ class CrawlerProxyServerRepo extends LazyLogging {
         logger.warn(t.getMessage)
         0L
     } recover {
-      case x: Throwable =>
+      case NonFatal(x) =>
         logger.warn(x.getMessage)
         0L
     }
 
   def create(crawlerProxyServers: List[CrawlerProxyServer]): Future[Option[Int]] =
     CanCan.db.run(CrawlerProxyServers ++= crawlerProxyServers) recover {
-      case x: Throwable =>
+      case NonFatal(x) =>
         logger.warn(x.getMessage)
         None
     }
@@ -97,7 +98,7 @@ class CrawlerProxyServerRepo extends LazyLogging {
     CanCan.db.run {
       CrawlerProxyServers.insertOrUpdate(crawlerProxyServer)
     } recover {
-      case x: Throwable =>
+      case NonFatal(x) =>
         logger.warn(x.getMessage)
         0
     }

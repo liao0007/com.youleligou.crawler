@@ -11,6 +11,7 @@ import slick.sql.SqlProfile.ColumnOption.SqlType
 
 import scala.concurrent.ExecutionContext.Implicits._
 import scala.concurrent.Future
+import scala.util.control.NonFatal
 
 case class CrawlerJob(
     id: Long = 0,
@@ -42,7 +43,7 @@ class CrawlerJobRepo extends LazyLogging {
 
   def find(id: Long): Future[Option[CrawlerJob]] =
     CanCan.db.run(CrawlerJobs.filter(_.id === id).result.headOption) recover {
-      case x: Throwable =>
+      case NonFatal(x) =>
         logger.warn(x.getMessage)
         None
     }
@@ -55,39 +56,39 @@ class CrawlerJobRepo extends LazyLogging {
         .take(1)
         .result
         .headOption) recover {
-      case x: Throwable =>
+      case NonFatal(x) =>
         logger.warn(x.getMessage)
         None
     }
 
   def delete(id: Long): Future[Int] =
     CanCan.db.run(CrawlerJobs.filter(_.id === id).delete) recover {
-      case x: Throwable =>
+      case NonFatal(x) =>
         logger.warn(x.getMessage)
         0
     }
 
   def all(): Future[List[CrawlerJob]] =
     CanCan.db.run(CrawlerJobs.to[List].result) recover {
-      case x: Throwable =>
+      case NonFatal(x) =>
         logger.warn(x.getMessage)
         List.empty[CrawlerJob]
     }
 
   def create(job: CrawlerJob): Future[Long] =
     CanCan.db.run(CrawlerJobs returning CrawlerJobs.map(_.id) += job).recover {
-      case t: Throwable =>
-        logger.warn(t.getMessage)
+      case NonFatal(x) =>
+        logger.warn(x.getMessage)
         0L
     } recover {
-      case x: Throwable =>
+      case NonFatal(x) =>
         logger.warn(x.getMessage)
         0L
     }
 
   def create(jobs: List[CrawlerJob]): Future[Option[Int]] =
     CanCan.db.run(CrawlerJobs ++= jobs) recover {
-      case x: Throwable =>
+      case NonFatal(x) =>
         logger.warn(x.getMessage)
         None
     }

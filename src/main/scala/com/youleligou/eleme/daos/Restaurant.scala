@@ -10,6 +10,7 @@ import slick.lifted.Tag
 
 import scala.concurrent.ExecutionContext.Implicits._
 import scala.concurrent.Future
+import scala.util.control.NonFatal
 
 case class Restaurant(
     id: Long = 0,
@@ -60,34 +61,34 @@ class RestaurantRepo extends LazyLogging {
 
   def find(id: Long): Future[Option[Restaurant]] =
     CanCan.db.run(Restaurants.filter(_.id === id).result.headOption) recover {
-      case x: Throwable =>
+      case NonFatal(x) =>
         logger.warn(x.getMessage)
         None
     }
 
   def delete(id: Long): Future[Int] =
     CanCan.db.run(Restaurants.filter(_.id === id).delete) recover {
-      case x: Throwable =>
+      case NonFatal(x) =>
         logger.warn(x.getMessage)
         0
     }
 
   def all(): Future[List[Restaurant]] =
     CanCan.db.run(Restaurants.to[List].result) recover {
-      case x: Throwable =>
+      case NonFatal(x) =>
         logger.warn(x.getMessage)
         List.empty[Restaurant]
     }
 
   def create(restaurant: Restaurant): Future[Any] =
     CanCan.db.run(Restaurants += restaurant) recover {
-      case x: Throwable =>
+      case NonFatal(x) =>
         logger.warn(x.getMessage)
     }
 
   def create(restaurants: List[Restaurant]): Future[Option[Int]] =
     CanCan.db.run(Restaurants ++= restaurants) recover {
-      case x: Throwable =>
+      case NonFatal(x) =>
         logger.warn(x.getMessage)
         None
     }
