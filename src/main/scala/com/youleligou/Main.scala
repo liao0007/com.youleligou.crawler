@@ -49,7 +49,7 @@ object Main extends App {
   if (args.contains("eleme/food"))
     injector.instance[ElemeCrawlerBootstrap].startFood()
 
-  if (args.contains("proxy"))
+  if (args.contains("proxy/assistant"))
     injector.instance[ProxyReplenishmentAssistantBootstrap].start()
 
   if (args.contains("proxy/you"))
