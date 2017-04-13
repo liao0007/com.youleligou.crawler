@@ -57,9 +57,7 @@ class ProxyAssistantActor @Inject()(config: Config,
         }
         testedProxyServers
 
-      } map crawlerProxyServerRepo.insertOrUpdate map { _ => //update database
-        context.stop(self)
-      }
+      } map crawlerProxyServerRepo.insertOrUpdate //update database
 
   }
 
