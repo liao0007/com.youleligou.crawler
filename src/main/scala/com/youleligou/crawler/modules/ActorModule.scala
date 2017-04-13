@@ -20,32 +20,12 @@ class ActorModule extends AbstractModule with ScalaModule with GuiceAkkaActorRef
   @Named(CountActor.name)
   def provideAuditActorRef(system: ActorSystem): ActorRef = provideActorRef(system, CountActor)
 
-  @Provides
-  @Singleton
-  @Named(CountActor.poolName)
-  def provideCountActorPoolRef(config: Config, system: ActorSystem): ActorRef = provideActorPoolRef(system, CountActor)
-
   /*
   proxy assistant actor
    */
   @Provides
   @Named(ProxyAssistantActor.name)
   def provideProxyAssistantActorRef(system: ActorSystem): ActorRef = provideActorRef(system, ProxyAssistantActor)
-
-  @Provides
-  @Singleton
-  @Named(ProxyAssistantActor.poolName)
-  def provideProxyAssistantActorPoolRef(config: Config, system: ActorSystem): ActorRef = provideActorPoolRef(system, ProxyAssistantActor)
-
-  @Provides
-  @Named(ProxyReplenishmentAssistantActor.name)
-  def provideProxyReplenishmentAssistantActorRef(system: ActorSystem): ActorRef = provideActorRef(system, ProxyReplenishmentAssistantActor)
-
-  @Provides
-  @Singleton
-  @Named(ProxyReplenishmentAssistantActor.poolName)
-  def provideProxyReplenishmentAssistantActorPoolRef(config: Config, system: ActorSystem): ActorRef =
-    provideActorPoolRef(system, ProxyReplenishmentAssistantActor)
 
   /*
   index actor
@@ -63,6 +43,5 @@ class ActorModule extends AbstractModule with ScalaModule with GuiceAkkaActorRef
     bind[Actor].annotatedWith(Names.named(CountActor.name)).to[CountActor]
     bind[Actor].annotatedWith(Names.named(IndexActor.name)).to[IndexActor]
     bind[Actor].annotatedWith(Names.named(ProxyAssistantActor.name)).to[ProxyAssistantActor]
-    bind[Actor].annotatedWith(Names.named(ProxyReplenishmentAssistantActor.name)).to[ProxyAssistantActor]
   }
 }

@@ -5,8 +5,8 @@ import com.google.inject.name.Named
 import com.google.inject.{Guice, Inject}
 import com.typesafe.config.{Config, ConfigFactory}
 import com.typesafe.scalalogging.LazyLogging
-import com.youleligou.crawler.actors.ProxyAssistantActor.{Init, Replenish}
-import com.youleligou.crawler.actors.ProxyReplenishmentAssistantActor
+import com.youleligou.crawler.actors.ProxyAssistantActor.Run
+import com.youleligou.crawler.actors.{ProxyAssistantActor}
 import com.youleligou.crawler.modules.{ActorModule, AkkaModule, ConfigModule, ServiceModule}
 import com.youleligou.eleme.{ElemeCrawlerBootstrap, ElemeModule}
 import com.youleligou.proxyHunters.xicidaili.{XiCiDaiLiCrawlerBootstrap, XiCiDaiLiModule}
@@ -17,14 +17,11 @@ import scala.concurrent.duration._
 /**
   * Created by liangliao on 31/3/17.
   */
-class ProxyReplenishmentAssistantBootstrap @Inject()(config: Config,
-                                                     system: ActorSystem,
-                                                     @Named(ProxyReplenishmentAssistantActor.poolName) proxyAssistantActor: ActorRef)
+class ProxyAssistantBootstrap @Inject()(config: Config, system: ActorSystem, @Named(ProxyAssistantActor.name) proxyAssistantActor: ActorRef)
     extends LazyLogging {
   import system.dispatcher
   def start(): Unit = {
-    system.scheduler.scheduleOnce(0.second, proxyAssistantActor, Init)
-    system.scheduler.schedule(10.second, 20.millis, proxyAssistantActor, Replenish)
+    system.scheduler.scheduleOnce(0.second, proxyAssistantActor, Run)
   }
 }
 
@@ -40,8 +37,7 @@ object Main extends App {
   )
 
   import net.codingwell.scalaguice.InjectorExtensions._
-//  injector.instance[XiCiDaiLiCrawlerBootstrap].start()
-  injector.instance[YouDaiLiCrawlerBootstrap].start()
+  injector.instance[ProxyAssistantBootstrap].start()
 
   if (args.contains("eleme/restaurant"))
     injector.instance[ElemeCrawlerBootstrap].startRestaurant()
@@ -50,7 +46,7 @@ object Main extends App {
     injector.instance[ElemeCrawlerBootstrap].startFood()
 
   if (args.contains("proxy/assistant"))
-    injector.instance[ProxyReplenishmentAssistantBootstrap].start()
+    injector.instance[ProxyAssistantBootstrap].start()
 
   if (args.contains("proxy/you"))
     injector.instance[YouDaiLiCrawlerBootstrap].start()

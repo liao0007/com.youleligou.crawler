@@ -104,6 +104,14 @@ class CrawlerProxyServerRepo @Inject()(@Named(CanCan) database: Database) extend
         logger.warn(x.getMessage)
         0
     }
+
+  def insertOrUpdate(crawlerProxyServers: Seq[CrawlerProxyServer]): Future[Any] =
+    database.run {
+      DBIO.sequence(crawlerProxyServers.map(CrawlerProxyServers.insertOrUpdate))
+    } recover {
+      case NonFatal(x) =>
+        logger.warn(x.getMessage)
+    }
 }
 
 class CrawlerProxyServerTable(tag: Tag) extends Table[CrawlerProxyServer](tag, "crawler_proxy_server") {

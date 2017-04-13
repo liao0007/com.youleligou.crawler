@@ -66,8 +66,7 @@ object ElemeModule {
 
   class RestaurantFetchActorProvider @Inject()(config: Config,
                                                fetchService: FetchService,
-                                               @Named(RestaurantInjectActor.poolName) injectorPool: ActorRef,
-                                               @Named(ProxyAssistantActor.poolName) proxyAssistantPool: ActorRef)
+                                               @Named(RestaurantInjectActor.poolName) injectorPool: ActorRef)
       extends Provider[Actor] {
     override def get(): Actor = {
       new AbstractFetchActor(config, fetchService, injectorPool, RestaurantParseActor) {}
@@ -95,8 +94,7 @@ object ElemeModule {
 
   class FoodFetchActorProvider @Inject()(config: Config,
                                          fetchService: FetchService,
-                                         @Named(FoodInjectActor.poolName) injectorPool: ActorRef,
-                                         @Named(ProxyAssistantActor.poolName) proxyAssistantPool: ActorRef)
+                                         @Named(FoodInjectActor.poolName) injectorPool: ActorRef)
       extends Provider[Actor] {
     override def get(): Actor = {
       new AbstractFetchActor(config, fetchService, injectorPool, FoodParseActor) {}

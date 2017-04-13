@@ -51,8 +51,7 @@ object XiCiDaiLiModule {
 
   class ProxyListFetchActorProvider @Inject()(config: Config,
                                               fetchService: FetchService,
-                                              @Named(ProxyListInjectActor.poolName) injectorPool: ActorRef,
-                                              @Named(ProxyAssistantActor.poolName) proxyAssistantPool: ActorRef)
+                                              @Named(ProxyListInjectActor.poolName) injectorPool: ActorRef)
       extends Provider[Actor] {
     override def get(): Actor = {
       new AbstractFetchActor(config, fetchService, injectorPool, ProxyListParseActor) {}
