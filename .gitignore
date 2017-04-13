@@ -1,7 +1,6 @@
 .idea/
-project/target/
 target/
 log
 /src/main/resources/cache.conf
 /src/main/resources/database.conf
-/src/main/resources/abuyun.conf
+/src/main/resources/proxy.conf
