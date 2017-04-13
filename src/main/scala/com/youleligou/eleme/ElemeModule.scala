@@ -70,7 +70,7 @@ object ElemeModule {
                                                @Named(ProxyAssistantActor.poolName) proxyAssistantPool: ActorRef)
       extends Provider[Actor] {
     override def get(): Actor = {
-      new AbstractFetchActor(config, fetchService, injectorPool, proxyAssistantPool, RestaurantParseActor) {}
+      new AbstractFetchActor(config, fetchService, injectorPool, RestaurantParseActor) {}
     }
   }
 
@@ -99,7 +99,7 @@ object ElemeModule {
                                          @Named(ProxyAssistantActor.poolName) proxyAssistantPool: ActorRef)
       extends Provider[Actor] {
     override def get(): Actor = {
-      new AbstractFetchActor(config, fetchService, injectorPool, proxyAssistantPool, FoodParseActor) {}
+      new AbstractFetchActor(config, fetchService, injectorPool, FoodParseActor) {}
     }
   }
 

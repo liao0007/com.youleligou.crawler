@@ -56,36 +56,27 @@ abstract class AbstractInjectActor(config: Config, redisClient: RedisClient, has
       } map Injected pipeTo self
 
     case Injected(count) =>
+
     case Tick =>
       log.info("{} tick", self.path)
-      redisClient.rpop[String](PendingInjectingUrlQueueKey) recover {
+      redisClient.rpop[String](PendingInjectingUrlQueueKey).map(Ticked) recover {
         case NonFatal(x) =>
           log.warning(x.getMessage)
           None
       } pipeTo self
 
-    case Some(fetchRequestString: String) =>
+    case Ticked(Some(fetchRequestString)) =>
       Json.parse(fetchRequestString).validate[FetchRequest].asOpt match {
         case Some(fetchRequest) =>
-          fetcher ! InitProxyServer
-          context become (fetching(fetchRequest), discardOld = false)
+          fetcher ! Fetch(fetchRequest)
+          context become (fetching(fetcher), discardOld = false)
         case _ =>
       }
 
     case _ =>
   }
 
-  def fetching(fetchRequest: FetchRequest): Receive = {
-    case InitProxyServerSucceed =>
-      log.info("{} fetch init succeed {}", self.path, fetchRequest)
-      sender ! Fetch(fetchRequest)
-
-    case InitProxyServerFailed =>
-      log.info("{} fetch init failed {}", self.path, fetchRequest)
-      self ! Inject(fetchRequest)
-      unstashAll()
-      context unbecome ()
-
+  def fetching(fetcher: ActorRef): Receive = {
     case WorkFinished =>
       unstashAll()
       context unbecome ()
@@ -110,5 +101,6 @@ object AbstractInjectActor {
   case class Inject(fetchRequest: FetchRequest, force: Boolean = false) extends Command
   case class Injected(count: Long)                                      extends Event
 
-  case object Tick extends Command
+  case object Tick                                      extends Command
+  case class Ticked(fetchRequestString: Option[String]) extends Event
 }

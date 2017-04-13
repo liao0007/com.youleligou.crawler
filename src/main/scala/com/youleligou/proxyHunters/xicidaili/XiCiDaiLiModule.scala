@@ -55,7 +55,7 @@ object XiCiDaiLiModule {
                                               @Named(ProxyAssistantActor.poolName) proxyAssistantPool: ActorRef)
       extends Provider[Actor] {
     override def get(): Actor = {
-      new AbstractFetchActor(config, fetchService, injectorPool, proxyAssistantPool, ProxyListParseActor) {}
+      new AbstractFetchActor(config, fetchService, injectorPool, ProxyListParseActor) {}
     }
   }
 

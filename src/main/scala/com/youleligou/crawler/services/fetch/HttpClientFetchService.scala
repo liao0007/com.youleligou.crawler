@@ -6,7 +6,7 @@ import com.youleligou.crawler.daos.{CrawlerJob, CrawlerJobRepo, CrawlerProxyServ
 import com.youleligou.crawler.models.{FetchRequest, FetchResponse}
 import com.youleligou.crawler.services.FetchService
 import play.api.libs.ws.ahc.StandaloneAhcWSClient
-import play.api.libs.ws.{DefaultWSProxyServer, WSAuthScheme}
+import play.api.libs.ws.{DefaultWSProxyServer, StandaloneWSRequest, WSAuthScheme}
 
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
@@ -20,17 +20,16 @@ class HttpClientFetchService @Inject()(config: Config, standaloneAhcWSClient: St
     extends FetchService {
 
   import com.github.andr83.scalaconfig._
-  val userAgents     = config.as[Seq[String]]("crawler.fetch.userAgents")
-  val userAgentsSize = userAgents.length
+  val useProxy: Boolean                = config.getBoolean("crawler.fetch.useProxy")
+  val proxyServer: Map[String, String] = config.as[Map[String, String]](config.getString("crawler.fetch.proxy"))
+  val userAgents: Seq[String]          = config.as[Seq[String]]("crawler.fetch.userAgents")
+  val userAgentsSize: Int              = userAgents.length
+  val timeout: Duration                = Duration(config.getInt("crawler.fetch.timeout"), MILLISECONDS)
 
-  val timeout = Duration(config.getInt("crawler.fetch.timeout"), MILLISECONDS)
+  def fetch(fetchRequest: FetchRequest)(implicit executor: ExecutionContext): Future[FetchResponse] = {
 
-  def fetch(fetchRequest: FetchRequest, crawlerProxyServerOpt: Option[CrawlerProxyServer])(
-      implicit executor: ExecutionContext): Future[FetchResponse] = {
-
-    val start                                     = System.currentTimeMillis()
-    val FetchRequest(requestName, urlInfo, retry) = fetchRequest
-    val rand                                      = new Random(System.currentTimeMillis())
+    val FetchRequest(requestName, urlInfo, _) = fetchRequest
+    val rand                                  = new Random(System.currentTimeMillis())
 
     Try {
       val client = standaloneAhcWSClient
@@ -39,15 +38,10 @@ class HttpClientFetchService @Inject()(config: Config, standaloneAhcWSClient: St
         .withRequestTimeout(timeout)
 
       val proxyClient =
-        if (crawlerProxyServerOpt.isDefined && crawlerProxyServerOpt.get.username.nonEmpty) {
-          val crawlerProxyServer = crawlerProxyServerOpt.get
+        if (useProxy) {
           client
-            .withAuth(crawlerProxyServer.username.get, crawlerProxyServer.password.get, WSAuthScheme.BASIC)
-            .withProxyServer(DefaultWSProxyServer(host = crawlerProxyServer.ip, port = crawlerProxyServer.port))
-        } else if (crawlerProxyServerOpt.isDefined && crawlerProxyServerOpt.get.username.isEmpty) {
-          val crawlerProxyServer = crawlerProxyServerOpt.get
-          client
-            .withProxyServer(DefaultWSProxyServer(host = crawlerProxyServer.ip, port = crawlerProxyServer.port))
+            .withAuth(proxyServer("username"), proxyServer("password"), WSAuthScheme.BASIC)
+            .withProxyServer(DefaultWSProxyServer(host = proxyServer("host"), port = proxyServer("port").toInt))
         } else
           client
 
@@ -58,7 +52,7 @@ class HttpClientFetchService @Inject()(config: Config, standaloneAhcWSClient: St
             CrawlerJob(
               url = urlInfo.url,
               jobName = requestName,
-              proxy = crawlerProxyServerOpt.map(crawlerProxyServer => s"""${crawlerProxyServer.ip}:${crawlerProxyServer.port}"""),
+              proxy = Some(s"""${proxyServer("host")}:${proxyServer("port")}"""),
               statusCode = Some(response.status),
               statusMessage = Some(response.statusText)
             )
@@ -70,7 +64,7 @@ class HttpClientFetchService @Inject()(config: Config, standaloneAhcWSClient: St
         CrawlerJob(
           url = urlInfo.domain,
           jobName = requestName,
-          proxy = crawlerProxyServerOpt.map(crawlerProxyServer => s"""${crawlerProxyServer.ip}:${crawlerProxyServer.port}"""),
+          proxy = Some(s"""${proxyServer("host")}:${proxyServer("port")}"""),
           statusCode = Some(FetchService.Timeout),
           statusMessage = None
         )

@@ -37,10 +37,12 @@ class ProxyListParseService @Inject()(md5HashService: Md5HashService, crawlerPro
       .select(".content")
       .text()
       .split("#")
-      .toSeq flatMap { urlsString =>
-      val pattern = """.*\D([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})\:?([0-9]{1,5})@(HTTP|HTTPS).*""".r
+      .toSeq
+      .map(_.replaceAll("[^\\x00-\\x7F]", "").trim)
+      .filter(_.length > 0) flatMap { urlsString =>
+      val pattern = """.*?([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})\:?([0-9]{1,5})@(HTTP|HTTPS).*""".r
       try {
-        val pattern(ip, port, supportedType) = urlsString.trim
+        val pattern(ip, port, supportedType) = urlsString
         Some(
           CrawlerProxyServer(
             hash = md5HashService.hash(s"""$ip:$port"""),

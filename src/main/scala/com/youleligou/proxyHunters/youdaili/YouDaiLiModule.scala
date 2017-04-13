@@ -66,7 +66,7 @@ object YouDaiLiModule {
                                               @Named(ProxyAssistantActor.poolName) proxyAssistantPool: ActorRef)
       extends Provider[Actor] {
     override def get(): Actor = {
-      new AbstractFetchActor(config, fetchService, injectorPool, proxyAssistantPool, ProxyListParseActor) {}
+      new AbstractFetchActor(config, fetchService, injectorPool, ProxyListParseActor) {}
     }
   }
 
@@ -94,7 +94,7 @@ object YouDaiLiModule {
                                               @Named(ProxyAssistantActor.poolName) proxyAssistantPool: ActorRef)
       extends Provider[Actor] {
     override def get(): Actor = {
-      new AbstractFetchActor(config, fetchService, injectorPool, proxyAssistantPool, ProxyPageParseActor) {}
+      new AbstractFetchActor(config, fetchService, injectorPool, ProxyPageParseActor) {}
     }
   }
 

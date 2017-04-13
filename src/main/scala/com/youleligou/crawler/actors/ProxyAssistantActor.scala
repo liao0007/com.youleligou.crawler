@@ -26,10 +26,10 @@ class ProxyAssistantActor @Inject()(config: Config,
     with ActorLogging {
   import context.dispatcher
 
-  val ProxyQueueKey: String    = "ProxyQueue"
-  val LiveProxySetKey: String  = "LiveProxySet"
-  val timeout                  = Duration(config.getInt("crawler.proxy-assistant.timeout"), MILLISECONDS)
-  val useAbuyun                = config.getBoolean("crawler.proxy-assistant.useAbuyun")
+  val ProxyQueueKey: String   = "ProxyQueue"
+  val LiveProxySetKey: String = "LiveProxySet"
+  val timeout                 = Duration(config.getInt("crawler.proxy-assistant.timeout"), MILLISECONDS)
+
   private def currentTimestamp = new Timestamp(System.currentTimeMillis())
 
   override def receive: Receive = {
@@ -75,47 +75,6 @@ class ProxyAssistantActor @Inject()(config: Config,
             0L
         }
       } getOrElse Future.successful(0L)
-
-    case GetProxyServer =>
-      Try {
-        if (useAbuyun) {
-          val abuyunConfig = config.getConfig("proxy.abuyun")
-          Future.successful(
-            ProxyServerAvailable(CrawlerProxyServer(
-              hash = "",
-              ip = abuyunConfig.getString("host"),
-              port = abuyunConfig.getInt("port"),
-              username = Some(abuyunConfig.getString("username")),
-              password = Some(abuyunConfig.getString("password"))
-            )))
-        } else {
-          redisClient.spop[String](LiveProxySetKey) map {
-            case Some(proxyServerString) =>
-              Json.parse(proxyServerString).validate[CrawlerProxyServer].asOpt
-            case _ => None
-          } flatMap {
-            case Some(proxyServer) =>
-              testAvailability(proxyServer) map { testedProxyServer =>
-                crawlerProxyServerRepo.insertOrUpdate(testedProxyServer)
-                if (testedProxyServer.isLive) {
-                  redisClient.sadd(LiveProxySetKey, Json.toJson(testedProxyServer).toString())
-                  Some(proxyServer)
-                } else {
-                  None
-                }
-              }
-            case None => Future.successful(None)
-          } map {
-            case Some(proxyServer) => ProxyServerAvailable(proxyServer)
-            case _                 => ProxyServerUnavailable
-          } recover {
-            case NonFatal(x) =>
-              log.warning("{} {}", self.path, x.getMessage)
-              ProxyServerUnavailable
-          }
-        }
-      } getOrElse Future.successful(ProxyServerUnavailable) pipeTo sender()
-
   }
 
   protected def testAvailability(proxyServer: CrawlerProxyServer)(implicit executor: ExecutionContext): Future[CrawlerProxyServer] = {
