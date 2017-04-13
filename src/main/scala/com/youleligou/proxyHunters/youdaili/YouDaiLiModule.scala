@@ -55,7 +55,7 @@ object YouDaiLiModule {
   class ProxyListInjectActorProvider @Inject()(config: Config, redisClient: RedisClient, hashService: HashService) extends Provider[Actor] {
     override def get(): Actor = {
       new AbstractInjectActor(config, redisClient, hashService, ProxyListFetchActor) {
-        override val Prefix: String = "YouDaiLiProxyList"
+        override val CachePrefix: String = ProxyListInjectActor.name
       }
     }
   }
@@ -83,7 +83,7 @@ object YouDaiLiModule {
   class ProxyPageInjectActorProvider @Inject()(config: Config, redisClient: RedisClient, hashService: HashService) extends Provider[Actor] {
     override def get(): Actor = {
       new AbstractInjectActor(config, redisClient, hashService, ProxyPageFetchActor) {
-        override val Prefix: String = "YouDaiLiProxyPage"
+        override val CachePrefix: String = ProxyPageInjectActor.name
       }
     }
   }

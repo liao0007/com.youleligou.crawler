@@ -5,5 +5,5 @@ case class ParseResult(title: Option[String] = None,
                        updateTime: Long = System.currentTimeMillis(),
                        childLink: Seq[UrlInfo] = Seq.empty[UrlInfo],
                        fetchResponse: FetchResponse) {
-  override def toString: String = "url=" + fetchResponse.fetchRequest.urlInfo.host + ",context length=" + fetchResponse.content.length
+  override def toString: String = "url=" + fetchResponse.fetchRequest.urlInfo.domain + ",context length=" + fetchResponse.content.length
 }

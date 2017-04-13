@@ -11,9 +11,11 @@ import com.youleligou.crawler.services.ParseService
 import com.youleligou.crawler.services.hash.Md5HashService
 import com.youleligou.proxyHunters.youdaili.ProxyListInjectActor
 import org.jsoup.Jsoup
+import org.jsoup.nodes.Document
 
 import scala.collection.JavaConverters._
 import scala.util.Try
+import scala.util.control.NonFatal
 
 /**
   * Created by young.yang on 2016/8/31.
@@ -24,35 +26,39 @@ class ProxyPageParseService @Inject()(md5HashService: Md5HashService,
                                       @Named(ProxyListInjectActor.poolName) injectorPool: ActorRef)
     extends ParseService {
 
-  private def getChildLinks(fetchResponse: FetchResponse) = {
-    val UrlInfo(host, queryParameters, urlType, deep) = fetchResponse.fetchRequest.urlInfo
-    val urls = Jsoup.parse(fetchResponse.content).select(".pagelist li").not(".thisclass").asScala.toSeq.flatMap { li =>
-      li.select("a").asScala.toSeq.headOption.map { a =>
-        UrlInfo(host = "http://www.youdaili.net/Daili/guonei/" + a.attr("href"), deep = deep + 1)
+  private def getChildLinks(document: Document, fetchResponse: FetchResponse) = {
+    document.select(".pagelist li").not(".thisclass").asScala.flatMap { li =>
+      li.select("a").asScala.find(_.hasAttr("href")).map { a =>
+        fetchResponse.fetchRequest.urlInfo.withPath(a.attr("href")).copy(deep = fetchResponse.fetchRequest.urlInfo.deep + 1)
       }
     }
-    if (urls.isEmpty) logger.warn("no child links for {}", fetchResponse.fetchRequest.urlInfo)
-    urls
   }
 
   /**
     * 解析具体实现
     */
   override def parse(fetchResponse: FetchResponse): ParseResult = {
-    Jsoup.parse(fetchResponse.content).select(".chunlist li p a").asScala.toSeq.foreach { a =>
-      Try {
-        val href = a.attr("href")
+    val document = Jsoup.parse(fetchResponse.content)
+    document.select(".chunlist li p a").asScala.filter(_.hasAttr("href")).foreach { a =>
+      try {
+        val url = a.attr("href").trim
         injectorPool ! AbstractInjectActor.Inject(
           FetchRequest(
             requestName = "fetch_youdaili_proxy_page",
-            urlInfo = UrlInfo(host = href)
+            urlInfo = UrlInfo(
+              domain = fetchResponse.fetchRequest.urlInfo.domain,
+              path = url.replace(fetchResponse.fetchRequest.urlInfo.domain, "")
+            )
           )
         )
-      } getOrElse Unit
+      } catch {
+        case NonFatal(x) =>
+          logger.warn(x.getMessage)
+      }
     }
 
     ParseResult(
-      childLink = getChildLinks(fetchResponse),
+      childLink = getChildLinks(document, fetchResponse),
       fetchResponse = fetchResponse
     )
   }

@@ -9,7 +9,7 @@ import com.youleligou.crawler.actors.ProxyAssistantActor.{Init, Replenish}
 import com.youleligou.crawler.actors.ProxyReplenishmentAssistantActor
 import com.youleligou.crawler.modules.{ActorModule, AkkaModule, ConfigModule, ServiceModule}
 import com.youleligou.eleme.{ElemeCrawlerBootstrap, ElemeModule}
-import com.youleligou.proxyHunters.xicidaili.XiCiDaiLiModule
+import com.youleligou.proxyHunters.xicidaili.{XiCiDaiLiCrawlerBootstrap, XiCiDaiLiModule}
 import com.youleligou.proxyHunters.youdaili.{YouDaiLiCrawlerBootstrap, YouDaiLiModule}
 
 import scala.concurrent.duration._
@@ -40,6 +40,8 @@ object Main extends App {
   )
 
   import net.codingwell.scalaguice.InjectorExtensions._
+//  injector.instance[XiCiDaiLiCrawlerBootstrap].start()
+  injector.instance[YouDaiLiCrawlerBootstrap].start()
 
   if (args.contains("eleme/restaurant"))
     injector.instance[ElemeCrawlerBootstrap].startRestaurant()
@@ -50,11 +52,11 @@ object Main extends App {
   if (args.contains("proxy"))
     injector.instance[ProxyReplenishmentAssistantBootstrap].start()
 
-  if (args.contains("youdaili"))
+  if (args.contains("proxy/you"))
     injector.instance[YouDaiLiCrawlerBootstrap].start()
 
-  if (args.contains("xicidaili"))
-    injector.instance[YouDaiLiCrawlerBootstrap].start()
+  if (args.contains("proxy/xici"))
+    injector.instance[XiCiDaiLiCrawlerBootstrap].start()
 }
 
 //object Main2 extends App {

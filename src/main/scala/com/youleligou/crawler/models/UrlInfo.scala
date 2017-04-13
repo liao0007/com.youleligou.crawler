@@ -6,16 +6,30 @@ import play.api.libs.json.Json
 /**
   * 爬取url类
   *
-  * @param host domain
+  * @param domain domain
   */
-case class UrlInfo(host: String,
+case class UrlInfo(domain: String,
+                   path: String = "",
                    queryParameters: Map[String, String] = Map.empty[String, String],
                    urlType: String = UrlInfoType.Generated,
                    deep: Int = 0) {
-  val url: String = host + (if (host.contains("?")) "&" else "?") + queryParameters
-    .map(queryParameter => queryParameter._1 + "=" + queryParameter._2)
-    .mkString("&")
+  val url: String = {
+    val parameterString =
+      if (queryParameters.nonEmpty)
+        queryParameters
+          .map(queryParameter => queryParameter._1 + "=" + queryParameter._2)
+          .mkString(if (path.contains("?")) "&" else "?", "&", "")
+      else ""
+    domain + path + parameterString
+  }
+
   override def toString: String = url
+
+  def withPath(newPath: String): UrlInfo = {
+    val trimmedPath = newPath.trim
+    copy(path = if (trimmedPath.startsWith("/")) trimmedPath else (path.split("/").dropRight(1).toSeq ++ Seq(trimmedPath)).mkString("/"))
+  }
+
 }
 
 object UrlInfo {

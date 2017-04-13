@@ -59,7 +59,7 @@ object ElemeModule {
   class RestaurantInjectActorProvider @Inject()(config: Config, redisClient: RedisClient, hashService: HashService) extends Provider[Actor] {
     override def get(): Actor = {
       new AbstractInjectActor(config, redisClient, hashService, RestaurantFetchActor) {
-        override val Prefix: String = "ElemeRestaurant"
+        override val CachePrefix: String = RestaurantInjectActor.name
       }
     }
   }
@@ -88,7 +88,7 @@ object ElemeModule {
   class FoodInjectActorProvider @Inject()(config: Config, redisClient: RedisClient, hashService: HashService) extends Provider[Actor] {
     override def get(): Actor = {
       new AbstractInjectActor(config, redisClient, hashService, FoodFetchActor) {
-        override val Prefix: String = "ElemeFood"
+        override val CachePrefix: String = FoodInjectActor.name
       }
     }
   }

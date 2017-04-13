@@ -15,6 +15,7 @@ package object xicidaili {
   object ProxyListFetchActor extends NamedActor {
     final val name     = "XiCiDaiLiProxyListFetchActor"
     final val poolName = "XiCiDaiLiProxyListFetchActorPool"
+
   }
 
   object ProxyListParseActor extends NamedActor {

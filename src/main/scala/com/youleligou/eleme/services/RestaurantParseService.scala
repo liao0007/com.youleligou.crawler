@@ -18,9 +18,9 @@ class RestaurantParseService @Inject()(restaurantRepo: RestaurantRepo) extends P
   final val OffsetKey        = "offset"
 
   private def getChildLinksByLocation(fetchResponse: FetchResponse): Seq[UrlInfo] = {
-    val UrlInfo(host, queryParameters, urlType, deep) = fetchResponse.fetchRequest.urlInfo
-    val originalLatitude                              = queryParameters.getOrElse(LatitudeKey, "39").toFloat
-    val originalLongitude                             = queryParameters.getOrElse(LongitudeKey, "116").toFloat
+    val UrlInfo(domain, path, queryParameters, urlType, deep) = fetchResponse.fetchRequest.urlInfo
+    val originalLatitude                                      = queryParameters.getOrElse(LatitudeKey, "39").toFloat
+    val originalLongitude                                     = queryParameters.getOrElse(LongitudeKey, "116").toFloat
 
     for {
       latitudeSteps  <- -Length to Length if latitudeSteps != 0; latitudeDelta   = latitudeSteps / Precision

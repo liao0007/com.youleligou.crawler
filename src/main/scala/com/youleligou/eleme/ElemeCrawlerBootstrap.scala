@@ -6,11 +6,14 @@ import com.google.inject.name.Named
 import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
 import com.youleligou.crawler.actors.AbstractInjectActor
-import com.youleligou.crawler.actors.AbstractInjectActor.Tick
+import com.youleligou.crawler.actors.AbstractInjectActor.{CacheCleared, ClearCache, Tick}
 import com.youleligou.crawler.models.UrlInfo.UrlInfoType
 import com.youleligou.crawler.models.{FetchRequest, UrlInfo}
+import com.youleligou.eleme
 import com.youleligou.eleme.daos.RestaurantRepo
 import redis.RedisClient
+import akka.pattern.ask
+import akka.util.Timeout
 
 import scala.concurrent.duration._
 
@@ -45,20 +48,24 @@ class ElemeCrawlerBootstrap @Inject()(config: Config,
   }
 
   def startFood(): Unit = {
-    //clean cache
-    redisClient.del("ElemeFoodInjectorPendingInjectingUrlQueueKey", "ElemeFoodInjectorInjectedUrlHashKey").map { _ =>
-      restaurantRepo.allIds() map { ids =>
-        ids.foreach { id =>
-          foodInjectorPool ! AbstractInjectActor.Inject(FetchRequest(
-                                                          requestName = "fetch_eleme_food",
-                                                          urlInfo = UrlInfo(
-                                                            host = s"http://mainsite-restapi.ele.me/shopping/v2/menu?restaurant_id=$id"
-                                                          )
-                                                        ),
-                                                        force = true)
+    implicit val timeout = Timeout(5.minutes)
+    foodInjectorPool ? ClearCache map {
+      case CacheCleared(_) =>
+        restaurantRepo.allIds() map { ids =>
+          ids.foreach { id =>
+            foodInjectorPool ! AbstractInjectActor.Inject(FetchRequest(
+                                                            requestName = "fetch_eleme_food",
+                                                            urlInfo = UrlInfo(
+                                                              domain = s"http://mainsite-restapi.ele.me/shopping/v2/menu?restaurant_id=$id"
+                                                            )
+                                                          ),
+                                                          force = true)
+          }
         }
-      }
-      system.scheduler.schedule(5.seconds, 20.millis, foodInjectorPool, Tick)
+        system.scheduler.schedule(5.seconds, 20.millis, foodInjectorPool, Tick)
+
+      case _ => logger.warn("food injector cache clear failed")
     }
+
   }
 }

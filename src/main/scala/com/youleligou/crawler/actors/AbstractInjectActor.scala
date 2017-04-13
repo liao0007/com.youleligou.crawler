@@ -24,15 +24,18 @@ abstract class AbstractInjectActor(config: Config, redisClient: RedisClient, has
     with ActorLogging
     with GuiceAkkaActorRefProvider {
 
-  val Prefix: String
-  lazy val PendingInjectingUrlQueueKey: String = Prefix + "InjectorPendingInjectingUrlQueueKey"
-  lazy val InjectedUrlHashKey: String          = Prefix + "InjectorInjectedUrlHashKey"
+  val CachePrefix: String
+  lazy val PendingInjectingUrlQueueKey: String = AbstractInjectActor.pendingInjectingUrlQueueKey(CachePrefix)
+  lazy val InjectedUrlHashKey: String          = AbstractInjectActor.injectedUrlHashKey(CachePrefix)
 
   val fetcher: ActorRef = provideActorRef(context.system, fetcherCompanion, Some(context))
 
   override def receive: Receive = standby
 
   def standby: Receive = {
+    case ClearCache =>
+      redisClient.del(PendingInjectingUrlQueueKey, InjectedUrlHashKey).map(CacheCleared) pipeTo sender
+
     case Inject(fetchRequest, force) =>
       log.info("{} hash check {}", self.path, fetchRequest)
       val md5 = hashService.hash(fetchRequest.urlInfo.url)
@@ -53,7 +56,6 @@ abstract class AbstractInjectActor(config: Config, redisClient: RedisClient, has
       } map Injected pipeTo self
 
     case Injected(count) =>
-
     case Tick =>
       log.info("{} tick", self.path)
       redisClient.rpop[String](PendingInjectingUrlQueueKey) recover {
@@ -96,9 +98,14 @@ abstract class AbstractInjectActor(config: Config, redisClient: RedisClient, has
 }
 
 object AbstractInjectActor {
+  def pendingInjectingUrlQueueKey(cachePrefix: String): String = cachePrefix + "PendingInjectingUrlQueue"
+  def injectedUrlHashKey(cachePrefix: String): String          = cachePrefix + "InjectedUrlHash"
 
   sealed trait Command
   sealed trait Event
+
+  case object ClearCache               extends Command
+  case class CacheCleared(count: Long) extends Event
 
   case class Inject(fetchRequest: FetchRequest, force: Boolean = false) extends Command
   case class Injected(count: Long)                                      extends Event

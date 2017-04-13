@@ -68,7 +68,7 @@ class HttpClientFetchService @Inject()(config: Config, standaloneAhcWSClient: St
     } getOrElse {
       crawlerJobRepo.create(
         CrawlerJob(
-          url = urlInfo.host,
+          url = urlInfo.domain,
           jobName = requestName,
           proxy = crawlerProxyServerOpt.map(crawlerProxyServer => s"""${crawlerProxyServer.ip}:${crawlerProxyServer.port}"""),
           statusCode = Some(FetchService.Timeout),
