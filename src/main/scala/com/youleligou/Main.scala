@@ -1,18 +1,21 @@
 package com.youleligou
 
+import java.io.{File, PrintWriter}
+
 import akka.actor.{ActorRef, ActorSystem}
 import com.google.inject.name.Named
 import com.google.inject.{Guice, Inject}
 import com.typesafe.config.{Config, ConfigFactory}
 import com.typesafe.scalalogging.LazyLogging
 import com.youleligou.crawler.actors.ProxyAssistantActor.Run
-import com.youleligou.crawler.actors.{ProxyAssistantActor}
+import com.youleligou.crawler.actors.ProxyAssistantActor
 import com.youleligou.crawler.modules.{ActorModule, AkkaModule, ConfigModule, ServiceModule}
 import com.youleligou.eleme.{ElemeCrawlerBootstrap, ElemeModule}
 import com.youleligou.proxyHunters.xicidaili.{XiCiDaiLiCrawlerBootstrap, XiCiDaiLiModule}
 import com.youleligou.proxyHunters.youdaili.{YouDaiLiCrawlerBootstrap, YouDaiLiModule}
 
 import scala.concurrent.duration._
+import scala.util.control.NonFatal
 
 /**
   * Created by liangliao on 31/3/17.
@@ -21,7 +24,7 @@ class ProxyAssistantBootstrap @Inject()(config: Config, system: ActorSystem, @Na
     extends LazyLogging {
   import system.dispatcher
   def start(): Unit = {
-    system.scheduler.scheduleOnce(0.second, proxyAssistantActor, Run)
+    system.scheduler.schedule(0.second, 30.minutes, proxyAssistantActor, Run)
   }
 }
 

@@ -1,5 +1,6 @@
 package com.youleligou.crawler.actors
 
+import java.io.{File, PrintWriter}
 import java.sql.Timestamp
 
 import akka.actor.{Actor, ActorLogging}
@@ -10,6 +11,7 @@ import com.youleligou.crawler.daos.{CrawlerProxyServer, CrawlerProxyServerRepo}
 import play.api.libs.ws.DefaultWSProxyServer
 import play.api.libs.ws.ahc.StandaloneAhcWSClient
 import redis.RedisClient
+import sys.process._
 
 import scala.concurrent.duration.{Duration, MILLISECONDS}
 import scala.concurrent.{ExecutionContext, Future}
@@ -37,7 +39,25 @@ class ProxyAssistantActor @Inject()(config: Config,
             testedProxyServer
           }
         })
-      } map crawlerProxyServerRepo.insertOrUpdate map { _ =>
+      } map { testedProxyServers =>
+        //update squid config file
+        val squidConfig = testedProxyServers.filter(_.isLive) map { liveProxyServers =>
+          s"""cache_peer ${liveProxyServers.ip} parent ${liveProxyServers.port} 0 round-robin no-query no-digest"""
+        } mkString "\n"
+
+        try {
+          val writer = new PrintWriter(new File(config.getString("proxy.squid-config-file")))
+          writer.write(squidConfig)
+          writer.close()
+          config.getString("proxy.squid-reload-command") !
+
+        } catch {
+          case NonFatal(x) =>
+            log.warning(x.getMessage)
+        }
+        testedProxyServers
+
+      } map crawlerProxyServerRepo.insertOrUpdate map { _ => //update database
         context.stop(self)
       }
 

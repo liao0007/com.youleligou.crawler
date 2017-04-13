@@ -37,8 +37,8 @@ class YouDaiLiCrawlerBootstrap @Inject()(config: Config,
                                                       force = true)
       }
 
-      system.scheduler.schedule(1.seconds, 4.seconds, pageInjectorPool, Tick)
-      system.scheduler.schedule(3.seconds, 4.seconds, listInjectorPool, Tick)
+      system.scheduler.schedule(1.seconds, 10.seconds, pageInjectorPool, Tick)
+      system.scheduler.schedule(3.seconds, 10.seconds, listInjectorPool, Tick)
     }
   }
 
