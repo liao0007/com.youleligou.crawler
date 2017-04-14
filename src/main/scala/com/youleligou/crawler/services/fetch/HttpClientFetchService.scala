@@ -2,11 +2,11 @@ package com.youleligou.crawler.services.fetch
 
 import com.google.inject.Inject
 import com.typesafe.config.Config
-import com.youleligou.crawler.daos.{CrawlerJob, CrawlerJobRepo, CrawlerProxyServer}
+import com.youleligou.crawler.daos.{CrawlerJob, CrawlerJobRepo}
 import com.youleligou.crawler.models.{FetchRequest, FetchResponse}
 import com.youleligou.crawler.services.FetchService
 import play.api.libs.ws.ahc.StandaloneAhcWSClient
-import play.api.libs.ws.{DefaultWSProxyServer, StandaloneWSRequest, WSAuthScheme}
+import play.api.libs.ws.{DefaultWSProxyServer, WSAuthScheme}
 
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
@@ -52,7 +52,7 @@ class HttpClientFetchService @Inject()(config: Config, standaloneAhcWSClient: St
             CrawlerJob(
               url = urlInfo.url,
               jobName = requestName,
-              proxy = Some(s"""${proxyServer("host")}:${proxyServer("port")}"""),
+              useProxy = useProxy,
               statusCode = Some(response.status),
               statusMessage = Some(response.statusText)
             )
@@ -64,7 +64,7 @@ class HttpClientFetchService @Inject()(config: Config, standaloneAhcWSClient: St
         CrawlerJob(
           url = urlInfo.domain,
           jobName = requestName,
-          proxy = Some(s"""${proxyServer("host")}:${proxyServer("port")}"""),
+          useProxy = useProxy,
           statusCode = Some(FetchService.Timeout),
           statusMessage = None
         )

@@ -1,19 +1,17 @@
 package com.youleligou.eleme
 
 import akka.actor._
+import akka.pattern.ask
+import akka.util.Timeout
 import com.google.inject.Inject
 import com.google.inject.name.Named
 import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
 import com.youleligou.crawler.actors.AbstractInjectActor
 import com.youleligou.crawler.actors.AbstractInjectActor.{CacheCleared, ClearCache, Tick}
-import com.youleligou.crawler.models.UrlInfo.UrlInfoType
 import com.youleligou.crawler.models.{FetchRequest, UrlInfo}
-import com.youleligou.eleme
 import com.youleligou.eleme.daos.RestaurantRepo
 import redis.RedisClient
-import akka.pattern.ask
-import akka.util.Timeout
 
 import scala.concurrent.duration._
 

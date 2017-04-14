@@ -1,6 +1,7 @@
 package com.youleligou.proxyHunters.xicidaili
 
 import akka.actor._
+import akka.pattern.ask
 import akka.util.Timeout
 import com.google.inject.Inject
 import com.google.inject.name.Named
@@ -9,7 +10,6 @@ import com.typesafe.scalalogging.LazyLogging
 import com.youleligou.crawler.actors.AbstractInjectActor
 import com.youleligou.crawler.actors.AbstractInjectActor.{CacheCleared, ClearCache, Tick}
 import com.youleligou.crawler.models.{FetchRequest, UrlInfo}
-import akka.pattern.ask
 
 import scala.concurrent.duration._
 

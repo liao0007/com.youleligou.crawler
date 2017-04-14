@@ -9,7 +9,6 @@ import com.typesafe.config.Config
 import com.youleligou.crawler.actors._
 import com.youleligou.crawler.modules._
 import com.youleligou.crawler.services.{FetchService, HashService, ParseService}
-import com.youleligou.eleme.RestaurantInjectActor
 import com.youleligou.proxyHunters.xicidaili.services.ProxyListParseService
 import net.codingwell.scalaguice.ScalaModule
 import redis.RedisClient

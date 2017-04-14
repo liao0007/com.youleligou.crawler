@@ -6,7 +6,6 @@ import com.youleligou.crawler.services.ParseService
 import com.youleligou.eleme.daos.{Restaurant, RestaurantRepo}
 import play.api.libs.json._
 
-import scala.concurrent.Future
 import scala.util.Try
 
 class RestaurantParseService @Inject()(restaurantRepo: RestaurantRepo) extends ParseService {

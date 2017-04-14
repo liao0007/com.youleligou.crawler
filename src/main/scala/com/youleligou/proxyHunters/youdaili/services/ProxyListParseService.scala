@@ -9,7 +9,6 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 
 import scala.collection.JavaConverters._
-import scala.util.Try
 import scala.util.control.NonFatal
 
 /**

@@ -11,10 +11,10 @@ import com.youleligou.crawler.daos.{CrawlerProxyServer, CrawlerProxyServerRepo}
 import play.api.libs.ws.DefaultWSProxyServer
 import play.api.libs.ws.ahc.StandaloneAhcWSClient
 import redis.RedisClient
-import sys.process._
 
 import scala.concurrent.duration.{Duration, MILLISECONDS}
 import scala.concurrent.{ExecutionContext, Future}
+import scala.sys.process._
 import scala.util.control.NonFatal
 
 class ProxyAssistantActor @Inject()(config: Config,

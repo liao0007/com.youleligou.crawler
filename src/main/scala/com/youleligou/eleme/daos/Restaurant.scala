@@ -3,7 +3,6 @@ package com.youleligou.eleme.daos
 import com.google.inject.Inject
 import com.google.inject.name.Named
 import com.typesafe.scalalogging.LazyLogging
-import com.youleligou.crawler.daos.CrawlerProxyServer
 import com.youleligou.crawler.daos.schema.CanCan
 import play.api.libs.functional.syntax._
 import play.api.libs.json.Reads._

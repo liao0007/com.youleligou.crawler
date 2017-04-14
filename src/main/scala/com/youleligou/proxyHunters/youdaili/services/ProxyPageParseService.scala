@@ -4,7 +4,6 @@ import akka.actor.ActorRef
 import com.google.inject.Inject
 import com.google.inject.name.Named
 import com.youleligou.crawler.actors.AbstractInjectActor
-import com.youleligou.crawler.actors.AbstractInjectActor.Tick
 import com.youleligou.crawler.daos.CrawlerProxyServerRepo
 import com.youleligou.crawler.models.{FetchRequest, FetchResponse, ParseResult, UrlInfo}
 import com.youleligou.crawler.services.ParseService
@@ -14,7 +13,6 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 
 import scala.collection.JavaConverters._
-import scala.util.Try
 import scala.util.control.NonFatal
 
 /**

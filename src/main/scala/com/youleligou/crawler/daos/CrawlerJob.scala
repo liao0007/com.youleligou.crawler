@@ -20,7 +20,7 @@ case class CrawlerJob(
     jobType: String = FetchJobType,
     jobName: String,
     url: String,
-    proxy: Option[String] = None,
+    useProxy: Boolean = false,
     createdAt: Timestamp = new Timestamp(System.currentTimeMillis()),
     statusCode: Option[Int] = None,
     statusMessage: Option[String] = None
@@ -105,7 +105,7 @@ class CrawlerJobTable(tag: Tag) extends Table[CrawlerJob](tag, "crawler_job") {
 
   def url = column[String]("url")
 
-  def proxy = column[String]("proxy")
+  def useProxy = column[Boolean]("use_proxy")
 
   def createdAt = column[Timestamp]("created_at", SqlType("timestamp not null default CURRENT_TIMESTAMP"))
 
@@ -114,6 +114,6 @@ class CrawlerJobTable(tag: Tag) extends Table[CrawlerJob](tag, "crawler_job") {
   def statusMessage = column[String]("status_message")
 
   def * =
-    (id, jobType, jobName, url, proxy.?, createdAt, statusCode.?, statusMessage.?) <> ((CrawlerJob.apply _).tupled, CrawlerJob.unapply)
+    (id, jobType, jobName, url, useProxy, createdAt, statusCode.?, statusMessage.?) <> ((CrawlerJob.apply _).tupled, CrawlerJob.unapply)
 
 }

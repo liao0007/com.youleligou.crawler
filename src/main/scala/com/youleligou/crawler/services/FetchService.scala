@@ -1,7 +1,6 @@
 package com.youleligou.crawler.services
 
 import com.typesafe.scalalogging.LazyLogging
-import com.youleligou.crawler.daos.CrawlerProxyServer
 import com.youleligou.crawler.models.{FetchRequest, FetchResponse}
 
 import scala.concurrent.{ExecutionContext, Future}
