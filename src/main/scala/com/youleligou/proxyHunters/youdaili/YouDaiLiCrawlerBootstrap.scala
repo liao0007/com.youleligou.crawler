@@ -20,16 +20,19 @@ class YouDaiLiCrawlerBootstrap @Inject()(config: Config,
     extends LazyLogging {
   import system.dispatcher
 
+  val youdailiConfig = config.getConfig("crawler.job.youdaili")
+
   def start(): Unit = {
     import com.github.andr83.scalaconfig._
 
+    val config           = youdailiConfig.getConfig("crawler.youdaili.proxy-page")
     implicit val timeout = Timeout(5.minutes)
 
     for {
       _ <- pageInjectorPool ? ClearCache
       _ <- pageInjectorPool ? ClearCache
     } yield {
-      val seeds = config.as[Seq[UrlInfo]]("crawler.seed.youdaili.proxy-page")
+      val seeds = config.as[Seq[UrlInfo]]("seed")
       seeds.foreach { seed =>
         pageInjectorPool ! AbstractInjectActor.Inject(FetchRequest(
                                                         requestName = "fetch_youdaili_proxy_page",
@@ -38,8 +41,11 @@ class YouDaiLiCrawlerBootstrap @Inject()(config: Config,
                                                       force = true)
       }
 
-      system.scheduler.schedule(0.seconds, 60.seconds, pageInjectorPool, Tick)
-      system.scheduler.schedule(30.seconds, 60.seconds, listInjectorPool, Tick)
+      system.scheduler.schedule(0.seconds, FiniteDuration(config.getInt("interval"), MILLISECONDS), pageInjectorPool, Tick)
+      system.scheduler.schedule(30.seconds,
+                                FiniteDuration(youdailiConfig.getInt("youdaili.proxy-list.interval"), MILLISECONDS),
+                                listInjectorPool,
+                                Tick)
     }
   }
 

@@ -52,8 +52,8 @@ class ProxyAssistantActor @Inject()(config: Config,
           log.info("{} write to squid config file", self.path)
           writer.write(squidConfig)
 
-          log.info("{} restart squid", self.path)
-          config.getString("proxy.squid-reload-command") !
+//          log.info("{} restart squid", self.path)
+//          config.getString("proxy.squid-reload-command") !
         } catch {
           case NonFatal(x) =>
             log.warning(x.getMessage)

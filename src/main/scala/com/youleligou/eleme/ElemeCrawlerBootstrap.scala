@@ -29,12 +29,16 @@ class ElemeCrawlerBootstrap @Inject()(config: Config,
 
   import system.dispatcher
 
+  val elemeConfig = config.getConfig("crawler.job.eleme")
+
   /**
     * 爬虫启动函数
     */
   def startRestaurant(): Unit = {
     import com.github.andr83.scalaconfig._
-    val seeds = config.as[Seq[UrlInfo]]("crawler.seed.eleme.restaurant-list")
+
+    val config = elemeConfig.getConfig("restaurant-list")
+    val seeds  = config.as[Seq[UrlInfo]]("seed")
     seeds.foreach { seed =>
       restaurantInjectorPool ! AbstractInjectActor.Inject(FetchRequest(
                                                             requestName = "fetch_eleme_restaurant",
@@ -42,10 +46,12 @@ class ElemeCrawlerBootstrap @Inject()(config: Config,
                                                           ),
                                                           force = true)
     }
-    system.scheduler.schedule(5.seconds, 200.millis, restaurantInjectorPool, Tick)
+    system.scheduler.schedule(5.seconds, FiniteDuration(config.getInt("interval"), MILLISECONDS), restaurantInjectorPool, Tick)
   }
 
   def startFood(): Unit = {
+    val config = elemeConfig.getConfig("food-list")
+
     implicit val timeout = Timeout(5.minutes)
     foodInjectorPool ? ClearCache map {
       case CacheCleared(_) =>
@@ -60,7 +66,7 @@ class ElemeCrawlerBootstrap @Inject()(config: Config,
                                                           force = true)
           }
         }
-        system.scheduler.schedule(5.seconds, 200.millis, foodInjectorPool, Tick)
+        system.scheduler.schedule(5.seconds, FiniteDuration(config.getInt("interval"), MILLISECONDS), foodInjectorPool, Tick)
 
       case _ => logger.warn("food injector cache clear failed")
     }

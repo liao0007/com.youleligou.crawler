@@ -17,13 +17,17 @@ class XiCiDaiLiCrawlerBootstrap @Inject()(config: Config, system: ActorSystem, @
     extends LazyLogging {
   import system.dispatcher
 
+  val xiciConfig = config.getConfig("crawler.job.xicidaili")
+
   def start(): Unit = {
     import com.github.andr83.scalaconfig._
+
+    val config = xiciConfig.getConfig("proxy-list")
 
     implicit val timeout = Timeout(5.minutes)
     injectorPool ? ClearCache map {
       case CacheCleared(_) =>
-        val seeds = config.as[Seq[UrlInfo]]("crawler.seed.xicidaili.proxy-list")
+        val seeds = config.as[Seq[UrlInfo]]("seed")
         seeds.foreach { seed =>
           injectorPool ! AbstractInjectActor.Inject(FetchRequest(
                                                       requestName = "fetch_xici_proxy_list",
@@ -32,7 +36,7 @@ class XiCiDaiLiCrawlerBootstrap @Inject()(config: Config, system: ActorSystem, @
                                                     force = true)
         }
 
-        system.scheduler.schedule(1.seconds, 30.seconds, injectorPool, Tick)
+        system.scheduler.schedule(1.seconds, FiniteDuration(config.getInt("interval"), MILLISECONDS), injectorPool, Tick)
 
       case _ => logger.warn("food injector cache clear failed")
     }
