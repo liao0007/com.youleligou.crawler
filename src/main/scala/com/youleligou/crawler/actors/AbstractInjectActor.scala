@@ -37,17 +37,17 @@ abstract class AbstractInjectActor(config: Config, redisClient: RedisClient, has
       redisClient.del(PendingInjectingUrlQueueKey, InjectedUrlHashKey).map(CacheCleared) pipeTo sender
 
     case Inject(fetchRequest, force) =>
-      log.info("{} hash check {}", self.path, fetchRequest)
+      log.debug("{} hash check {}", self.path, fetchRequest)
       val md5 = hashService.hash(fetchRequest.urlInfo.url)
 
       redisClient.hsetnx(InjectedUrlHashKey, md5, "1") map { result =>
         if (force) true else result
       } flatMap {
         case true =>
-          log.info("{} injected {}", self.path, fetchRequest)
+          log.debug("{} injected {}", self.path, fetchRequest)
           redisClient.lpush(PendingInjectingUrlQueueKey, Json.toJson(fetchRequest).toString())
         case _ =>
-          log.info("{} rejected {}", self.path, fetchRequest)
+          log.debug("{} rejected {}", self.path, fetchRequest)
           Future.successful(0L)
       } recover {
         case NonFatal(x) =>
@@ -58,7 +58,7 @@ abstract class AbstractInjectActor(config: Config, redisClient: RedisClient, has
     case Injected(count) =>
 
     case Tick =>
-      log.info("{} tick", self.path)
+      log.debug("{} tick", self.path)
       redisClient.rpop[String](PendingInjectingUrlQueueKey).map(Ticked) recover {
         case NonFatal(x) =>
           log.warning(x.getMessage)

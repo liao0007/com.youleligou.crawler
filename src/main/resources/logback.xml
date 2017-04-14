@@ -16,12 +16,11 @@
         </encoder>
     </appender>
 
-    <logger name="akka" level="WARN"/>
-    <logger name="slick" level="WARN"/>
+    <logger name="akka" level="INFO"/>
+    <logger name="slick" level="INFO"/>
 
-    <root level="WARN">
+    <root level="INFO">
         <appender-ref ref="CONSOLE"/>
-        <appender-ref ref="FILE"/>
     </root>
 
 </configuration>

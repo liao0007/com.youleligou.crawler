@@ -33,13 +33,13 @@ abstract class AbstractFetchActor(config: Config, fetchService: FetchService, in
 
   def fetching(injector: ActorRef): Receive = {
     case Fetched(fetchResponse @ FetchResponse(FetchService.Ok, _, _, _)) =>
-      log.info("{} fetch succeed", self.path)
+      log.debug("{} fetch succeed", self.path)
       parser ! Parse(fetchResponse)
       injector ! WorkFinished
       context unbecome ()
 
     case Fetched(FetchResponse(statusCode @ FetchService.NotFound, _, message, _)) =>
-      log.info("{} fetch failed {} {}", self.path, statusCode, message)
+      log.debug("{} fetch failed {} {}", self.path, statusCode, message)
       injector ! WorkFinished
       context unbecome ()
 
@@ -49,7 +49,7 @@ abstract class AbstractFetchActor(config: Config, fetchService: FetchService, in
       context.system.terminate()
 
     case Fetched(FetchResponse(statusCode @ _, _, message, fetchRequest)) if fetchRequest.retry < MaxRetry =>
-      log.info("{} fetch failed {} {}, retry", self.path, statusCode, message)
+      log.debug("{} fetch failed {} {}, retry", self.path, statusCode, message)
       injectorPool ! Inject(fetchRequest.copy(retry = fetchRequest.retry + 1), force = true)
       injector ! WorkFinished
       context unbecome ()

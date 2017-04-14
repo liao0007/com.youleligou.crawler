@@ -31,11 +31,11 @@ class ProxyAssistantActor @Inject()(config: Config,
 
   override def receive: Receive = {
     case Run =>
-      log.info("{} run", self.path)
+      log.debug("{} run", self.path)
       crawlerProxyServerRepo.all() flatMap { proxyServers =>
         Future.sequence(proxyServers map { proxyServer =>
           testAvailability(proxyServer) map { testedProxyServer =>
-            log.info("{} {}:{} isLive={}", self.path, testedProxyServer.ip, testedProxyServer.port, testedProxyServer.isLive)
+            log.debug("{} {}:{} isLive={}", self.path, testedProxyServer.ip, testedProxyServer.port, testedProxyServer.isLive)
             testedProxyServer
           }
         })
@@ -45,18 +45,20 @@ class ProxyAssistantActor @Inject()(config: Config,
           s"""cache_peer ${liveProxyServers.ip} parent ${liveProxyServers.port} 0 round-robin no-query no-digest"""
         } mkString "\n"
 
+        val writer = new PrintWriter(new File(config.getString("proxy.squid-config-file")))
         try {
-          val writer = new PrintWriter(new File(config.getString("proxy.squid-config-file")))
+          log.info("{} write to squid config file", self.path)
           writer.write(squidConfig)
-          writer.close()
-          config.getString("proxy.squid-reload-command") !
 
+          log.info("{} reload squid", self.path)
+          config.getString("proxy.squid-reload-command") !
         } catch {
           case NonFatal(x) =>
             log.warning(x.getMessage)
+        } finally {
+          writer.close()
         }
         testedProxyServers
-
       } map crawlerProxyServerRepo.insertOrUpdate //update database
 
   }

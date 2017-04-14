@@ -32,7 +32,7 @@ class XiCiDaiLiCrawlerBootstrap @Inject()(config: Config, system: ActorSystem, @
                                                     force = true)
         }
 
-        system.scheduler.schedule(1.seconds, 5.seconds, injectorPool, Tick)
+        system.scheduler.schedule(1.seconds, 30.seconds, injectorPool, Tick)
 
       case _ => logger.warn("food injector cache clear failed")
     }
