@@ -28,7 +28,7 @@ class ServiceModule extends AbstractModule with ScalaModule {
   def provideRedisClient(config: Config)(implicit system: ActorSystem): RedisClient = {
     val redisConfig: Config = config.getConfig("cache.redis")
     val redisClient =
-      RedisClient(host = redisConfig.getString("host"), port = redisConfig.getInt("port"), password = Some(redisConfig.getString("password")))
+      RedisClient(host = redisConfig.getString("host"), port = redisConfig.getInt("port"))
     system.registerOnTermination({
       redisClient.shutdown()
     })
