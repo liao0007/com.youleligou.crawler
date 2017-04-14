@@ -64,8 +64,17 @@ class CrawlerProxyServerRepo @Inject()(@Named(CanCan) database: Database) extend
         0
     }
 
-  def all(): Future[List[CrawlerProxyServer]] =
-    database.run(CrawlerProxyServers.to[List].result) recover {
+  def all(limitOpt: Option[Int] = None): Future[List[CrawlerProxyServer]] =
+    database.run {
+      val prequery = CrawlerProxyServers.sortBy(_.checkCount.asc)
+      limitOpt
+        .fold(prequery) { limit =>
+          prequery.take(limit)
+        }
+        .to[List]
+        .result
+
+    } recover {
       case NonFatal(x) =>
         logger.warn(x.getMessage)
         List.empty[CrawlerProxyServer]
@@ -91,7 +100,7 @@ class CrawlerProxyServerRepo @Inject()(@Named(CanCan) database: Database) extend
 
   def create(crawlerProxyServers: List[CrawlerProxyServer]): Future[Option[Int]] =
     database.run(CrawlerProxyServers ++= crawlerProxyServers) recover {
-      case NonFatal(x) =>
+      case NonFatal(x) if !x.getMessage.contains("Duplicate entry") =>
         logger.warn(x.getMessage)
         None
     }

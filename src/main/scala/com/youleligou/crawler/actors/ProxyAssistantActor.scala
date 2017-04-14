@@ -4,6 +4,7 @@ import java.io.{File, PrintWriter}
 import java.sql.Timestamp
 
 import akka.actor.{Actor, ActorLogging}
+import akka.stream.ActorMaterializer
 import com.google.inject.Inject
 import com.typesafe.config.Config
 import com.youleligou.crawler.actors.ProxyAssistantActor._
@@ -15,12 +16,13 @@ import redis.RedisClient
 import scala.concurrent.duration.{Duration, MILLISECONDS}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.sys.process._
+import scala.util.Try
 import scala.util.control.NonFatal
 
 class ProxyAssistantActor @Inject()(config: Config,
                                     redisClient: RedisClient,
-                                    standaloneAhcWSClient: StandaloneAhcWSClient,
-                                    crawlerProxyServerRepo: CrawlerProxyServerRepo)
+                                    crawlerProxyServerRepo: CrawlerProxyServerRepo,
+                                    standaloneAhcWSClient: StandaloneAhcWSClient)
     extends Actor
     with ActorLogging {
   import context.dispatcher
@@ -50,7 +52,7 @@ class ProxyAssistantActor @Inject()(config: Config,
           log.info("{} write to squid config file", self.path)
           writer.write(squidConfig)
 
-          log.info("{} reload squid", self.path)
+          log.info("{} restart squid", self.path)
           config.getString("proxy.squid-reload-command") !
         } catch {
           case NonFatal(x) =>
@@ -64,7 +66,7 @@ class ProxyAssistantActor @Inject()(config: Config,
   }
 
   protected def testAvailability(proxyServer: CrawlerProxyServer)(implicit executor: ExecutionContext): Future[CrawlerProxyServer] = {
-    try {
+    Try {
       standaloneAhcWSClient
         .url("http://www.baidu.com")
         .withProxyServer(DefaultWSProxyServer(proxyServer.ip, proxyServer.port))
@@ -80,14 +82,16 @@ class ProxyAssistantActor @Inject()(config: Config,
         case NonFatal(_) =>
           proxyServer.copy(isLive = false, lastVerifiedAt = Some(currentTimestamp), checkCount = proxyServer.checkCount + 1)
       }
-    } catch {
-      case NonFatal(_) =>
-        Future.successful(proxyServer.copy(isLive = false, lastVerifiedAt = Some(currentTimestamp), checkCount = proxyServer.checkCount + 1))
+
+    } getOrElse {
+      Future.successful(proxyServer.copy(isLive = false, lastVerifiedAt = Some(currentTimestamp), checkCount = proxyServer.checkCount + 1))
+
+    } recover {
+      case NonFatal(x) =>
+        log.warning("{} {}", self.path, x.getMessage)
+        proxyServer.copy(isLive = false, lastVerifiedAt = Some(currentTimestamp), checkCount = proxyServer.checkCount + 1)
+
     }
-  } recover {
-    case NonFatal(x) =>
-      log.warning("{} {}", self.path, x.getMessage)
-      proxyServer.copy(isLive = false, lastVerifiedAt = Some(currentTimestamp), checkCount = proxyServer.checkCount + 1)
   }
 }
 

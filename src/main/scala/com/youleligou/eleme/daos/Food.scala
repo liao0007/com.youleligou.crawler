@@ -76,7 +76,7 @@ class FoodRepo @Inject()(@Named(CanCan) database: Database) extends LazyLogging 
 
   def create(restaurants: List[Food]): Future[Option[Int]] =
     database.run(Foods ++= restaurants) recover {
-      case NonFatal(x) =>
+      case NonFatal(x) if !x.getMessage.contains("Duplicate entry") =>
         logger.warn(x.getMessage)
         None
     }

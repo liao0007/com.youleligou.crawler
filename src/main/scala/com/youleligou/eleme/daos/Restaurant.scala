@@ -101,7 +101,7 @@ class RestaurantRepo @Inject()(@Named(CanCan) database: Database) extends LazyLo
 
   def create(restaurants: List[Restaurant]): Future[Option[Int]] =
     database.run(Restaurants ++= restaurants) recover {
-      case NonFatal(x) =>
+      case NonFatal(x) if !x.getMessage.contains("Duplicate entry") =>
         logger.warn(x.getMessage)
         None
     }

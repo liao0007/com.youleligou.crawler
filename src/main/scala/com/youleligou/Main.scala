@@ -1,6 +1,5 @@
 package com.youleligou
 
-
 import akka.actor.{ActorRef, ActorSystem}
 import com.google.inject.name.Named
 import com.google.inject.{Guice, Inject}
@@ -22,7 +21,7 @@ class ProxyAssistantBootstrap @Inject()(config: Config, system: ActorSystem, @Na
     extends LazyLogging {
   import system.dispatcher
   def start(): Unit = {
-    system.scheduler.schedule(0.second, 30.minutes, proxyAssistantActor, Run)
+    system.scheduler.schedule(0.second, 10.minutes, proxyAssistantActor, Run)
   }
 }
 

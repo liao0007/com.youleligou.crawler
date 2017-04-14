@@ -1,5 +1,6 @@
 package com.youleligou.crawler.services.fetch
 
+import akka.stream.ActorMaterializer
 import com.google.inject.Inject
 import com.typesafe.config.Config
 import com.youleligou.crawler.daos.{CrawlerJob, CrawlerJobRepo}
@@ -10,13 +11,14 @@ import play.api.libs.ws.{DefaultWSProxyServer, WSAuthScheme}
 
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.control.NonFatal
 import scala.util.{Random, Try}
 
 /**
   * Created by young.yang on 2016/8/28.
   * 采用HttpClient实现的爬取器
   */
-class HttpClientFetchService @Inject()(config: Config, standaloneAhcWSClient: StandaloneAhcWSClient, crawlerJobRepo: CrawlerJobRepo)
+class HttpClientFetchService @Inject()(config: Config, crawlerJobRepo: CrawlerJobRepo, standaloneAhcWSClient: StandaloneAhcWSClient)
     extends FetchService {
 
   import com.github.andr83.scalaconfig._
@@ -27,25 +29,25 @@ class HttpClientFetchService @Inject()(config: Config, standaloneAhcWSClient: St
   val timeout: Duration                = Duration(config.getInt("crawler.fetch.timeout"), MILLISECONDS)
 
   def fetch(fetchRequest: FetchRequest)(implicit executor: ExecutionContext): Future[FetchResponse] = {
-
     val FetchRequest(requestName, urlInfo, _) = fetchRequest
     val rand                                  = new Random(System.currentTimeMillis())
 
-    Try {
-      val client = standaloneAhcWSClient
+    val clientWithUrl =
+      standaloneAhcWSClient
         .url(urlInfo.url)
         .withHeaders("User-Agent" -> userAgents(rand.nextInt(userAgentsSize)))
         .withRequestTimeout(timeout)
 
-      val proxyClient =
-        if (useProxy) {
-          client
-            .withAuth(proxyServer("username"), proxyServer("password"), WSAuthScheme.BASIC)
-            .withProxyServer(DefaultWSProxyServer(host = proxyServer("host"), port = proxyServer("port").toInt))
-        } else
-          client
+    val clientWithProxy =
+      if (useProxy) {
+        clientWithUrl
+          .withAuth(proxyServer("username"), proxyServer("password"), WSAuthScheme.BASIC)
+          .withProxyServer(DefaultWSProxyServer(host = proxyServer("host"), port = proxyServer("port").toInt))
+      } else
+        clientWithUrl
 
-      proxyClient
+    Try {
+      clientWithProxy
         .get()
         .map { response =>
           crawlerJobRepo.create(
@@ -59,6 +61,7 @@ class HttpClientFetchService @Inject()(config: Config, standaloneAhcWSClient: St
           )
           FetchResponse(response.status, response.body, response.statusText, fetchRequest)
         }
+
     } getOrElse {
       crawlerJobRepo.create(
         CrawlerJob(
@@ -70,10 +73,12 @@ class HttpClientFetchService @Inject()(config: Config, standaloneAhcWSClient: St
         )
       )
       Future.successful(FetchResponse(FetchService.Timeout, "", "", fetchRequest))
+
+    } recover {
+      case NonFatal(x) =>
+        logger.warn(x.getMessage)
+        FetchResponse(FetchService.Timeout, "", "", fetchRequest)
+
     }
-  } recover {
-    case x: Throwable =>
-      logger.warn(x.getMessage)
-      FetchResponse(FetchService.Timeout, "", "", fetchRequest)
   }
 }

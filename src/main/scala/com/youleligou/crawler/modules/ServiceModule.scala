@@ -8,7 +8,6 @@ import com.google.inject.{AbstractModule, Provides}
 import com.typesafe.config.Config
 import com.youleligou.crawler.daos
 import com.youleligou.crawler.services._
-import com.youleligou.crawler.services.cache.RedisCacheService
 import com.youleligou.crawler.services.fetch.HttpClientFetchService
 import com.youleligou.crawler.services.filter.DefaultFilterService
 import com.youleligou.crawler.services.hash.Md5HashService
@@ -26,28 +25,47 @@ class ServiceModule extends AbstractModule with ScalaModule {
 
   @Provides
   @Singleton
-  def provideStandaloneAhcWSClient()(implicit system: ActorSystem): StandaloneAhcWSClient = {
-    implicit val materializer = ActorMaterializer()
-    StandaloneAhcWSClient()
-  }
-
-  @Provides
-  @Singleton
   def provideRedisClient(config: Config)(implicit system: ActorSystem): RedisClient = {
     val redisConfig: Config = config.getConfig("cache.redis")
-    RedisClient(host = redisConfig.getString("host"), port = redisConfig.getInt("port"), password = Some(redisConfig.getString("password")))
+    val redisClient =
+      RedisClient(host = redisConfig.getString("host"), port = redisConfig.getInt("port"), password = Some(redisConfig.getString("password")))
+    system.registerOnTermination({
+      redisClient.shutdown()
+    })
+    redisClient
   }
 
   @Provides
   @Singleton
   @Named(daos.schema.CanCan)
-  def provideDatabaseCanCan(): MySQLProfile.backend.Database = Database.forConfig("db.cancan")
+  def provideDatabaseCanCan(system: ActorSystem): MySQLProfile.backend.Database = {
+    val database = Database.forConfig("db.cancan")
+    system.registerOnTermination({
+      database.close()
+    })
+    database
+  }
+
+  @Provides
+  @Singleton
+  def provideActorMaterializer(implicit system: ActorSystem): ActorMaterializer = {
+    ActorMaterializer()
+  }
+
+  @Provides
+  @Singleton
+  def provideStandaloneAhcWSClient(system: ActorSystem)(implicit actorMaterializer: ActorMaterializer): StandaloneAhcWSClient = {
+    val standaloneAhcWSClient = StandaloneAhcWSClient()
+    system.registerOnTermination({
+      standaloneAhcWSClient.close()
+    })
+    standaloneAhcWSClient
+  }
 
   override def configure() {
     bind[HashService].to[Md5HashService].asEagerSingleton()
     bind[FetchService].to[HttpClientFetchService].asEagerSingleton()
     bind[IndexService].to[ElasticIndexService].asEagerSingleton()
-    bind[CacheService].to[RedisCacheService].asEagerSingleton()
     bind[FilterService].to[DefaultFilterService].asEagerSingleton()
   }
 }
