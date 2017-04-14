@@ -25,7 +25,7 @@ class YouDaiLiCrawlerBootstrap @Inject()(config: Config,
   def start(): Unit = {
     import com.github.andr83.scalaconfig._
 
-    val config           = youdailiConfig.getConfig("crawler.youdaili.proxy-page")
+    val config           = youdailiConfig.getConfig("proxy-page")
     implicit val timeout = Timeout(5.minutes)
 
     for {
@@ -42,10 +42,7 @@ class YouDaiLiCrawlerBootstrap @Inject()(config: Config,
       }
 
       system.scheduler.schedule(0.seconds, FiniteDuration(config.getInt("interval"), MILLISECONDS), pageInjectorPool, Tick)
-      system.scheduler.schedule(30.seconds,
-                                FiniteDuration(youdailiConfig.getInt("youdaili.proxy-list.interval"), MILLISECONDS),
-                                listInjectorPool,
-                                Tick)
+      system.scheduler.schedule(30.seconds, FiniteDuration(youdailiConfig.getInt("proxy-list.interval"), MILLISECONDS), listInjectorPool, Tick)
     }
   }
 
