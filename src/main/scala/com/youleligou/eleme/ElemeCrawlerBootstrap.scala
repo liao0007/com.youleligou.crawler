@@ -55,17 +55,6 @@ class ElemeCrawlerBootstrap @Inject()(config: Config,
     implicit val timeout = Timeout(5.minutes)
     foodInjectorPool ? ClearCache map {
       case CacheCleared(_) =>
-        foodInjectorPool ! AbstractInjectActor.Inject(
-          FetchRequest(
-            requestName = "fetch_eleme_food",
-            urlInfo = UrlInfo(
-              domain = s"http://mainsite-restapi.ele.me/shopping/v2/menu?restaurant_id=41990"
-            )
-          ),
-          force = true
-        )
-
-        /*
         restaurantRepo.allIds() map { ids =>
           ids.foreach { id =>
             foodInjectorPool ! AbstractInjectActor.Inject(FetchRequest(
@@ -77,10 +66,7 @@ class ElemeCrawlerBootstrap @Inject()(config: Config,
                                                           force = true)
           }
         }
-         */
-
         system.scheduler.schedule(5.seconds, FiniteDuration(config.getInt("interval"), MILLISECONDS), foodInjectorPool, Tick)
-
       case _ => logger.warn("food injector cache clear failed")
     }
 
