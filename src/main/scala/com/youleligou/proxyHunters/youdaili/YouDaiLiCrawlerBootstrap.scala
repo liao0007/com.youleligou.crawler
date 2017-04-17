@@ -39,6 +39,7 @@ class YouDaiLiCrawlerBootstrap @Inject()(config: Config, system: ActorSystem, @N
                                 FiniteDuration(proxyPageConfig.getInt("interval"), MILLISECONDS),
                                 injectors,
                                 Tick(proxyPageConfig.getString("jobType")))
+
       system.scheduler.schedule(
         30.seconds,
         FiniteDuration(proxyPageConfig.getInt("proxyList.interval"), MILLISECONDS),

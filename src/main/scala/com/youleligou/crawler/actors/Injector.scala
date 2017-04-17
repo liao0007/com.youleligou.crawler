@@ -55,7 +55,7 @@ class Injector @Inject()(config: Config, redisClient: RedisClient, hashService: 
     case Injector.Injected(count) =>
 
     case Injector.Tick(queue) =>
-      log.debug("{} tick", self.path)
+      log.debug("{} tick {}", self.path, queue)
       redisClient.rpop[String](pendingInjectingUrlQueueKey(queue)).map(Injector.Ticked) recover {
         case NonFatal(x) =>
           log.warning(x.getMessage)

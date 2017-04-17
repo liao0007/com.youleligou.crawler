@@ -3,13 +3,13 @@ package com.youleligou.proxyHunters.youdaili.services.proxyPage
 import akka.actor.ActorRef
 import com.google.inject.Inject
 import com.google.inject.name.Named
+import com.typesafe.config.Config
 import com.youleligou.crawler.actors.Injector
 import com.youleligou.crawler.daos.CrawlerProxyServerRepo
 import com.youleligou.crawler.models.{FetchRequest, FetchResponse, ParseResult, UrlInfo}
 import com.youleligou.crawler.services.hash.Md5HashService
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
-import play.shaded.ahc.org.asynchttpclient.config.AsyncHttpClientConfigHelper.Config
 
 import scala.collection.JavaConverters._
 import scala.util.control.NonFatal
