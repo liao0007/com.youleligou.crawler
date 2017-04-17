@@ -1,27 +1,12 @@
 package com.youleligou.crawler.modules
 
-import akka.actor.{
-  Actor,
-  ActorContext,
-  ActorRef,
-  ActorSystem,
-  ExtendedActorSystem,
-  Extension,
-  ExtensionId,
-  ExtensionIdProvider,
-  IndirectActorProducer,
-  Props
-}
+import akka.actor.{Actor, ActorContext, ActorRef, ActorSystem, ExtendedActorSystem, Extension, ExtensionId, ExtensionIdProvider, IndirectActorProducer, Props}
 import akka.routing.FromConfig
 import com.google.inject._
-import com.google.inject.name.{Named, Names}
+import com.google.inject.name.Names
 import com.typesafe.config.Config
 import com.youleligou.crawler.actors.NamedActor
-import com.youleligou.crawler.daos.schema.CanCan
 import net.codingwell.scalaguice.ScalaModule
-import play.api.libs.ws.ahc.StandaloneAhcWSClient
-import redis.RedisClient
-import slick.jdbc.MySQLProfile.api._
 
 class GuiceActorProducer(injector: Injector, actorName: String) extends IndirectActorProducer {
   override def actorClass: Class[Actor] = classOf[Actor]
@@ -55,13 +40,13 @@ object GuiceAkkaExtension extends ExtensionId[GuiceAkkaExtensionImpl] with Exten
   */
 trait GuiceAkkaActorRefProvider {
   def propsFor(system: ActorSystem, namedActor: NamedActor): Props =
-    GuiceAkkaExtension(system).props(namedActor.name)
+    GuiceAkkaExtension(system).props(namedActor.Name)
 
   def provideActorRef(system: ActorSystem, actorCompanion: NamedActor, actorContextOpt: Option[ActorContext] = None): ActorRef =
     actorContextOpt.getOrElse(system).actorOf(propsFor(system, actorCompanion))
 
   def provideActorPoolRef(system: ActorSystem, actorCompanion: NamedActor, actorContextOpt: Option[ActorContext] = None): ActorRef =
-    actorContextOpt.getOrElse(system).actorOf(FromConfig.props(GuiceAkkaExtension(system).props(actorCompanion.name)), actorCompanion.poolName)
+    actorContextOpt.getOrElse(system).actorOf(FromConfig.props(GuiceAkkaExtension(system).props(actorCompanion.Name)), actorCompanion.PoolName)
 }
 
 /**
@@ -74,8 +59,7 @@ class AkkaModule extends AbstractModule with ScalaModule {
 
   @Provides
   @Singleton
-  def providesActorSystem(config: Config,
-                          injector: Injector): ActorSystem = {
+  def providesActorSystem(config: Config, injector: Injector): ActorSystem = {
     val system = ActorSystem(config.getString("appName"), config)
     GuiceAkkaExtension(system).initialize(injector)
     system

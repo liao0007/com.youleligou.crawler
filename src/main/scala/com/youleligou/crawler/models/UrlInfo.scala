@@ -12,7 +12,9 @@ case class UrlInfo(domain: String,
                    path: String = "",
                    queryParameters: Map[String, String] = Map.empty[String, String],
                    urlType: String = UrlInfoType.Generated,
-                   deep: Int = 0) {
+                   jobType: String,
+                   deep: Int = 0,
+                   services: Map[String, String] = Map.empty[String, String]) {
   val url: String = {
     val parameterString =
       if (queryParameters.nonEmpty)

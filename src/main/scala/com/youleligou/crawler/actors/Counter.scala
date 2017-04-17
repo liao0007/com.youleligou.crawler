@@ -1,13 +1,13 @@
 package com.youleligou.crawler.actors
 
 import akka.actor.Actor
-import com.youleligou.crawler.actors.CountActor._
+import com.youleligou.crawler.actors.Counter._
 
 /**
   * Created by young.yang on 2016/9/3.
   * 用来对任务进行计数
   */
-class CountActor extends Actor {
+class Counter extends Actor {
 
   private var fetchCounter = FetchCounter(0)
   private var fetchOk = FetchOk(0)
@@ -47,9 +47,9 @@ class CountActor extends Actor {
   }
 }
 
-object CountActor extends NamedActor {
-  override final val name = "CountActor"
-  override final val poolName = "CountActorPool"
+object Counter extends NamedActor {
+  override final val Name = "CountActor"
+  override final val PoolName = "CountActorPool"
 
   sealed trait Counter
 

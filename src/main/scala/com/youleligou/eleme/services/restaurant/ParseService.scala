@@ -1,14 +1,13 @@
-package com.youleligou.eleme.services
+package com.youleligou.eleme.services.restaurant
 
 import com.google.inject.Inject
 import com.youleligou.crawler.models.{FetchResponse, ParseResult, UrlInfo}
-import com.youleligou.crawler.services.ParseService
 import com.youleligou.eleme.daos.{Restaurant, RestaurantRepo}
 import play.api.libs.json._
 
 import scala.util.Try
 
-class RestaurantParseService @Inject()(restaurantRepo: RestaurantRepo) extends ParseService {
+class ParseService @Inject()(restaurantRepo: RestaurantRepo) extends com.youleligou.crawler.services.ParseService {
 
   final val Length: Int      = 2
   final val Precision: Float = 10F
@@ -17,9 +16,10 @@ class RestaurantParseService @Inject()(restaurantRepo: RestaurantRepo) extends P
   final val OffsetKey        = "offset"
 
   private def getChildLinksByLocation(fetchResponse: FetchResponse): Seq[UrlInfo] = {
-    val UrlInfo(domain, path, queryParameters, urlType, deep) = fetchResponse.fetchRequest.urlInfo
-    val originalLatitude                                      = queryParameters.getOrElse(LatitudeKey, "39").toFloat
-    val originalLongitude                                     = queryParameters.getOrElse(LongitudeKey, "116").toFloat
+    val queryParameters   = fetchResponse.fetchRequest.urlInfo.queryParameters
+    val deep              = fetchResponse.fetchRequest.urlInfo.deep
+    val originalLatitude  = queryParameters.getOrElse(LatitudeKey, "39").toFloat
+    val originalLongitude = queryParameters.getOrElse(LongitudeKey, "116").toFloat
 
     for {
       latitudeSteps  <- -Length to Length if latitudeSteps != 0; latitudeDelta   = latitudeSteps / Precision
@@ -61,8 +61,4 @@ class RestaurantParseService @Inject()(restaurantRepo: RestaurantRepo) extends P
       childLink = if (restaurants.isEmpty) getChildLinksByLocation(fetchResponse) else getChildLinksByOffset(fetchResponse)
     )
   }
-}
-
-object RestaurantParseService {
-  final val name = "ElemeRestaurantParseService"
 }

@@ -1,9 +1,8 @@
-package com.youleligou.proxyHunters.youdaili.services
+package com.youleligou.proxyHunters.youdaili.services.proxyList
 
 import com.google.inject.Inject
 import com.youleligou.crawler.daos.{CrawlerProxyServer, CrawlerProxyServerRepo}
 import com.youleligou.crawler.models.{FetchResponse, ParseResult, UrlInfo}
-import com.youleligou.crawler.services.ParseService
 import com.youleligou.crawler.services.hash.Md5HashService
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
@@ -15,7 +14,7 @@ import scala.util.control.NonFatal
   * Created by young.yang on 2016/8/31.
   * Jsoup解析器
   */
-class ProxyListParseService @Inject()(md5HashService: Md5HashService, crawlerProxyServerRepo: CrawlerProxyServerRepo) extends ParseService {
+class ParseService @Inject()(md5HashService: Md5HashService, crawlerProxyServerRepo: CrawlerProxyServerRepo) extends com.youleligou.crawler.services.ParseService {
 
   private def getChildLinks(content: Document, fetchResponse: FetchResponse) = {
     content.select(".pagebreak li").not(".thisclass").asScala.flatMap { li =>
@@ -63,9 +62,4 @@ class ProxyListParseService @Inject()(md5HashService: Md5HashService, crawlerPro
       fetchResponse = fetchResponse
     )
   }
-}
-
-object ProxyListParseService {
-  val format     = new java.text.SimpleDateFormat("yy-MM-dd hh:mm")
-  final val name = "YouDaiLiProxyListParseService"
 }

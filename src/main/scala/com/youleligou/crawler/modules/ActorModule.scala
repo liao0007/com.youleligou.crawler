@@ -17,31 +17,46 @@ class ActorModule extends AbstractModule with ScalaModule with GuiceAkkaActorRef
   count actor
    */
   @Provides
-  @Named(CountActor.name)
-  def provideAuditActorRef(system: ActorSystem): ActorRef = provideActorRef(system, CountActor)
+  @Named(Counter.Name)
+  def provideCounter(system: ActorSystem): ActorRef = provideActorRef(system, Counter)
 
   /*
   proxy assistant actor
    */
   @Provides
-  @Named(ProxyAssistantActor.name)
-  def provideProxyAssistantActorRef(system: ActorSystem): ActorRef = provideActorRef(system, ProxyAssistantActor)
+  @Named(ProxyAssistant.Name)
+  def provideProxyAssistant(system: ActorSystem): ActorRef = provideActorRef(system, ProxyAssistant)
 
   /*
-  index actor
+  inject actor
    */
   @Provides
-  @Named(IndexActor.name)
-  def provideIndexActorRef(system: ActorSystem): ActorRef = provideActorRef(system, IndexActor)
+  @Named(Injector.Name)
+  def provideInjector(system: ActorSystem): ActorRef = provideActorRef(system, Injector)
 
   @Provides
   @Singleton
-  @Named(IndexActor.poolName)
-  def provideIndexActorPoolRef(config: Config, system: ActorSystem): ActorRef = provideActorPoolRef(system, IndexActor)
+  @Named(Injector.PoolName)
+  def provideInjectActors(config: Config, system: ActorSystem): ActorRef = provideActorPoolRef(system, Injector)
+
+  @Provides
+  @Named(Fetcher.Name)
+  def provideFetcher(system: ActorSystem): ActorRef = provideActorRef(system, Fetcher)
+
+  @Provides
+  @Named(Parser.Name)
+  def provideParser(system: ActorSystem): ActorRef = provideActorRef(system, Parser)
+
+  @Provides
+  @Named(Indexer.Name)
+  def provideIndexer(system: ActorSystem): ActorRef = provideActorRef(system, Indexer)
 
   override def configure() {
-    bind[Actor].annotatedWith(Names.named(CountActor.name)).to[CountActor]
-    bind[Actor].annotatedWith(Names.named(IndexActor.name)).to[IndexActor]
-    bind[Actor].annotatedWith(Names.named(ProxyAssistantActor.name)).to[ProxyAssistantActor]
+    bind[Actor].annotatedWith(Names.named(Counter.Name)).to[Counter]
+    bind[Actor].annotatedWith(Names.named(Indexer.Name)).to[Indexer]
+    bind[Actor].annotatedWith(Names.named(ProxyAssistant.Name)).to[ProxyAssistant]
+    bind[Actor].annotatedWith(Names.named(Injector.Name)).to[Injector]
+    bind[Actor].annotatedWith(Names.named(Fetcher.Name)).to[Fetcher]
+    bind[Actor].annotatedWith(Names.named(Parser.Name)).to[Parser]
   }
 }

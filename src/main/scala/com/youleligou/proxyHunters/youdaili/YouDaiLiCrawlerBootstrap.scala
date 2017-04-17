@@ -7,42 +7,44 @@ import com.google.inject.Inject
 import com.google.inject.name.Named
 import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
-import com.youleligou.crawler.actors.AbstractInjectActor
-import com.youleligou.crawler.actors.AbstractInjectActor.{ClearCache, Tick}
+import com.youleligou.crawler.actors.Injector
+import com.youleligou.crawler.actors.Injector.{ClearCache, Tick}
 import com.youleligou.crawler.models.{FetchRequest, UrlInfo}
 
 import scala.concurrent.duration._
 
-class YouDaiLiCrawlerBootstrap @Inject()(config: Config,
-                                         system: ActorSystem,
-                                         @Named(ProxyPageInjectActor.poolName) pageInjectorPool: ActorRef,
-                                         @Named(ProxyListInjectActor.poolName) listInjectorPool: ActorRef)
-    extends LazyLogging {
+class YouDaiLiCrawlerBootstrap @Inject()(config: Config, system: ActorSystem, @Named(Injector.PoolName) injectors: ActorRef) extends LazyLogging {
   import system.dispatcher
 
-  val youdailiConfig = config.getConfig("crawler.job.youdaili")
+  val proxyPageConfig = config.getConfig("crawler.job.youdaili.proxyPage")
 
   def start(): Unit = {
     import com.github.andr83.scalaconfig._
 
-    val config           = youdailiConfig.getConfig("proxy-page")
     implicit val timeout = Timeout(5.minutes)
 
     for {
-      _ <- pageInjectorPool ? ClearCache
-      _ <- listInjectorPool ? ClearCache
+      _ <- injectors ? ClearCache(proxyPageConfig.getString("jobType"))
+      _ <- injectors ? ClearCache(config.getString("crawler.job.youdaili.proxyList.jobType"))
     } yield {
-      val seeds = config.as[Seq[UrlInfo]]("seed")
+      val seeds = proxyPageConfig.as[Seq[UrlInfo]]("seed")
       seeds.foreach { seed =>
-        pageInjectorPool ! AbstractInjectActor.Inject(FetchRequest(
-                                                        requestName = "fetch_youdaili_proxy_page",
-                                                        urlInfo = seed
-                                                      ),
-                                                      force = true)
+        injectors ! Injector.Inject(FetchRequest(
+                                       urlInfo = seed
+                                     ),
+                                     force = true)
       }
 
-      system.scheduler.schedule(0.seconds, FiniteDuration(config.getInt("interval"), MILLISECONDS), pageInjectorPool, Tick)
-      system.scheduler.schedule(30.seconds, FiniteDuration(youdailiConfig.getInt("proxy-list.interval"), MILLISECONDS), listInjectorPool, Tick)
+      system.scheduler.schedule(0.seconds,
+                                FiniteDuration(proxyPageConfig.getInt("interval"), MILLISECONDS),
+                                injectors,
+                                Tick(proxyPageConfig.getString("jobType")))
+      system.scheduler.schedule(
+        30.seconds,
+        FiniteDuration(proxyPageConfig.getInt("proxyList.interval"), MILLISECONDS),
+        injectors,
+        Tick(config.getString("crawler.job.youdaili.proxyList.jobType"))
+      )
     }
   }
 

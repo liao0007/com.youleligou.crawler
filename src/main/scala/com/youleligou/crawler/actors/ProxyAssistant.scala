@@ -4,10 +4,9 @@ import java.io.{File, PrintWriter}
 import java.sql.Timestamp
 
 import akka.actor.{Actor, ActorLogging}
-import akka.stream.ActorMaterializer
 import com.google.inject.Inject
 import com.typesafe.config.Config
-import com.youleligou.crawler.actors.ProxyAssistantActor._
+import com.youleligou.crawler.actors.ProxyAssistant._
 import com.youleligou.crawler.daos.{CrawlerProxyServer, CrawlerProxyServerRepo}
 import play.api.libs.ws.DefaultWSProxyServer
 import play.api.libs.ws.ahc.StandaloneAhcWSClient
@@ -15,14 +14,13 @@ import redis.RedisClient
 
 import scala.concurrent.duration.{Duration, MILLISECONDS}
 import scala.concurrent.{ExecutionContext, Future}
-import scala.sys.process._
 import scala.util.Try
 import scala.util.control.NonFatal
 
-class ProxyAssistantActor @Inject()(config: Config,
-                                    redisClient: RedisClient,
-                                    crawlerProxyServerRepo: CrawlerProxyServerRepo,
-                                    standaloneAhcWSClient: StandaloneAhcWSClient)
+class ProxyAssistant @Inject()(config: Config,
+                               redisClient: RedisClient,
+                               crawlerProxyServerRepo: CrawlerProxyServerRepo,
+                               standaloneAhcWSClient: StandaloneAhcWSClient)
     extends Actor
     with ActorLogging {
   import context.dispatcher
@@ -98,9 +96,9 @@ class ProxyAssistantActor @Inject()(config: Config,
   }
 }
 
-object ProxyAssistantActor extends NamedActor {
-  override final val name     = "ProxyAssistantActor"
-  override final val poolName = "ProxyAssistantActorPool"
+object ProxyAssistant extends NamedActor {
+  override final val Name     = "ProxyAssistantActor"
+  override final val PoolName = "ProxyAssistantActorPool"
 
   sealed trait Command
   sealed trait Event

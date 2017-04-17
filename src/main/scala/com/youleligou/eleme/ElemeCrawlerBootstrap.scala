@@ -7,8 +7,8 @@ import com.google.inject.Inject
 import com.google.inject.name.Named
 import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
-import com.youleligou.crawler.actors.AbstractInjectActor
-import com.youleligou.crawler.actors.AbstractInjectActor.{CacheCleared, ClearCache, Tick}
+import com.youleligou.crawler.actors.Injector
+import com.youleligou.crawler.actors.Injector.{CacheCleared, ClearCache, Tick}
 import com.youleligou.crawler.models.{FetchRequest, UrlInfo}
 import com.youleligou.eleme.daos.RestaurantRepo
 import redis.RedisClient
@@ -23,13 +23,13 @@ class ElemeCrawlerBootstrap @Inject()(config: Config,
                                       system: ActorSystem,
                                       restaurantRepo: RestaurantRepo,
                                       redisClient: RedisClient,
-                                      @Named(RestaurantInjectActor.poolName) restaurantInjectorPool: ActorRef,
-                                      @Named(FoodInjectActor.poolName) foodInjectorPool: ActorRef)
+                                      @Named(Injector.PoolName) injectors: ActorRef)
     extends LazyLogging {
 
   import system.dispatcher
 
-  val elemeConfig = config.getConfig("crawler.job.eleme")
+  val restaurantListConfig = config.getConfig("crawler.job.eleme.restaurantList")
+  val foodListConfig       = config.getConfig("crawler.job.eleme.foodList")
 
   /**
     * 爬虫启动函数
@@ -37,36 +37,42 @@ class ElemeCrawlerBootstrap @Inject()(config: Config,
   def startRestaurant(): Unit = {
     import com.github.andr83.scalaconfig._
 
-    val config = elemeConfig.getConfig("restaurant-list")
-    val seeds  = config.as[Seq[UrlInfo]]("seed")
+    val seeds = restaurantListConfig.as[Seq[UrlInfo]]("seed")
     seeds.foreach { seed =>
-      restaurantInjectorPool ! AbstractInjectActor.Inject(FetchRequest(
-                                                            requestName = "fetch_eleme_restaurant",
-                                                            urlInfo = seed
-                                                          ),
-                                                          force = true)
+      injectors ! Injector.Inject(FetchRequest(
+                                    urlInfo = seed
+                                  ),
+                                  force = true)
     }
-    system.scheduler.schedule(5.seconds, FiniteDuration(config.getInt("interval"), MILLISECONDS), restaurantInjectorPool, Tick)
+    system.scheduler.schedule(5.seconds,
+                              FiniteDuration(restaurantListConfig.getInt("interval"), MILLISECONDS),
+                              injectors,
+                              Tick(restaurantListConfig.getString("jobType")))
   }
 
   def startFood(): Unit = {
-    val config = elemeConfig.getConfig("food-list")
+    val foodListJobType = foodListConfig.getString("jobType")
 
     implicit val timeout = Timeout(5.minutes)
-    foodInjectorPool ? ClearCache map {
+    injectors ? ClearCache(foodListJobType) map {
       case CacheCleared(_) =>
         restaurantRepo.allIds() map { ids =>
           ids.foreach { id =>
-            foodInjectorPool ! AbstractInjectActor.Inject(FetchRequest(
-                                                            requestName = "fetch_eleme_food",
-                                                            urlInfo = UrlInfo(
-                                                              domain = s"http://mainsite-restapi.ele.me/shopping/v2/menu?restaurant_id=$id"
-                                                            )
-                                                          ),
-                                                          force = true)
+            injectors ! Injector.Inject(
+              FetchRequest(
+                urlInfo = UrlInfo(
+                  domain = s"http://mainsite-restapi.ele.me/shopping/v2/menu?restaurant_id=$id",
+                  jobType = foodListJobType,
+                  services = Map(
+                    "ParseService" -> "com.youleligou.eleme.services.food.ParseService"
+                  )
+                )
+              ),
+              force = true
+            )
           }
         }
-        system.scheduler.schedule(5.seconds, FiniteDuration(config.getInt("interval"), MILLISECONDS), foodInjectorPool, Tick)
+        system.scheduler.schedule(5.seconds, FiniteDuration(foodListConfig.getInt("interval"), MILLISECONDS), injectors, Tick(foodListJobType))
       case _ => logger.warn("food injector cache clear failed")
     }
 

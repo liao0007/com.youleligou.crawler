@@ -3,7 +3,7 @@ package com.youleligou.crawler.actors
 import akka.actor.{Actor, ActorLogging}
 import com.google.inject.Inject
 import com.typesafe.config.Config
-import com.youleligou.crawler.actors.IndexActor.Index
+import com.youleligou.crawler.actors.Indexer.Index
 import com.youleligou.crawler.models.ParseResult
 import com.youleligou.crawler.services.IndexService
 
@@ -11,7 +11,7 @@ import com.youleligou.crawler.services.IndexService
   * Created by dell on 2016/8/29.
   * 索引任务
   */
-class IndexActor @Inject()(config: Config, indexService: IndexService) extends Actor with ActorLogging {
+class Indexer @Inject()(config: Config, indexService: IndexService) extends Actor with ActorLogging {
 
   override def receive: Receive = {
     case Index(parseResult) =>
@@ -19,9 +19,9 @@ class IndexActor @Inject()(config: Config, indexService: IndexService) extends A
   }
 }
 
-object IndexActor extends NamedActor {
-  override final val name     = "IndexActor"
-  override final val poolName = "IndexActorPool"
+object Indexer extends NamedActor {
+  override final val Name     = "IndexActor"
+  override final val PoolName = "IndexActorPool"
 
   sealed trait Command
   sealed trait Event

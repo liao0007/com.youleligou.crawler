@@ -1,7 +1,6 @@
-val pattern = """.*?([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})\:?([0-9]{1,5})@(HTTP|HTTPS).*""".r
-val pattern(d,b,c) =
-  """220.176.196.100:8998@HTTP""".replaceAll("[^\\x00-\\x7F]", "").trim
+
+import com.youleligou.crawler.actors.Injector
 
 
-
-Seq((1,2),(2,3),(1,3)).groupBy(_._1).map(_._2.head)
+val jec = classOf[Injector]
+jec.type

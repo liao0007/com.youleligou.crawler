@@ -5,19 +5,19 @@ import com.google.inject.name.Named
 import com.google.inject.{Guice, Inject}
 import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
-import com.youleligou.crawler.actors.ProxyAssistantActor
-import com.youleligou.crawler.actors.ProxyAssistantActor.Run
+import com.youleligou.crawler.actors.ProxyAssistant
+import com.youleligou.crawler.actors.ProxyAssistant.Run
 import com.youleligou.crawler.modules.{ActorModule, AkkaModule, ConfigModule, ServiceModule}
 import com.youleligou.eleme.{ElemeCrawlerBootstrap, ElemeModule}
-import com.youleligou.proxyHunters.xicidaili.{XiCiDaiLiCrawlerBootstrap, XiCiDaiLiModule}
-import com.youleligou.proxyHunters.youdaili.{YouDaiLiCrawlerBootstrap, YouDaiLiModule}
+//import com.youleligou.proxyHunters.xicidaili.{XiCiDaiLiCrawlerBootstrap, XiCiDaiLiModule}
+//import com.youleligou.proxyHunters.youdaili.{YouDaiLiCrawlerBootstrap, YouDaiLiModule}
 
 import scala.concurrent.duration._
 
 /**
   * Created by liangliao on 31/3/17.
   */
-class ProxyAssistantBootstrap @Inject()(config: Config, system: ActorSystem, @Named(ProxyAssistantActor.name) proxyAssistantActor: ActorRef)
+class ProxyAssistantBootstrap @Inject()(config: Config, system: ActorSystem, @Named(ProxyAssistant.Name) proxyAssistantActor: ActorRef)
     extends LazyLogging {
   import system.dispatcher
   def start(): Unit = {
@@ -31,12 +31,14 @@ object Main extends App {
     new AkkaModule,
     new ServiceModule,
     new ActorModule,
-    new ElemeModule,
-    new XiCiDaiLiModule,
-    new YouDaiLiModule
+    new ElemeModule
+//    new XiCiDaiLiModule,
+//    new YouDaiLiModule
   )
 
   import net.codingwell.scalaguice.InjectorExtensions._
+
+  injector.instance[ElemeCrawlerBootstrap].startRestaurant()
 
   if (args.contains("eleme/restaurant"))
     injector.instance[ElemeCrawlerBootstrap].startRestaurant()
@@ -47,11 +49,11 @@ object Main extends App {
   if (args.contains("proxy/assistant"))
     injector.instance[ProxyAssistantBootstrap].start()
 
-  if (args.contains("proxy/you"))
-    injector.instance[YouDaiLiCrawlerBootstrap].start()
-
-  if (args.contains("proxy/xici"))
-    injector.instance[XiCiDaiLiCrawlerBootstrap].start()
+//  if (args.contains("proxy/you"))
+//    injector.instance[YouDaiLiCrawlerBootstrap].start()
+//
+//  if (args.contains("proxy/xici"))
+//    injector.instance[XiCiDaiLiCrawlerBootstrap].start()
 }
 
 //object Main2 extends App {

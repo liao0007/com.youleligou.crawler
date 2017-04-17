@@ -1,6 +1,5 @@
 package com.youleligou.crawler.services.fetch
 
-import akka.stream.ActorMaterializer
 import com.google.inject.Inject
 import com.typesafe.config.Config
 import com.youleligou.crawler.daos.{CrawlerJob, CrawlerJobRepo}
@@ -29,8 +28,8 @@ class HttpClientFetchService @Inject()(config: Config, crawlerJobRepo: CrawlerJo
   val timeout: Duration                = Duration(config.getInt("crawler.fetch.timeout"), MILLISECONDS)
 
   def fetch(fetchRequest: FetchRequest)(implicit executor: ExecutionContext): Future[FetchResponse] = {
-    val FetchRequest(requestName, urlInfo, _) = fetchRequest
-    val rand                                  = new Random(System.currentTimeMillis())
+    val FetchRequest(urlInfo, _) = fetchRequest
+    val rand                     = new Random(System.currentTimeMillis())
 
     val clientWithUrl =
       standaloneAhcWSClient
@@ -53,7 +52,7 @@ class HttpClientFetchService @Inject()(config: Config, crawlerJobRepo: CrawlerJo
           crawlerJobRepo.create(
             CrawlerJob(
               url = urlInfo.url,
-              jobName = requestName,
+              jobName = urlInfo.jobType,
               useProxy = useProxy,
               statusCode = Some(response.status),
               statusMessage = Some(response.statusText)
@@ -66,7 +65,7 @@ class HttpClientFetchService @Inject()(config: Config, crawlerJobRepo: CrawlerJo
       crawlerJobRepo.create(
         CrawlerJob(
           url = urlInfo.domain,
-          jobName = requestName,
+          jobName = urlInfo.jobType,
           useProxy = useProxy,
           statusCode = Some(FetchService.Timeout),
           statusMessage = None
