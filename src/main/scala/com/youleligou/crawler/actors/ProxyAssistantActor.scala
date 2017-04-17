@@ -43,7 +43,10 @@ class ProxyAssistantActor @Inject()(config: Config,
         })
       } map { testedProxyServers =>
         //update squid config file
-        val squidConfig = testedProxyServers.filter(_.isLive) map { liveProxyServers =>
+        val squidConfig = testedProxyServers
+          .filter(_.isLive)
+          .groupBy(_.ip)
+          .map(_._2.head) map { liveProxyServers => // group by and map to remove duplicate ip with diff ports
           s"""cache_peer ${liveProxyServers.ip} parent ${liveProxyServers.port} 0 round-robin no-query no-digest"""
         } mkString "\n"
 

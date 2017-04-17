@@ -30,7 +30,7 @@ class YouDaiLiCrawlerBootstrap @Inject()(config: Config,
 
     for {
       _ <- pageInjectorPool ? ClearCache
-      _ <- pageInjectorPool ? ClearCache
+      _ <- listInjectorPool ? ClearCache
     } yield {
       val seeds = config.as[Seq[UrlInfo]]("seed")
       seeds.foreach { seed =>
