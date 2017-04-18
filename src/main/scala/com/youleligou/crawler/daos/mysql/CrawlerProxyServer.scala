@@ -1,4 +1,4 @@
-package com.youleligou.crawler.daos
+package com.youleligou.crawler.daos.mysql
 
 import java.sql.Timestamp
 import java.text.SimpleDateFormat
@@ -6,7 +6,6 @@ import java.text.SimpleDateFormat
 import com.google.inject.Inject
 import com.google.inject.name.Named
 import com.typesafe.scalalogging.LazyLogging
-import com.youleligou.crawler.daos.schema.CanCan
 import play.api.libs.json._
 import slick.jdbc.MySQLProfile.api._
 import slick.lifted.Tag
@@ -47,7 +46,7 @@ object CrawlerProxyServer {
   implicit val jsonFormat: OFormat[CrawlerProxyServer] = Json.format[CrawlerProxyServer]
 }
 
-class CrawlerProxyServerRepo @Inject()(@Named(CanCan) database: Database) extends LazyLogging {
+class CrawlerProxyServerRepo @Inject()(@Named(schemas.CanCan) database: Database) extends LazyLogging {
   val CrawlerProxyServers: TableQuery[CrawlerProxyServerTable] = TableQuery[CrawlerProxyServerTable]
 
   def find(id: Long): Future[Option[CrawlerProxyServer]] =

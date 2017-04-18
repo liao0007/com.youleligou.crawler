@@ -2,7 +2,7 @@ package com.youleligou.crawler.services.fetch
 
 import com.google.inject.Inject
 import com.typesafe.config.Config
-import com.youleligou.crawler.daos.{CrawlerJob, CrawlerJobRepo}
+import com.youleligou.crawler.daos.mysql.{CrawlerJob, CrawlerJobRepo}
 import com.youleligou.crawler.models.{FetchRequest, FetchResponse}
 import com.youleligou.crawler.services.FetchService
 import play.api.libs.ws.ahc.StandaloneAhcWSClient

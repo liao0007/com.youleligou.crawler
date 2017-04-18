@@ -1,7 +1,7 @@
 package com.youleligou.proxyHunters.youdaili.services.proxyList
 
 import com.google.inject.Inject
-import com.youleligou.crawler.daos.{CrawlerProxyServer, CrawlerProxyServerRepo}
+import com.youleligou.crawler.daos.mysql.{CrawlerProxyServer, CrawlerProxyServerRepo}
 import com.youleligou.crawler.models.{FetchResponse, ParseResult, UrlInfo}
 import com.youleligou.crawler.services.hash.Md5HashService
 import org.jsoup.Jsoup

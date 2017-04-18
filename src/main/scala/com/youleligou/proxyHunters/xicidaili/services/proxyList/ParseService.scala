@@ -3,7 +3,7 @@ package com.youleligou.proxyHunters.xicidaili.services.proxyList
 import java.sql.Timestamp
 
 import com.google.inject.Inject
-import com.youleligou.crawler.daos.{CrawlerProxyServer, CrawlerProxyServerRepo}
+import com.youleligou.crawler.daos.mysql.{CrawlerProxyServer, CrawlerProxyServerRepo}
 import com.youleligou.crawler.models.{FetchResponse, ParseResult, UrlInfo}
 import com.youleligou.crawler.services.hash.Md5HashService
 import org.jsoup.Jsoup

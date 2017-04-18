@@ -1,6 +1,6 @@
 
-import com.youleligou.crawler.actors.Injector
+object JobType extends Enumeration {
+  val Fetch = Value("F")
+}
 
-
-val jec = classOf[Injector]
-jec.type
+JobType.Fetch

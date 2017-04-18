@@ -1,12 +1,12 @@
 package com.youleligou.crawler.modules
 
-import javax.inject.{Named, Singleton}
-
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
-import com.google.inject.{AbstractModule, Provides}
+import com.datastax.driver.core.{HostDistance, PoolingOptions}
+import com.google.inject._
+import com.google.inject.name.Named
+import com.outworkers.phantom.connectors.{CassandraConnection, ContactPoints}
 import com.typesafe.config.Config
-import com.youleligou.crawler.daos
 import com.youleligou.crawler.services._
 import com.youleligou.crawler.services.fetch.HttpClientFetchService
 import com.youleligou.crawler.services.filter.DefaultFilterService
@@ -17,6 +17,8 @@ import play.api.libs.ws.ahc.StandaloneAhcWSClient
 import redis.RedisClient
 import slick.jdbc.MySQLProfile
 import slick.jdbc.MySQLProfile.api._
+import com.youleligou.crawler.daos
+import com.youleligou.crawler.daos.cassandra.crawler.CrawlerDatabase
 
 /**
   * Created by liangliao on 31/3/17.
@@ -37,7 +39,7 @@ class ServiceModule extends AbstractModule with ScalaModule {
 
   @Provides
   @Singleton
-  @Named(daos.schema.CanCan)
+  @Named(daos.mysql.schemas.CanCan)
   def provideDatabaseCanCan(system: ActorSystem): MySQLProfile.backend.Database = {
     val database = Database.forConfig("db.cancan")
     system.registerOnTermination({
@@ -46,6 +48,37 @@ class ServiceModule extends AbstractModule with ScalaModule {
     database
   }
 
+  /*
+  cassandra provider
+   */
+  @Provides
+  @Singleton
+  @Named(daos.cassandra.keyspaces.Crawler)
+  def provideCrawlerCassandraConnection(system: ActorSystem): CassandraConnection = {
+    val poolingOptions = new PoolingOptions()
+    poolingOptions
+      .setMaxRequestsPerConnection(HostDistance.LOCAL, 32768)
+      .setMaxRequestsPerConnection(HostDistance.REMOTE, 2000)
+
+    ContactPoints(Seq("192.168.1.32"))
+      .withClusterBuilder(
+        _.withPoolingOptions(poolingOptions)
+      )
+      .keySpace("crawler")
+  }
+
+  @Provides
+  @Singleton
+  @Named(daos.cassandra.keyspaces.Crawler)
+  def provideCrawlerCassandraDatabaseProvider(system: ActorSystem, crawlerDatabase: CrawlerDatabase): CrawlerDatabase = {
+    system.registerOnTermination({
+      crawlerDatabase.shutdown()
+    })
+    crawlerDatabase
+  }
+
+  /*
+   */
   @Provides
   @Singleton
   def provideActorMaterializer(implicit system: ActorSystem): ActorMaterializer = {
@@ -67,5 +100,6 @@ class ServiceModule extends AbstractModule with ScalaModule {
     bind[FetchService].to[HttpClientFetchService].asEagerSingleton()
     bind[IndexService].to[ElasticIndexService].asEagerSingleton()
     bind[FilterService].to[DefaultFilterService].asEagerSingleton()
+//    bind[Database[CrawlerDatabase]].to[CrawlerDatabase].asEagerSingleton()
   }
 }

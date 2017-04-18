@@ -7,7 +7,7 @@ import akka.actor.{Actor, ActorLogging}
 import com.google.inject.Inject
 import com.typesafe.config.Config
 import com.youleligou.crawler.actors.ProxyAssistant._
-import com.youleligou.crawler.daos.{CrawlerProxyServer, CrawlerProxyServerRepo}
+import com.youleligou.crawler.daos.mysql.{CrawlerProxyServer, CrawlerProxyServerRepo}
 import play.api.libs.ws.DefaultWSProxyServer
 import play.api.libs.ws.ahc.StandaloneAhcWSClient
 import redis.RedisClient

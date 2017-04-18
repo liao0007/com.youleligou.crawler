@@ -1,12 +1,11 @@
-package com.youleligou.crawler.daos
+package com.youleligou.crawler.daos.mysql
 
 import java.sql.Timestamp
 
 import com.google.inject.Inject
 import com.google.inject.name.Named
 import com.typesafe.scalalogging.LazyLogging
-import com.youleligou.crawler.daos.CrawlerJob.{FetchJobType, JobType}
-import com.youleligou.crawler.daos.schema.CanCan
+import com.youleligou.crawler.daos.mysql.CrawlerJob.{FetchJobType, JobType}
 import slick.jdbc.MySQLProfile.api._
 import slick.lifted.Tag
 import slick.sql.SqlProfile.ColumnOption.SqlType
@@ -40,7 +39,7 @@ object CrawlerJob {
 
 }
 
-class CrawlerJobRepo @Inject()(@Named(CanCan) database: Database) extends LazyLogging {
+class CrawlerJobRepo @Inject()(@Named(schemas.CanCan) database: Database) extends LazyLogging {
   val CrawlerJobs: TableQuery[CrawlerJobTable] = TableQuery[CrawlerJobTable]
 
   def find(id: Long): Future[Option[CrawlerJob]] =
@@ -71,7 +70,7 @@ class CrawlerJobRepo @Inject()(@Named(CanCan) database: Database) extends LazyLo
     }
 
   def all(): Future[List[CrawlerJob]] =
-    database.run(CrawlerJobs.to[List].result) recover {
+    database.run(CrawlerJobs.to[List].sortBy(_.id.desc).result) recover {
       case NonFatal(x) =>
         logger.warn(x.getMessage)
         List.empty[CrawlerJob]

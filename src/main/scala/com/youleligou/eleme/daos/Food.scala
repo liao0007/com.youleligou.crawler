@@ -3,7 +3,7 @@ package com.youleligou.eleme.daos
 import com.google.inject.Inject
 import com.google.inject.name.Named
 import com.typesafe.scalalogging.LazyLogging
-import com.youleligou.crawler.daos.schema.CanCan
+import com.youleligou.crawler.daos.mysql.schemas
 import play.api.libs.functional.syntax._
 import play.api.libs.json.Reads._
 import play.api.libs.json._
@@ -44,7 +44,7 @@ object Food {
   )(Food.apply _)
 }
 
-class FoodRepo @Inject()(@Named(CanCan) database: Database) extends LazyLogging {
+class FoodRepo @Inject()(@Named(schemas.CanCan) database: Database) extends LazyLogging {
   val Foods: TableQuery[FoodTable] = TableQuery[FoodTable]
 
   def find(id: Long): Future[Option[Food]] =

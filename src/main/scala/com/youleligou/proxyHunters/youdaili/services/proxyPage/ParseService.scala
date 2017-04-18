@@ -5,7 +5,7 @@ import com.google.inject.Inject
 import com.google.inject.name.Named
 import com.typesafe.config.Config
 import com.youleligou.crawler.actors.Injector
-import com.youleligou.crawler.daos.CrawlerProxyServerRepo
+import com.youleligou.crawler.daos.mysql.CrawlerProxyServerRepo
 import com.youleligou.crawler.models.{FetchRequest, FetchResponse, ParseResult, UrlInfo}
 import com.youleligou.crawler.services.hash.Md5HashService
 import org.jsoup.Jsoup
