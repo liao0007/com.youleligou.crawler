@@ -25,7 +25,7 @@ object Main extends App {
   import net.codingwell.scalaguice.InjectorExtensions._
 
 //  injector.instance[ElemeCassandraBootstrap].start()
-  injector.instance[ElemeCrawlerBootstrap].startFood()
+//  injector.instance[ElemeCrawlerBootstrap].startFood()
 
   if (args.contains("eleme/restaurant"))
     injector.instance[ElemeCrawlerBootstrap].startRestaurant()
