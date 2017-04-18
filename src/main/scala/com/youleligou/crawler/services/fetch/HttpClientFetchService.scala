@@ -1,10 +1,12 @@
 package com.youleligou.crawler.services.fetch
 
 import com.google.inject.Inject
+import com.outworkers.phantom.database.DatabaseProvider
 import com.typesafe.config.Config
-import com.youleligou.crawler.daos.mysql.{CrawlerJob, CrawlerJobRepo}
+import com.youleligou.crawler.daos.cassandra.{CrawlerDatabase, CrawlerJob}
 import com.youleligou.crawler.models.{FetchRequest, FetchResponse}
 import com.youleligou.crawler.services.FetchService
+import org.joda.time.DateTime
 import play.api.libs.ws.ahc.StandaloneAhcWSClient
 import play.api.libs.ws.{DefaultWSProxyServer, WSAuthScheme}
 
@@ -17,8 +19,9 @@ import scala.util.{Random, Try}
   * Created by young.yang on 2016/8/28.
   * 采用HttpClient实现的爬取器
   */
-class HttpClientFetchService @Inject()(config: Config, crawlerJobRepo: CrawlerJobRepo, standaloneAhcWSClient: StandaloneAhcWSClient)
-    extends FetchService {
+class HttpClientFetchService @Inject()(config: Config, val database: CrawlerDatabase, standaloneAhcWSClient: StandaloneAhcWSClient)
+    extends FetchService
+    with DatabaseProvider[CrawlerDatabase] {
 
   import com.github.andr83.scalaconfig._
   val useProxy: Boolean                = config.getBoolean("crawler.fetch.useProxy")
@@ -30,6 +33,12 @@ class HttpClientFetchService @Inject()(config: Config, crawlerJobRepo: CrawlerJo
   def fetch(fetchRequest: FetchRequest)(implicit executor: ExecutionContext): Future[FetchResponse] = {
     val FetchRequest(urlInfo, _) = fetchRequest
     val rand                     = new Random(System.currentTimeMillis())
+
+    val crawlerJob = CrawlerJob(
+      url = urlInfo.url,
+      jobName = urlInfo.jobType,
+      useProxy = useProxy
+    )
 
     val clientWithUrl =
       standaloneAhcWSClient
@@ -49,28 +58,14 @@ class HttpClientFetchService @Inject()(config: Config, crawlerJobRepo: CrawlerJo
       clientWithProxy
         .get()
         .map { response =>
-          crawlerJobRepo.create(
-            CrawlerJob(
-              url = urlInfo.url,
-              jobName = urlInfo.jobType,
-              useProxy = useProxy,
-              statusCode = Some(response.status),
-              statusMessage = Some(response.statusText)
-            )
+          database.crawlerJobs.create(
+            crawlerJob.copy(statusCode = Some(response.status), statusMessage = Some(response.statusText), completedAt = Some(DateTime.now()))
           )
           FetchResponse(response.status, response.body, response.statusText, fetchRequest)
         }
 
     } getOrElse {
-      crawlerJobRepo.create(
-        CrawlerJob(
-          url = urlInfo.domain,
-          jobName = urlInfo.jobType,
-          useProxy = useProxy,
-          statusCode = Some(FetchService.Timeout),
-          statusMessage = None
-        )
-      )
+      database.crawlerJobs.create(crawlerJob)
       Future.successful(FetchResponse(FetchService.Timeout, "", "", fetchRequest))
 
     } recover {

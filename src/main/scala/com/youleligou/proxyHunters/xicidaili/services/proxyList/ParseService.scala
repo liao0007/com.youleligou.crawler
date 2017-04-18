@@ -3,9 +3,10 @@ package com.youleligou.proxyHunters.xicidaili.services.proxyList
 import java.sql.Timestamp
 
 import com.google.inject.Inject
-import com.youleligou.crawler.daos.mysql.{CrawlerProxyServer, CrawlerProxyServerRepo}
+import com.outworkers.phantom.database.DatabaseProvider
+import com.youleligou.crawler.daos.cassandra.{CrawlerDatabase, CrawlerProxyServer}
 import com.youleligou.crawler.models.{FetchResponse, ParseResult, UrlInfo}
-import com.youleligou.crawler.services.hash.Md5HashService
+import org.joda.time.DateTime
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 
@@ -16,9 +17,11 @@ import scala.util.control.NonFatal
   * Created by young.yang on 2016/8/31.
   * Jsoup解析器
   */
-class ParseService @Inject()(md5HashService: Md5HashService, crawlerProxyServerRepo: CrawlerProxyServerRepo) extends com.youleligou.crawler.services.ParseService {
+class ParseService @Inject()(val database: CrawlerDatabase)
+    extends com.youleligou.crawler.services.ParseService
+    with DatabaseProvider[CrawlerDatabase] {
 
-  val format     = new java.text.SimpleDateFormat("yy-MM-dd hh:mm")
+  val format = new java.text.SimpleDateFormat("yy-MM-dd hh:mm")
 
   private def getChildLinks(document: Document, fetchResponse: FetchResponse) = {
     document.select(".pagination a").asScala.filter(_.hasAttr("href")).map { a =>
@@ -26,7 +29,7 @@ class ParseService @Inject()(md5HashService: Md5HashService, crawlerProxyServerR
     }
   }
 
-  private def persist(proxyServers: Seq[CrawlerProxyServer]) = crawlerProxyServerRepo.create(proxyServers.toList)
+  private def persist(proxyServers: Seq[CrawlerProxyServer]) = database.crawlerProxyServers.create(proxyServers)
 
   /**
     * 解析具体实现
@@ -41,14 +44,13 @@ class ParseService @Inject()(md5HashService: Md5HashService, crawlerProxyServerR
           val Seq(_, ip, port, location, isAnonymous, supportedType, _, _, _, lastVerifiedAt) = tds.map(_.text())
           Some(
             CrawlerProxyServer(
-              hash = md5HashService.hash(s"""$ip:$port"""),
               ip = ip,
               port = port.toInt,
               isAnonymous = Some(isAnonymous contains "高匿"),
               supportedType = Some(supportedType),
               location = Some(location),
               reactTime = """[1-9]+""".r.findFirstIn(tds(6).select(".bar").attr("title")).map(_.toFloat),
-              lastVerifiedAt = Some(new Timestamp(format.parse(lastVerifiedAt).getTime))
+              lastVerifiedAt = Some(new DateTime(new Timestamp(format.parse(lastVerifiedAt).getTime)))
             ))
         } catch {
           case NonFatal(x) =>

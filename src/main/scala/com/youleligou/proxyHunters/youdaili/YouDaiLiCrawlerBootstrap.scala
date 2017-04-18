@@ -16,7 +16,7 @@ import scala.concurrent.duration._
 class YouDaiLiCrawlerBootstrap @Inject()(config: Config, system: ActorSystem, @Named(Injector.PoolName) injectors: ActorRef) extends LazyLogging {
   import system.dispatcher
 
-  val proxyPageConfig = config.getConfig("crawler.job.youdaili.proxyPage")
+  val proxyPageConfig = config.getConfig("crawler.youdaili.job.proxyPage")
 
   def start(): Unit = {
     import com.github.andr83.scalaconfig._
@@ -25,7 +25,7 @@ class YouDaiLiCrawlerBootstrap @Inject()(config: Config, system: ActorSystem, @N
 
     for {
       _ <- injectors ? ClearCache(proxyPageConfig.getString("jobType"))
-      _ <- injectors ? ClearCache(config.getString("crawler.job.youdaili.proxyList.jobType"))
+      _ <- injectors ? ClearCache(config.getString("crawler.youdaili.job.proxyList.jobType"))
     } yield {
       val seeds = proxyPageConfig.as[Seq[UrlInfo]]("seed")
       seeds.foreach { seed =>
@@ -44,7 +44,7 @@ class YouDaiLiCrawlerBootstrap @Inject()(config: Config, system: ActorSystem, @N
         30.seconds,
         FiniteDuration(proxyPageConfig.getInt("proxyList.interval"), MILLISECONDS),
         injectors,
-        Tick(config.getString("crawler.job.youdaili.proxyList.jobType"))
+        Tick(config.getString("crawler.youdaili.job.proxyList.jobType"))
       )
     }
   }

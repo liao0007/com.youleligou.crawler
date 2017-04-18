@@ -1,21 +1,23 @@
 package com.youleligou.eleme.services.food
 
 import com.google.inject.Inject
+import com.outworkers.phantom.database.DatabaseProvider
+import com.outworkers.phantom.dsl.ResultSet
 import com.youleligou.crawler.models.{FetchResponse, ParseResult, UrlInfo}
-import com.youleligou.eleme.daos.{Food, FoodRepo}
+import com.youleligou.eleme.daos.cassandra.{ElemeDatabase, Food}
 import play.api.libs.json._
 
 import scala.concurrent.Future
 
-class ParseService @Inject()(foodRepo: FoodRepo) extends com.youleligou.crawler.services.ParseService {
+class ParseService @Inject()(val database: ElemeDatabase) extends com.youleligou.crawler.services.ParseService with DatabaseProvider[ElemeDatabase] {
 
-  private def persist(food: Seq[Food]): Future[Option[Int]] = foodRepo.create(food.toList)
+  private def persist(foods: Seq[Food]): Seq[Future[ResultSet]] = database.foods.create(foods)
 
   /**
     * 解析具体实现
     */
   override def parse(fetchResponse: FetchResponse): ParseResult = {
-    val food =
+    val foods =
       Json.parse(fetchResponse.content) \\ "foods" flatMap {
         case JsArray(value) =>
           value flatMap { item =>
@@ -24,7 +26,7 @@ class ParseService @Inject()(foodRepo: FoodRepo) extends com.youleligou.crawler.
         case _ => None
       }
 
-    persist(food.toList)
+    persist(foods)
 
     ParseResult(
       fetchResponse = fetchResponse,

@@ -1,13 +1,16 @@
 package com.youleligou.eleme.services.restaurant
 
 import com.google.inject.Inject
+import com.outworkers.phantom.database.DatabaseProvider
+import com.outworkers.phantom.dsl.ResultSet
 import com.youleligou.crawler.models.{FetchResponse, ParseResult, UrlInfo}
-import com.youleligou.eleme.daos.{Restaurant, RestaurantRepo}
+import com.youleligou.eleme.daos.cassandra.{ElemeDatabase, Restaurant}
 import play.api.libs.json._
 
+import scala.concurrent.Future
 import scala.util.Try
 
-class ParseService @Inject()(restaurantRepo: RestaurantRepo) extends com.youleligou.crawler.services.ParseService {
+class ParseService @Inject()(val database: ElemeDatabase) extends com.youleligou.crawler.services.ParseService with DatabaseProvider[ElemeDatabase] {
 
   final val Length: Int      = 2
   final val Precision: Float = 10F
@@ -36,7 +39,7 @@ class ParseService @Inject()(restaurantRepo: RestaurantRepo) extends com.youleli
     Seq(urlInfo.copy(queryParameters = urlInfo.queryParameters + (OffsetKey -> (offset + 1).toString)))
   }
 
-  private def persist(restaurants: Seq[Restaurant]): Unit = restaurants.foreach(restaurantRepo.insertOrUpdate)
+  private def persist(restaurants: Seq[Restaurant]): Seq[Future[ResultSet]] = database.restaurants.create(restaurants)
 
   /**
     * 解析具体实现

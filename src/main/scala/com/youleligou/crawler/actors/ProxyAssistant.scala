@@ -5,9 +5,11 @@ import java.sql.Timestamp
 
 import akka.actor.{Actor, ActorLogging}
 import com.google.inject.Inject
+import com.outworkers.phantom.database.DatabaseProvider
 import com.typesafe.config.Config
 import com.youleligou.crawler.actors.ProxyAssistant._
-import com.youleligou.crawler.daos.mysql.{CrawlerProxyServer, CrawlerProxyServerRepo}
+import com.youleligou.crawler.daos.cassandra.{CrawlerDatabase, CrawlerProxyServer}
+import org.joda.time.DateTime
 import play.api.libs.ws.DefaultWSProxyServer
 import play.api.libs.ws.ahc.StandaloneAhcWSClient
 import redis.RedisClient
@@ -17,22 +19,20 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 import scala.util.control.NonFatal
 
-class ProxyAssistant @Inject()(config: Config,
-                               redisClient: RedisClient,
-                               crawlerProxyServerRepo: CrawlerProxyServerRepo,
-                               standaloneAhcWSClient: StandaloneAhcWSClient)
+class ProxyAssistant @Inject()(config: Config, redisClient: RedisClient, val database: CrawlerDatabase, standaloneAhcWSClient: StandaloneAhcWSClient)
     extends Actor
-    with ActorLogging {
+    with ActorLogging
+    with DatabaseProvider[CrawlerDatabase] {
   import context.dispatcher
 
   val timeout = Duration(config.getInt("crawler.proxy-assistant.timeout"), MILLISECONDS)
 
-  private def currentTimestamp = new Timestamp(System.currentTimeMillis())
+  private def now = DateTime.now()
 
   override def receive: Receive = {
     case Run =>
       log.debug("{} run", self.path)
-      crawlerProxyServerRepo.all() flatMap { proxyServers =>
+      database.crawlerProxyServers.all flatMap { proxyServers =>
         Future.sequence(proxyServers map { proxyServer =>
           testAvailability(proxyServer) map { testedProxyServer =>
             log.debug("{} {}:{} isLive={}", self.path, testedProxyServer.ip, testedProxyServer.port, testedProxyServer.isLive)
@@ -62,7 +62,9 @@ class ProxyAssistant @Inject()(config: Config,
           writer.close()
         }
         testedProxyServers
-      } map crawlerProxyServerRepo.insertOrUpdate //update database
+      } map { testedProxyServer =>
+        database.crawlerProxyServers.create(testedProxyServer)
+      }
 
   }
 
@@ -75,22 +77,22 @@ class ProxyAssistant @Inject()(config: Config,
         .get()
         .map { response =>
           if (response.status == 200 && response.body.contains("百度一下，你就知道")) {
-            proxyServer.copy(isLive = true, lastVerifiedAt = Some(currentTimestamp), checkCount = 0)
+            proxyServer.copy(isLive = true, lastVerifiedAt = Some(now), checkCount = 0)
           } else {
-            proxyServer.copy(isLive = false, lastVerifiedAt = Some(currentTimestamp), checkCount = proxyServer.checkCount + 1)
+            proxyServer.copy(isLive = false, lastVerifiedAt = Some(now), checkCount = proxyServer.checkCount + 1)
           }
         } recover {
         case NonFatal(_) =>
-          proxyServer.copy(isLive = false, lastVerifiedAt = Some(currentTimestamp), checkCount = proxyServer.checkCount + 1)
+          proxyServer.copy(isLive = false, lastVerifiedAt = Some(now), checkCount = proxyServer.checkCount + 1)
       }
 
     } getOrElse {
-      Future.successful(proxyServer.copy(isLive = false, lastVerifiedAt = Some(currentTimestamp), checkCount = proxyServer.checkCount + 1))
+      Future.successful(proxyServer.copy(isLive = false, lastVerifiedAt = Some(now), checkCount = proxyServer.checkCount + 1))
 
     } recover {
       case NonFatal(x) =>
         log.warning("{} {}", self.path, x.getMessage)
-        proxyServer.copy(isLive = false, lastVerifiedAt = Some(currentTimestamp), checkCount = proxyServer.checkCount + 1)
+        proxyServer.copy(isLive = false, lastVerifiedAt = Some(now), checkCount = proxyServer.checkCount + 1)
 
     }
   }

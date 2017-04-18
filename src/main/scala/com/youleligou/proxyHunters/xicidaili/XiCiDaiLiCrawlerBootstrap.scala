@@ -15,7 +15,7 @@ import scala.concurrent.duration._
 class XiCiDaiLiCrawlerBootstrap @Inject()(config: Config, system: ActorSystem, @Named(Injector.PoolName) injectors: ActorRef) extends LazyLogging {
   import system.dispatcher
 
-  val proxyListConfig = config.getConfig("crawler.job.xicidaili.proxyList")
+  val proxyListConfig = config.getConfig("crawler.xicidaili.job.proxyList")
 
   def start(): Unit = {
     import com.github.andr83.scalaconfig._

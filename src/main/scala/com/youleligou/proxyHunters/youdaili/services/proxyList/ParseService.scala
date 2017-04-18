@@ -1,9 +1,9 @@
 package com.youleligou.proxyHunters.youdaili.services.proxyList
 
 import com.google.inject.Inject
-import com.youleligou.crawler.daos.mysql.{CrawlerProxyServer, CrawlerProxyServerRepo}
+import com.outworkers.phantom.database.DatabaseProvider
+import com.youleligou.crawler.daos.cassandra.{CrawlerDatabase, CrawlerProxyServer}
 import com.youleligou.crawler.models.{FetchResponse, ParseResult, UrlInfo}
-import com.youleligou.crawler.services.hash.Md5HashService
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 
@@ -14,7 +14,9 @@ import scala.util.control.NonFatal
   * Created by young.yang on 2016/8/31.
   * Jsoup解析器
   */
-class ParseService @Inject()(md5HashService: Md5HashService, crawlerProxyServerRepo: CrawlerProxyServerRepo) extends com.youleligou.crawler.services.ParseService {
+class ParseService @Inject()(val database: CrawlerDatabase)
+    extends com.youleligou.crawler.services.ParseService
+    with DatabaseProvider[CrawlerDatabase] {
 
   private def getChildLinks(content: Document, fetchResponse: FetchResponse) = {
     content.select(".pagebreak li").not(".thisclass").asScala.flatMap { li =>
@@ -24,7 +26,7 @@ class ParseService @Inject()(md5HashService: Md5HashService, crawlerProxyServerR
     }
   }
 
-  private def persist(proxyServers: Seq[CrawlerProxyServer]) = crawlerProxyServerRepo.create(proxyServers.toList)
+  private def persist(proxyServers: Seq[CrawlerProxyServer]) = database.crawlerProxyServers.create(proxyServers)
 
   /**
     * 解析具体实现
@@ -43,7 +45,6 @@ class ParseService @Inject()(md5HashService: Md5HashService, crawlerProxyServerR
         val pattern(ip, port, supportedType) = urlsString
         Some(
           CrawlerProxyServer(
-            hash = md5HashService.hash(s"""$ip:$port"""),
             ip = ip,
             port = port.toInt,
             supportedType = Some(supportedType)

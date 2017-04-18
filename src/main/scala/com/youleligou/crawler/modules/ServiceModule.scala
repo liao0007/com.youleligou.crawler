@@ -18,7 +18,7 @@ import redis.RedisClient
 import slick.jdbc.MySQLProfile
 import slick.jdbc.MySQLProfile.api._
 import com.youleligou.crawler.daos
-import com.youleligou.crawler.daos.cassandra.crawler.CrawlerDatabase
+import com.youleligou.crawler.daos.cassandra.CrawlerDatabase
 
 /**
   * Created by liangliao on 31/3/17.
@@ -54,17 +54,20 @@ class ServiceModule extends AbstractModule with ScalaModule {
   @Provides
   @Singleton
   @Named(daos.cassandra.keyspaces.Crawler)
-  def provideCrawlerCassandraConnection(system: ActorSystem): CassandraConnection = {
-    val poolingOptions = new PoolingOptions()
-    poolingOptions
-      .setMaxRequestsPerConnection(HostDistance.LOCAL, 32768)
-      .setMaxRequestsPerConnection(HostDistance.REMOTE, 2000)
+  def provideCrawlerCassandraConnection(config: Config, system: ActorSystem): CassandraConnection = {
+    import com.github.andr83.scalaconfig._
 
-    ContactPoints(Seq("192.168.1.32"))
+    val poolingOptions: PoolingOptions = new PoolingOptions()
+    poolingOptions
+      .setMaxRequestsPerConnection(HostDistance.LOCAL, config.getInt("db.cassandra.maxRequestsPerLocalConnection"))
+      .setMaxRequestsPerConnection(HostDistance.REMOTE, config.getInt("db.cassandra.maxRequestsPerRemoteConnection"))
+      .setMaxQueueSize(config.getInt("db.cassandra.maxQueueSize"))
+
+    ContactPoints(config.as[Seq[String]]("db.cassandra.contactPoints"))
       .withClusterBuilder(
         _.withPoolingOptions(poolingOptions)
       )
-      .keySpace("crawler")
+      .keySpace(daos.cassandra.keyspaces.Crawler)
   }
 
   @Provides
@@ -100,6 +103,5 @@ class ServiceModule extends AbstractModule with ScalaModule {
     bind[FetchService].to[HttpClientFetchService].asEagerSingleton()
     bind[IndexService].to[ElasticIndexService].asEagerSingleton()
     bind[FilterService].to[DefaultFilterService].asEagerSingleton()
-//    bind[Database[CrawlerDatabase]].to[CrawlerDatabase].asEagerSingleton()
   }
 }

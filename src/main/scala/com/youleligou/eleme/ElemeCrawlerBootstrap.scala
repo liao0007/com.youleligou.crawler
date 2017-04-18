@@ -28,8 +28,8 @@ class ElemeCrawlerBootstrap @Inject()(config: Config,
 
   import system.dispatcher
 
-  val restaurantListConfig = config.getConfig("crawler.job.eleme.restaurantList")
-  val foodListConfig       = config.getConfig("crawler.job.eleme.foodList")
+  val restaurantListConfig = config.getConfig("crawler.eleme.job.restaurantList")
+  val foodListConfig       = config.getConfig("crawler.eleme.job.foodList")
 
   /**
     * 爬虫启动函数
