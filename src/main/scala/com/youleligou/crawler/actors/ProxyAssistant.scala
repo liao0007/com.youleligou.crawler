@@ -63,7 +63,7 @@ class ProxyAssistant @Inject()(config: Config, redisClient: RedisClient, val dat
         }
         testedProxyServers
       } map { testedProxyServer =>
-        database.crawlerProxyServers.create(testedProxyServer)
+        database.crawlerProxyServers.insertOrUpdate(testedProxyServer)
       }
 
   }

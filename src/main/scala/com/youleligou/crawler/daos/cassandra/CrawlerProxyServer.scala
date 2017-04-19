@@ -35,9 +35,9 @@ abstract class CrawlerProxyServers extends CassandraTable[CrawlerProxyServers, C
   object checkCount     extends IntColumn(this)
   object createdAt      extends DateTimeColumn(this)
 
-  def create(crawlerProxyServers: Seq[CrawlerProxyServer]): Seq[Future[ResultSet]] = crawlerProxyServers.map(create)
+  def insertOrUpdate(crawlerProxyServers: Seq[CrawlerProxyServer]): Seq[Future[ResultSet]] = crawlerProxyServers.map(insertOrUpdate)
 
-  def create(crawlerProxyServer: CrawlerProxyServer): Future[ResultSet] = store(crawlerProxyServer).future()
+  def insertOrUpdate(crawlerProxyServer: CrawlerProxyServer): Future[ResultSet] = store(crawlerProxyServer).future()
 
   def all: Future[List[CrawlerProxyServer]] = select.fetch()
 }

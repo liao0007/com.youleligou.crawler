@@ -11,7 +11,7 @@ import scala.concurrent.Future
 
 class ParseService @Inject()(val database: ElemeDatabase) extends com.youleligou.crawler.services.ParseService with DatabaseProvider[ElemeDatabase] {
 
-  private def persist(foods: Seq[Food]): Seq[Future[ResultSet]] = database.foods.create(foods)
+  private def persist(foods: Seq[Food]): Seq[Future[ResultSet]] = database.foods.insertOrUpdate(foods)
 
   /**
     * 解析具体实现

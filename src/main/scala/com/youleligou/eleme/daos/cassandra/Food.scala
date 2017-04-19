@@ -52,9 +52,9 @@ abstract class Foods extends CassandraTable[Foods, Food] with RootConnector {
   object satisfyRate  extends FloatColumn(this)
   object createdAt    extends DateTimeColumn(this) with ClusteringOrder with Descending
 
-  def create(foods: Seq[Food]): Seq[Future[ResultSet]] = foods.map(create)
+  def insertOrUpdate(foods: Seq[Food]): Seq[Future[ResultSet]] = foods.map(insertOrUpdate)
 
-  def create(food: Food): Future[ResultSet] = store(food).future()
+  def insertOrUpdate(food: Food): Future[ResultSet] = store(food).future()
 
   def all: Future[List[Food]] = select.fetch()
 }

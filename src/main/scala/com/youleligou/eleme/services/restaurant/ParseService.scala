@@ -39,7 +39,7 @@ class ParseService @Inject()(val database: ElemeDatabase) extends com.youleligou
     Seq(urlInfo.copy(queryParameters = urlInfo.queryParameters + (OffsetKey -> (offset + 1).toString)))
   }
 
-  private def persist(restaurants: Seq[Restaurant]): Seq[Future[ResultSet]] = database.restaurants.create(restaurants)
+  private def persist(restaurants: Seq[Restaurant]): Seq[Future[ResultSet]] = database.restaurants.insertOrUpdate(restaurants)
 
   /**
     * 解析具体实现

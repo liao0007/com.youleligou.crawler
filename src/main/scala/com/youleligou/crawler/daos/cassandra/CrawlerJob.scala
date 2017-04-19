@@ -41,9 +41,9 @@ abstract class CrawlerJobs extends CassandraTable[CrawlerJobs, CrawlerJob] with 
   object completedAt   extends OptionalDateTimeColumn(this)
   object createdAt     extends DateTimeColumn(this) with ClusteringOrder with Descending
 
-  def create(crawlerJobs: Seq[CrawlerJob]): Seq[Future[ResultSet]] = crawlerJobs.map(create)
+  def insertOrUpdate(crawlerJobs: Seq[CrawlerJob]): Seq[Future[ResultSet]] = crawlerJobs.map(insertOrUpdate)
 
-  def create(crawlerJob: CrawlerJob): Future[ResultSet] = store(crawlerJob).future()
+  def insertOrUpdate(crawlerJob: CrawlerJob): Future[ResultSet] = store(crawlerJob).future()
 
   def all: Future[List[CrawlerJob]] = select.fetch()
 }

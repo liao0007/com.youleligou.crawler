@@ -1,4 +1,4 @@
-package com.youleligou.eleme.daos
+package com.youleligou.eleme.daos.mysql
 
 import com.google.inject.Inject
 import com.google.inject.name.Named

@@ -58,14 +58,14 @@ class HttpClientFetchService @Inject()(config: Config, val database: CrawlerData
       clientWithProxy
         .get()
         .map { response =>
-          database.crawlerJobs.create(
+          database.crawlerJobs.insertOrUpdate(
             crawlerJob.copy(statusCode = Some(response.status), statusMessage = Some(response.statusText), completedAt = Some(DateTime.now()))
           )
           FetchResponse(response.status, response.body, response.statusText, fetchRequest)
         }
 
     } getOrElse {
-      database.crawlerJobs.create(crawlerJob)
+      database.crawlerJobs.insertOrUpdate(crawlerJob)
       Future.successful(FetchResponse(FetchService.Timeout, "", "", fetchRequest))
 
     } recover {

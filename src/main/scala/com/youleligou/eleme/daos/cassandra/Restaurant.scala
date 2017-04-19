@@ -82,9 +82,9 @@ abstract class Restaurants extends CassandraTable[Restaurants, Restaurant] with 
   object status             extends IntColumn(this)
   object createdAt          extends DateTimeColumn(this) with ClusteringOrder with Descending
 
-  def create(restaurants: Seq[Restaurant]): Seq[Future[ResultSet]] = restaurants.map(create)
+  def insertOrUpdate(restaurants: Seq[Restaurant]): Seq[Future[ResultSet]] = restaurants.map(insertOrUpdate)
 
-  def create(restaurant: Restaurant): Future[ResultSet] = store(restaurant).future()
+  def insertOrUpdate(restaurant: Restaurant): Future[ResultSet] = store(restaurant).future()
 
   def all: Future[List[Restaurant]] = select.fetch()
 }
