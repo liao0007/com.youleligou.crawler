@@ -1,11 +1,10 @@
 package com.youleligou
 
 import com.google.inject.Guice
-import com.youleligou.crawler.{CrawlerCassandraBootstrap, ProxyAssistantBootstrap}
 import com.youleligou.crawler.modules.{ActorModule, AkkaModule, ConfigModule, ServiceModule}
-import com.youleligou.eleme.{ElemeCassandraBootstrap, ElemeCrawlerBootstrap, ElemeModule}
-import com.youleligou.proxyHunters.xicidaili.{XiCiDaiLiCrawlerBootstrap, XiCiDaiLiModule}
-import com.youleligou.proxyHunters.youdaili.{YouDaiLiCrawlerBootstrap, YouDaiLiModule}
+import com.youleligou.eleme.ElemeModule
+import com.youleligou.proxyHunters.xicidaili.XiCiDaiLiModule
+import com.youleligou.proxyHunters.youdaili.YouDaiLiModule
 
 /**
   * Created by liangliao on 31/3/17.
@@ -23,9 +22,6 @@ object Main extends App {
   )
 
   import net.codingwell.scalaguice.InjectorExtensions._
-
-//  injector.instance[ElemeCassandraBootstrap].start()
-//  injector.instance[ElemeCrawlerBootstrap].startFood()
 
   if (args.contains("eleme/restaurant"))
     injector.instance[ElemeCrawlerBootstrap].startRestaurant()

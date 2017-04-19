@@ -1,10 +1,10 @@
-package com.youleligou.crawler
+package com.youleligou.migration
 
 import akka.actor.ActorSystem
 import com.google.inject.Inject
-import com.outworkers.phantom.dsl.{DatabaseProvider, DateTime}
+import com.outworkers.phantom.dsl.DatabaseProvider
 import com.typesafe.config.Config
-import com.youleligou.crawler.daos.cassandra.{CrawlerDatabase, CrawlerJob, CrawlerProxyServer}
+import com.youleligou.crawler.daos.cassandra.{CrawlerDatabase, CrawlerProxyServer}
 import com.youleligou.crawler.daos.mysql.{CrawlerJobRepo, CrawlerProxyServerRepo}
 import org.joda.time.DateTime
 

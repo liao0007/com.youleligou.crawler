@@ -26,7 +26,7 @@ class ParseService @Inject()(val database: CrawlerDatabase)
     }
   }
 
-  private def persist(proxyServers: Seq[CrawlerProxyServer]) = database.crawlerProxyServers.insertOrUpdate(proxyServers)
+  private def persist(proxyServers: Seq[CrawlerProxyServer]) = database.crawlerProxyServers.batchInsertOrUpdate(proxyServers)
 
   /**
     * 解析具体实现

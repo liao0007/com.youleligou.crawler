@@ -7,6 +7,8 @@ import com.google.inject._
 import com.google.inject.name.Named
 import com.outworkers.phantom.connectors.{CassandraConnection, ContactPoints}
 import com.typesafe.config.Config
+import com.youleligou.crawler.daos
+import com.youleligou.crawler.daos.cassandra.CrawlerDatabase
 import com.youleligou.crawler.services._
 import com.youleligou.crawler.services.fetch.HttpClientFetchService
 import com.youleligou.crawler.services.filter.DefaultFilterService
@@ -17,8 +19,6 @@ import play.api.libs.ws.ahc.StandaloneAhcWSClient
 import redis.RedisClient
 import slick.jdbc.MySQLProfile
 import slick.jdbc.MySQLProfile.api._
-import com.youleligou.crawler.daos
-import com.youleligou.crawler.daos.cassandra.CrawlerDatabase
 
 /**
   * Created by liangliao on 31/3/17.

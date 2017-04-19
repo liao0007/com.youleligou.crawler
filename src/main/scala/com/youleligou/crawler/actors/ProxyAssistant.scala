@@ -1,7 +1,6 @@
 package com.youleligou.crawler.actors
 
 import java.io.{File, PrintWriter}
-import java.sql.Timestamp
 
 import akka.actor.{Actor, ActorLogging}
 import com.google.inject.Inject
@@ -61,9 +60,8 @@ class ProxyAssistant @Inject()(config: Config, redisClient: RedisClient, val dat
         } finally {
           writer.close()
         }
-        testedProxyServers
-      } map { testedProxyServer =>
-        database.crawlerProxyServers.insertOrUpdate(testedProxyServer)
+
+        database.crawlerProxyServers.batchInsertOrUpdate(testedProxyServers)
       }
 
   }

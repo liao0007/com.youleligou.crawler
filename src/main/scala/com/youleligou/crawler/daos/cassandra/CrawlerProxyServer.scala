@@ -1,5 +1,7 @@
 package com.youleligou.crawler.daos.cassandra
 
+import com.outworkers.phantom.batch.BatchQuery
+import com.outworkers.phantom.builder.Unspecified
 import com.outworkers.phantom.builder.query.InsertQuery.Default
 import com.outworkers.phantom.dsl._
 import org.joda.time.DateTime
@@ -35,7 +37,14 @@ abstract class CrawlerProxyServers extends CassandraTable[CrawlerProxyServers, C
   object checkCount     extends IntColumn(this)
   object createdAt      extends DateTimeColumn(this)
 
-  def insertOrUpdate(crawlerProxyServers: Seq[CrawlerProxyServer]): Seq[Future[ResultSet]] = crawlerProxyServers.map(insertOrUpdate)
+  def batchInsertOrUpdate(crawlerProxyServers: Seq[CrawlerProxyServer]): Future[ResultSet] =
+    Batch.unlogged
+      .add(crawlerProxyServers.map { crawlerProxyServer =>
+        store(crawlerProxyServer)
+      }.iterator)
+      .future()
+
+  def insertOrUpdate(crawlerProxyServers: Seq[CrawlerProxyServer]): Seq[Future[ResultSet]] = crawlerProxyServers map insertOrUpdate
 
   def insertOrUpdate(crawlerProxyServer: CrawlerProxyServer): Future[ResultSet] = store(crawlerProxyServer).future()
 

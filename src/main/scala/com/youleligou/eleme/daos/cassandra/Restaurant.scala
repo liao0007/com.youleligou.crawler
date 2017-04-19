@@ -1,11 +1,11 @@
 package com.youleligou.eleme.daos.cassandra
 
-import com.outworkers.phantom.builder.query.InsertQuery.Default
 import com.outworkers.phantom.dsl._
+import com.youleligou.crawler.daos.cassandra.CrawlerJob
 import org.joda.time.DateTime
-import play.api.libs.json.{JsPath, Reads}
 import play.api.libs.functional.syntax._
 import play.api.libs.json.Reads._
+import play.api.libs.json.{JsPath, Reads}
 
 import scala.concurrent.Future
 
@@ -81,6 +81,13 @@ abstract class Restaurants extends CassandraTable[Restaurants, Restaurant] with 
   object companyName        extends OptionalStringColumn(this)
   object status             extends IntColumn(this)
   object createdAt          extends DateTimeColumn(this) with ClusteringOrder with Descending
+
+  def batchInsertOrUpdate(restaurants: Seq[CrawlerJob]): Future[ResultSet] =
+    Batch.unlogged
+      .add(restaurants.map { restaurant =>
+        store(restaurant)
+      }.iterator)
+      .future()
 
   def insertOrUpdate(restaurants: Seq[Restaurant]): Seq[Future[ResultSet]] = restaurants.map(insertOrUpdate)
 

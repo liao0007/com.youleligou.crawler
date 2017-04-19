@@ -1,4 +1,4 @@
-package com.youleligou.eleme
+package com.youleligou
 
 import akka.actor._
 import akka.pattern.ask

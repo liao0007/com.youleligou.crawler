@@ -1,4 +1,4 @@
-package com.youleligou.crawler
+package com.youleligou
 
 import akka.actor.{ActorRef, ActorSystem}
 import com.google.inject.Inject

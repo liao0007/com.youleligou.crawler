@@ -1,11 +1,10 @@
 package com.youleligou.eleme.daos.cassandra
 
-import com.outworkers.phantom.builder.query.InsertQuery.Default
 import com.outworkers.phantom.dsl._
 import org.joda.time.DateTime
-import play.api.libs.json.{JsPath, Reads}
 import play.api.libs.functional.syntax._
 import play.api.libs.json.Reads._
+import play.api.libs.json.{JsPath, Reads}
 
 import scala.concurrent.Future
 
@@ -51,6 +50,13 @@ abstract class Foods extends CassandraTable[Foods, Food] with RootConnector {
   object satisfyCount extends IntColumn(this)
   object satisfyRate  extends FloatColumn(this)
   object createdAt    extends DateTimeColumn(this) with ClusteringOrder with Descending
+
+  def batchInsertOrUpdate(foods: Seq[Food]): Future[ResultSet] =
+    Batch.unlogged
+      .add(foods.map { food =>
+        store(food)
+      }.iterator)
+      .future()
 
   def insertOrUpdate(foods: Seq[Food]): Seq[Future[ResultSet]] = foods.map(insertOrUpdate)
 

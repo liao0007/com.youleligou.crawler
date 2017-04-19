@@ -1,4 +1,4 @@
-package com.youleligou.eleme
+package com.youleligou.migration
 
 import akka.actor.ActorSystem
 import com.google.inject.Inject
@@ -6,7 +6,6 @@ import com.outworkers.phantom.dsl.DatabaseProvider
 import com.typesafe.config.Config
 import com.youleligou.eleme.daos.cassandra.{ElemeDatabase, Restaurant}
 import com.youleligou.eleme.daos.mysql.RestaurantRepo
-import org.joda.time.DateTime
 
 /**
   * Created by liangliao on 18/4/17.
