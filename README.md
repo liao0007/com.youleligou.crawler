@@ -16,13 +16,24 @@ docker run --restart=always -p 3128:3128 --name squid -v /etc/squid/squid_combin
 ```
 
 ```
-docker run --restart=always -p 9042:9042 -p 9160:9160 --name cassandra -v /var/data/cassandra:/var/lib/cassandra -d cassandra
+//create database dir 
+mkdir /var/data/cassandra
+chcon -Rt svirt_sandbox_file_t /var/data/cassandra
+
+//first node
+docker run --restart=always -p 9042:9042 -p 9160:9160 -p 7000:7000 --name cassandra -v /var/data/cassandra:/var/lib/cassandra -d -e CASSANDRA_BROADCAST_ADDRESS=192.168.1.32 cassandra
+
+//subsequent nodes
+docker run --restart=always -p 9042:9042 -p 9160:9160 -p 7000:7000 --name cassandra -v /var/data/cassandra:/var/lib/cassandra -d -e CASSANDRA_SEEDS=192.168.1.32 -e CASSANDRA_BROADCAST_ADDRESS=192.168.1.33 cassandra
+
+//open ports for each node
 firewall-cmd --zone=public --add-port=9042/tcp --permanent
 firewall-cmd --zone=public --add-port=9160/tcp --permanent
+firewall-cmd --zone=public --add-port=7000/tcp --permanent
 firewall-cmd --reload
 ```
 
 ### crontab
 ```
-30,0 * * * * cat squid.conf cache_peer.conf > squid_combined.conf; docker restart *docker_id*
+30,0 * * * * cat squid.conf cache_peer.conf > squid_combined.conf; docker restart *squid_docker_id*
 ```
