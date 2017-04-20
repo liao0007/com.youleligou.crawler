@@ -16,7 +16,8 @@ object FetchService {
   val Ok                 = 200
   val PaymentRequired    = 402
   val NotFound           = 404
+  val TooManyRequest     = 429
   val ServiceUnavailable = 503
   val Timeout            = 504
-  val TooManyRequest     = 429
+  val RemoteClosed       = 999
 }

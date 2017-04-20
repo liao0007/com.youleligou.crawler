@@ -8,7 +8,7 @@ import com.youleligou.crawler.models.{FetchRequest, FetchResponse}
 import com.youleligou.crawler.services.FetchService
 import org.joda.time.DateTime
 import play.api.libs.ws.ahc.StandaloneAhcWSClient
-import play.api.libs.ws.{DefaultWSProxyServer, WSAuthScheme}
+import play.api.libs.ws.{DefaultWSProxyServer, StandaloneWSRequest, WSAuthScheme}
 
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
@@ -46,18 +46,20 @@ class HttpClientFetchService @Inject()(config: Config, val database: CrawlerData
         .withHeaders("User-Agent" -> userAgents(rand.nextInt(userAgentsSize)))
         .withRequestTimeout(timeout)
 
+    val withForwardedFor = addXForwardedFor(clientWithUrl)
+
     val clientWithProxy =
       if (useProxy) {
-        clientWithUrl
+        withForwardedFor
           .withProxyServer(
             DefaultWSProxyServer(host = proxyServer("host"),
                                  port = proxyServer("port").toInt,
                                  principal = Some(proxyServer("username")),
                                  password = Some(proxyServer("password"))))
       } else
-        clientWithUrl
+        withForwardedFor
 
-    Try {
+    try {
       clientWithProxy
         .get()
         .map { response =>
@@ -65,17 +67,35 @@ class HttpClientFetchService @Inject()(config: Config, val database: CrawlerData
             crawlerJob.copy(statusCode = Some(response.status), statusMessage = Some(response.statusText), completedAt = Some(DateTime.now()))
           )
           FetchResponse(response.status, response.body, response.statusText, fetchRequest)
-        }
-
-    } getOrElse {
-      database.crawlerJobs.insertOrUpdate(crawlerJob)
-      Future.successful(FetchResponse(FetchService.Timeout, "", "", fetchRequest))
-
-    } recover {
+        } recover {
+        case NonFatal(x) =>
+          logger.warn(x.getMessage)
+          database.crawlerJobs.insertOrUpdate(crawlerJob.copy(statusCode = Some(999), statusMessage = Some(x.getMessage)))
+          x.getMessage match {
+            case "Remotely closed" =>
+              FetchResponse(FetchService.RemoteClosed, "", x.getMessage, fetchRequest)
+            case _ =>
+              FetchResponse(FetchService.Timeout, "", x.getMessage, fetchRequest)
+          }
+      }
+    } catch {
       case NonFatal(x) =>
-        logger.warn(x.getMessage)
-        FetchResponse(FetchService.Timeout, "", "", fetchRequest)
-
+        database.crawlerJobs.insertOrUpdate(crawlerJob.copy(statusCode = Some(999), statusMessage = Some(x.getMessage)))
+        Future.successful(FetchResponse(FetchService.RemoteClosed, "", x.getMessage, fetchRequest))
     }
   }
+
+  def addXForwardedFor(standaloneWSRequest: StandaloneWSRequest): StandaloneWSRequest = {
+    val roll = Random.nextInt(100)
+    if (roll < 60) {
+      standaloneWSRequest.withHeaders("X-Forwarded-For" -> randomIp)
+    } else if (roll < 80) {
+      standaloneWSRequest.withHeaders("X-Forwarded-For" -> Seq.fill(2)(randomIp).mkString(", "))
+    } else {
+      standaloneWSRequest
+    }
+  }
+
+  def randomIp: String = Seq.fill(4)(Random.nextInt(255)).mkString(".")
+
 }
