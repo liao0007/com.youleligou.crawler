@@ -49,8 +49,11 @@ class HttpClientFetchService @Inject()(config: Config, val database: CrawlerData
     val clientWithProxy =
       if (useProxy) {
         clientWithUrl
-          .withAuth(proxyServer("username"), proxyServer("password"), WSAuthScheme.BASIC)
-          .withProxyServer(DefaultWSProxyServer(host = proxyServer("host"), port = proxyServer("port").toInt))
+          .withProxyServer(
+            DefaultWSProxyServer(host = proxyServer("host"),
+                                 port = proxyServer("port").toInt,
+                                 principal = Some(proxyServer("username")),
+                                 password = Some(proxyServer("password"))))
       } else
         clientWithUrl
 
