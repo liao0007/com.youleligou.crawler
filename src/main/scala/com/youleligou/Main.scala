@@ -3,7 +3,6 @@ package com.youleligou
 import com.google.inject.Guice
 import com.youleligou.crawler.modules.{ActorModule, AkkaModule, ConfigModule, ServiceModule}
 import com.youleligou.eleme.ElemeModule
-import com.youleligou.migration.{CrawlerCassandraBootstrap, ElemeCassandraBootstrap}
 import com.youleligou.proxyHunters.xicidaili.XiCiDaiLiModule
 import com.youleligou.proxyHunters.youdaili.YouDaiLiModule
 

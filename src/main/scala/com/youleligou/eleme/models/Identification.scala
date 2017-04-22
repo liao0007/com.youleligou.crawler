@@ -1,8 +1,6 @@
 package com.youleligou.eleme.models
 
-import play.api.libs.functional.syntax._
-import play.api.libs.json.Reads._
-import play.api.libs.json.{JsPath, Json, OFormat, Reads}
+import play.api.libs.json.{Json, OFormat}
 
 /**
   * Created by liangliao on 23/4/17.

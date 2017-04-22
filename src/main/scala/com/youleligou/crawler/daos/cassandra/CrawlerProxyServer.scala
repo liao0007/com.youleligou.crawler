@@ -1,8 +1,5 @@
 package com.youleligou.crawler.daos.cassandra
 
-import com.outworkers.phantom.batch.BatchQuery
-import com.outworkers.phantom.builder.Unspecified
-import com.outworkers.phantom.builder.query.InsertQuery.Default
 import com.outworkers.phantom.dsl._
 import org.joda.time.DateTime
 

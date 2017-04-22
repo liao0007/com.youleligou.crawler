@@ -8,12 +8,12 @@ import com.youleligou.crawler.models.{FetchRequest, FetchResponse}
 import com.youleligou.crawler.services.FetchService
 import org.joda.time.DateTime
 import play.api.libs.ws.ahc.StandaloneAhcWSClient
-import play.api.libs.ws.{DefaultWSProxyServer, StandaloneWSRequest, WSAuthScheme}
+import play.api.libs.ws.{DefaultWSProxyServer, StandaloneWSRequest}
 
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.Random
 import scala.util.control.NonFatal
-import scala.util.{Random, Try}
 
 /**
   * Created by young.yang on 2016/8/28.

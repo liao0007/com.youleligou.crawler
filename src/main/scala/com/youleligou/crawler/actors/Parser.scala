@@ -25,7 +25,7 @@ class Parser @Inject()(config: Config, injector: com.google.inject.Injector, @Na
     case Parser.Parse(fetchResponse) =>
       log.debug("{} parse {}", self.path, fetchResponse.fetchRequest.urlInfo)
 
-      fetchResponse.fetchRequest.urlInfo.services.get(Parser.ServiceNameKey).map { serviceName =>
+      fetchResponse.fetchRequest.urlInfo.services.get(Parser.ServiceNameKey).foreach { serviceName =>
         val parseService             = injector.getInstance(Key.get(classOf[ParseService], Names.named(serviceName)))
         val parseResult: ParseResult = parseService.parse(fetchResponse)
         parseResult.childLink.foreach { urlInfo =>

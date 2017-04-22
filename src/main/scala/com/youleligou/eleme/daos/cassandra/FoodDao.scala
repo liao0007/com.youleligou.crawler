@@ -3,9 +3,6 @@ package com.youleligou.eleme.daos.cassandra
 import com.outworkers.phantom.dsl._
 import com.youleligou.eleme.models.Food
 import org.joda.time.DateTime
-import play.api.libs.functional.syntax._
-import play.api.libs.json.Reads._
-import play.api.libs.json.{JsPath, Reads}
 
 import scala.concurrent.Future
 

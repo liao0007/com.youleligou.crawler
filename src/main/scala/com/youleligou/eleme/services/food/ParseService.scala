@@ -4,7 +4,7 @@ import com.google.inject.Inject
 import com.outworkers.phantom.database.DatabaseProvider
 import com.outworkers.phantom.dsl.ResultSet
 import com.youleligou.crawler.models.{FetchResponse, ParseResult, UrlInfo}
-import com.youleligou.eleme.daos.cassandra.{ElemeDatabase, FoodDao}
+import com.youleligou.eleme.daos.cassandra.ElemeDatabase
 import com.youleligou.eleme.models.Food
 import play.api.libs.json._
 

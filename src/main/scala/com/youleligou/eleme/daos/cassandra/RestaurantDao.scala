@@ -2,18 +2,15 @@ package com.youleligou.eleme.daos.cassandra
 
 import com.outworkers.phantom.dsl._
 import com.youleligou.crawler.daos.cassandra.CrawlerJob
-import com.youleligou.eleme.models.{Identification, Restaurant}
+import com.youleligou.eleme.models.Restaurant
 import org.joda.time.{DateTime, LocalDate}
-import play.api.libs.functional.syntax._
-import play.api.libs.json.Reads._
-import play.api.libs.json.{JsPath, Reads}
 
 import scala.concurrent.Future
 
 case class RestaurantDao(
     id: Long,
     address: String,
-    averageCost: String,
+    averageCost: Option[String],
     description: String,
     deliveryFee: Float,
     minimumOrderAmount: Float,
@@ -65,7 +62,7 @@ object RestaurantDao {
 abstract class Restaurants extends CassandraTable[Restaurants, RestaurantDao] with RootConnector {
   object id                 extends LongColumn(this) with PartitionKey
   object address            extends StringColumn(this)
-  object averageCost        extends StringColumn(this)
+  object averageCost        extends OptionalStringColumn(this)
   object description        extends StringColumn(this)
   object deliveryFee        extends FloatColumn(this)
   object minimumOrderAmount extends FloatColumn(this)

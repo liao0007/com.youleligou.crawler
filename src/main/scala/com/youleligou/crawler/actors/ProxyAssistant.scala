@@ -15,8 +15,8 @@ import redis.RedisClient
 
 import scala.concurrent.duration.{Duration, MILLISECONDS}
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.control.NonFatal
 import scala.sys.process._
+import scala.util.control.NonFatal
 
 class ProxyAssistant @Inject()(config: Config, redisClient: RedisClient, val database: CrawlerDatabase, standaloneAhcWSClient: StandaloneAhcWSClient)
     extends Actor

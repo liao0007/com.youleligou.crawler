@@ -9,7 +9,6 @@ import com.youleligou.eleme.models.Restaurant
 import play.api.libs.json._
 
 import scala.concurrent.Future
-import scala.util.Try
 
 class ParseService @Inject()(val database: ElemeDatabase) extends com.youleligou.crawler.services.ParseService with DatabaseProvider[ElemeDatabase] {
 
@@ -67,11 +66,11 @@ class ParseService @Inject()(val database: ElemeDatabase) extends com.youleligou
         Seq.empty[Restaurant]
     }
 
-    persist(restaurants.toList)
+    persist(restaurants)
 
     ParseResult(
       fetchResponse = fetchResponse,
-      childLink = getChildLinksByOffset(fetchResponse) // if (restaurants.isEmpty) getChildLinksByLocation(fetchResponse) else getChildLinksByOffset(fetchResponse)
+      childLink = if (restaurants.nonEmpty) getChildLinksByOffset(fetchResponse) else Seq.empty[UrlInfo] // if (restaurants.isEmpty) getChildLinksByLocation(fetchResponse) else getChildLinksByOffset(fetchResponse)
     )
   }
 }
