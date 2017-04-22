@@ -1,6 +1,7 @@
 package com.youleligou.eleme.daos.cassandra
 
 import com.outworkers.phantom.dsl._
+import com.youleligou.eleme.models.Food
 import org.joda.time.DateTime
 import play.api.libs.functional.syntax._
 import play.api.libs.json.Reads._
@@ -8,7 +9,7 @@ import play.api.libs.json.{JsPath, Reads}
 
 import scala.concurrent.Future
 
-case class Food(
+case class FoodDao(
     itemId: Long,
     restaurantId: Long,
     categoryId: Long,
@@ -22,23 +23,25 @@ case class Food(
     createdAt: DateTime = DateTime.now()
 )
 
-object Food {
-  implicit val restaurantReads: Reads[Food] = (
-    (JsPath \ "item_id").read[String].map(_.toLong) and
-      (JsPath \ "restaurant_id").read[Long] and
-      (JsPath \ "category_id").read[Long] and
-      (JsPath \ "name").read[String] and
-      (JsPath \ "description").read[String] and
-      (JsPath \ "month_sales").read[Int] and
-      (JsPath \ "rating").read[Float] and
-      (JsPath \ "rating_count").read[Int] and
-      (JsPath \ "satisfy_count").read[Int] and
-      (JsPath \ "satisfy_rate").read[Float] and
-      (JsPath \ "created_at").readWithDefault(DateTime.now())
-  )(Food.apply _)
-}
+object FoodDao {
 
-abstract class Foods extends CassandraTable[Foods, Food] with RootConnector {
+  implicit def fromModel(model: com.youleligou.eleme.models.Food): FoodDao = FoodDao(
+    itemId = model.itemId,
+    restaurantId = model.restaurantId,
+    categoryId = model.categoryId,
+    name = model.name,
+    description = model.description,
+    monthSales = model.monthSales,
+    rating = model.rating,
+    ratingCount = model.ratingCount,
+    satisfyCount = model.satisfyCount,
+    satisfyRate = model.satisfyRate
+  )
+
+  implicit def convertSeq(source: Seq[Food])(implicit converter: Food => FoodDao): Seq[FoodDao] = source map converter
+
+}
+abstract class Foods extends CassandraTable[Foods, FoodDao] with RootConnector {
   object restaurantId extends LongColumn(this) with PartitionKey
   object itemId       extends LongColumn(this)
   object categoryId   extends LongColumn(this)
@@ -51,16 +54,16 @@ abstract class Foods extends CassandraTable[Foods, Food] with RootConnector {
   object satisfyRate  extends FloatColumn(this)
   object createdAt    extends DateTimeColumn(this) with ClusteringOrder with Descending
 
-  def batchInsertOrUpdate(foods: Seq[Food]): Future[ResultSet] =
+  def batchInsertOrUpdate(foods: Seq[FoodDao]): Future[ResultSet] =
     Batch.unlogged
       .add(foods.map { food =>
         store(food)
       }.iterator)
       .future()
 
-  def insertOrUpdate(foods: Seq[Food]): Seq[Future[ResultSet]] = foods.map(insertOrUpdate)
+  def insertOrUpdate(foods: Seq[FoodDao]): Seq[Future[ResultSet]] = foods.map(insertOrUpdate)
 
-  def insertOrUpdate(food: Food): Future[ResultSet] = store(food).future()
+  def insertOrUpdate(food: FoodDao): Future[ResultSet] = store(food).future()
 
-  def all(): Future[List[Food]] = select.fetch()
+  def all(): Future[List[FoodDao]] = select.fetch()
 }

@@ -2,14 +2,15 @@ package com.youleligou.eleme.daos.cassandra
 
 import com.outworkers.phantom.dsl._
 import com.youleligou.crawler.daos.cassandra.CrawlerJob
-import org.joda.time.DateTime
+import com.youleligou.eleme.models.{Identification, Restaurant}
+import org.joda.time.{DateTime, LocalDate}
 import play.api.libs.functional.syntax._
 import play.api.libs.json.Reads._
 import play.api.libs.json.{JsPath, Reads}
 
 import scala.concurrent.Future
 
-case class Restaurant(
+case class RestaurantDao(
     id: Long,
     address: String,
     averageCost: String,
@@ -27,39 +28,41 @@ case class Restaurant(
     rating: Float,
     ratingCount: Int,
     recentOrderNum: Int,
-    licensesNumber: Option[String],
-    companyName: Option[String],
+    licensesNumber: Option[String] = None,
+    companyName: Option[String] = None,
     status: Int,
+    createdDate: LocalDate = LocalDate.now(),
     createdAt: DateTime = DateTime.now()
 )
 
-object Restaurant {
-  implicit val restaurantReads: Reads[Restaurant] = (
-    (JsPath \ "id").read[Long] and
-      (JsPath \ "address").readWithDefault[String]("").map(_.trim) and
-      (JsPath \ "average_cost").readWithDefault[String]("").map(_.trim) and
-      (JsPath \ "description").readWithDefault[String]("").map(_.trim) and
-      (JsPath \ "float_delivery_fee").readWithDefault[Float](0f) and
-      (JsPath \ "float_minimum_order_amount").readWithDefault[Float](0f) and
-      (JsPath \ "image_path").readWithDefault[String]("").map(_.trim) and
-      (JsPath \ "is_new").readWithDefault[Boolean](false) and
-      (JsPath \ "is_premium").readWithDefault[Boolean](false) and
-      (JsPath \ "latitude").readWithDefault[Float](0f) and
-      (JsPath \ "longitude").readWithDefault[Float](0f) and
-      (JsPath \ "name").readWithDefault[String]("").map(_.trim) and
-      (JsPath \ "phone").readWithDefault[String]("").map(_.trim) and
-      (JsPath \ "promotion_info").readWithDefault[String]("").map(_.trim) and
-      (JsPath \ "rating").readWithDefault[Float](0f) and
-      (JsPath \ "rating_count").readWithDefault[Int](0) and
-      (JsPath \ "recent_order_num").readWithDefault[Int](0) and
-      (JsPath \ "identification" \ "licenses_number").readNullable[String] and
-      (JsPath \ "identification" \ "company_name").readNullable[String] and
-      (JsPath \ "status").readWithDefault[Int](0) and
-      (JsPath \ "created_at").readWithDefault(DateTime.now())
-  )(Restaurant.apply _)
+object RestaurantDao {
+  implicit def fromModel(model: Restaurant): RestaurantDao = RestaurantDao(
+    id = model.id,
+    address = model.address,
+    averageCost = model.averageCost,
+    description = model.description,
+    deliveryFee = model.deliveryFee,
+    minimumOrderAmount = model.minimumOrderAmount,
+    imagePath = model.imagePath,
+    isNew = model.isNew,
+    isPremium = model.isPremium,
+    latitude = model.latitude,
+    longitude = model.longitude,
+    name = model.name,
+    phone = model.phone,
+    promotionInfo = model.promotionInfo,
+    rating = model.rating,
+    ratingCount = model.ratingCount,
+    recentOrderNum = model.recentOrderNum,
+    licensesNumber = model.identification.flatMap(_.licensesNumber),
+    companyName = model.identification.flatMap(_.companyName),
+    status = model.status
+  )
+
+  implicit def convertSeq(source: Seq[Restaurant])(implicit converter: Restaurant => RestaurantDao): Seq[RestaurantDao] = source map converter
 }
 
-abstract class Restaurants extends CassandraTable[Restaurants, Restaurant] with RootConnector {
+abstract class Restaurants extends CassandraTable[Restaurants, RestaurantDao] with RootConnector {
   object id                 extends LongColumn(this) with PartitionKey
   object address            extends StringColumn(this)
   object averageCost        extends StringColumn(this)
@@ -80,7 +83,8 @@ abstract class Restaurants extends CassandraTable[Restaurants, Restaurant] with 
   object licensesNumber     extends OptionalStringColumn(this)
   object companyName        extends OptionalStringColumn(this)
   object status             extends IntColumn(this)
-  object createdAt          extends DateTimeColumn(this) with ClusteringOrder with Descending
+  object createdDate        extends LocalDateColumn(this) with ClusteringOrder with Descending
+  object createdAt          extends DateTimeColumn(this)
 
   def batchInsertOrUpdate(restaurants: Seq[CrawlerJob]): Future[ResultSet] =
     Batch.unlogged
@@ -89,11 +93,11 @@ abstract class Restaurants extends CassandraTable[Restaurants, Restaurant] with 
       }.iterator)
       .future()
 
-  def insertOrUpdate(restaurants: Seq[Restaurant]): Seq[Future[ResultSet]] = restaurants.map(insertOrUpdate)
+  def insertOrUpdate(restaurants: Seq[RestaurantDao]): Seq[Future[ResultSet]] = restaurants.map(insertOrUpdate)
 
-  def insertOrUpdate(restaurant: Restaurant): Future[ResultSet] = store(restaurant).future()
+  def insertOrUpdate(restaurant: RestaurantDao): Future[ResultSet] = store(restaurant).future()
 
-  def all(): Future[List[Restaurant]] = select.fetch()
+  def all(): Future[List[RestaurantDao]] = select.fetch()
 
   def allIds(): Future[List[Long]] = select(_.id).fetch()
 }

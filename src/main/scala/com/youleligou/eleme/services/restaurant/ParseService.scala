@@ -4,7 +4,8 @@ import com.google.inject.Inject
 import com.outworkers.phantom.database.DatabaseProvider
 import com.outworkers.phantom.dsl.ResultSet
 import com.youleligou.crawler.models.{FetchResponse, ParseResult, UrlInfo}
-import com.youleligou.eleme.daos.cassandra.{ElemeDatabase, Restaurant}
+import com.youleligou.eleme.daos.cassandra.ElemeDatabase
+import com.youleligou.eleme.models.Restaurant
 import play.api.libs.json._
 
 import scala.concurrent.Future
@@ -13,10 +14,13 @@ import scala.util.Try
 class ParseService @Inject()(val database: ElemeDatabase) extends com.youleligou.crawler.services.ParseService with DatabaseProvider[ElemeDatabase] {
 
   final val Length: Int      = 2
-  final val Precision: Float = 10F
+  final val Precision: Float = 100F
   final val LatitudeKey      = "latitude"
   final val LongitudeKey     = "longitude"
   final val OffsetKey        = "offset"
+  final val LimitKey         = "limit"
+
+  private def rounding(number: Float) = (Math.round(number * 100) / 100F).toString
 
   private def getChildLinksByLocation(fetchResponse: FetchResponse): Seq[UrlInfo] = {
     val queryParameters   = fetchResponse.fetchRequest.urlInfo.queryParameters
@@ -28,7 +32,8 @@ class ParseService @Inject()(val database: ElemeDatabase) extends com.youleligou
       latitudeSteps  <- -Length to Length if latitudeSteps != 0; latitudeDelta   = latitudeSteps / Precision
       longitudeSteps <- -Length to Length if longitudeSteps != 0; longitudeDelta = longitudeSteps / Precision
     } yield {
-      val updatedQueryParameters = queryParameters + (LatitudeKey -> (originalLatitude + latitudeDelta).toString) + (LongitudeKey -> (originalLongitude + longitudeDelta).toString) + (OffsetKey -> "0")
+      val updatedQueryParameters = queryParameters + (LatitudeKey -> rounding(originalLatitude + latitudeDelta)) + (LongitudeKey -> rounding(
+        originalLongitude + longitudeDelta)) + (OffsetKey -> "0")
       fetchResponse.fetchRequest.urlInfo.copy(queryParameters = updatedQueryParameters, deep = deep + 1)
     }
   }
@@ -36,7 +41,8 @@ class ParseService @Inject()(val database: ElemeDatabase) extends com.youleligou
   private def getChildLinksByOffset(fetchResponse: FetchResponse): Seq[UrlInfo] = {
     val urlInfo = fetchResponse.fetchRequest.urlInfo
     val offset  = urlInfo.queryParameters.getOrElse(OffsetKey, "0").toInt
-    Seq(urlInfo.copy(queryParameters = urlInfo.queryParameters + (OffsetKey -> (offset + 1).toString)))
+    val limit   = urlInfo.queryParameters.getOrElse(LimitKey, "30").toInt
+    Seq(urlInfo.copy(queryParameters = urlInfo.queryParameters + (OffsetKey -> (offset + limit).toString)))
   }
 
   private def persist(restaurants: Seq[Restaurant]): Seq[Future[ResultSet]] = database.restaurants.insertOrUpdate(restaurants)
@@ -45,23 +51,27 @@ class ParseService @Inject()(val database: ElemeDatabase) extends com.youleligou
     * 解析具体实现
     */
   override def parse(fetchResponse: FetchResponse): ParseResult = {
-    val restaurants = Try {
-      Json.parse(fetchResponse.content) match {
-        case JsArray(restaurantsJsValue) =>
-          restaurantsJsValue.flatMap { restaurant =>
-            restaurant.validate[Restaurant].asOpt
+    val restaurants = Json.parse(fetchResponse.content) match {
+      case JsArray(restaurantsJsValue) =>
+        restaurantsJsValue.flatMap { restaurant =>
+          restaurant.validate[Restaurant] match {
+            case restaurant: JsSuccess[Restaurant] =>
+              Some(restaurant.value)
+            case error: JsError =>
+              logger.warn("parse restaurant failed, {}", error.errors.toString())
+              None
           }
-        case _ => Seq.empty[Restaurant]
-      }
-    } getOrElse {
-      Seq.empty[Restaurant]
+        }
+      case _ =>
+        logger.warn("parse restaurant failed, url {}", fetchResponse.fetchRequest.urlInfo.url)
+        Seq.empty[Restaurant]
     }
 
     persist(restaurants.toList)
 
     ParseResult(
       fetchResponse = fetchResponse,
-      childLink = if (restaurants.isEmpty) getChildLinksByLocation(fetchResponse) else getChildLinksByOffset(fetchResponse)
+      childLink = getChildLinksByOffset(fetchResponse) // if (restaurants.isEmpty) getChildLinksByLocation(fetchResponse) else getChildLinksByOffset(fetchResponse)
     )
   }
 }

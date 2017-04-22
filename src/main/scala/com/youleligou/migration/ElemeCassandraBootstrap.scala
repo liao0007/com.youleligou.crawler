@@ -4,7 +4,7 @@ import akka.actor.ActorSystem
 import com.google.inject.Inject
 import com.outworkers.phantom.dsl.DatabaseProvider
 import com.typesafe.config.Config
-import com.youleligou.eleme.daos.cassandra.{ElemeDatabase, Restaurant}
+import com.youleligou.eleme.daos.cassandra.ElemeDatabase
 import com.youleligou.eleme.daos.mysql.RestaurantRepo
 
 /**
@@ -15,6 +15,9 @@ class ElemeCassandraBootstrap @Inject()(config: Config, system: ActorSystem, val
   import system.dispatcher
 
   def start(): Unit = {
+
+    database.createAsync()
+    /*
     for {
       _           <- database.createAsync()
       restaurants <- restaurantRepo.all()
@@ -47,6 +50,7 @@ class ElemeCassandraBootstrap @Inject()(config: Config, system: ActorSystem, val
           .future()
       }
     }
+    */
 
   }
 }

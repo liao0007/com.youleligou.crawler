@@ -22,7 +22,7 @@ class Fetcher @Inject()(config: Config, fetchService: FetchService, @Named(Injec
 
   import context.dispatcher
 
-  final val MaxRetry: Int = config.getInt("crawler.fetch.max-retry")
+  final val MaxRetry: Int = config.getInt("crawler.fetch.maxRetry")
 
   val parsers: ActorRef = provideActorRef(context.system, Parser, Some(context))
 
@@ -36,11 +36,6 @@ class Fetcher @Inject()(config: Config, fetchService: FetchService, @Named(Injec
     case Fetcher.Fetched(fetchResponse @ FetchResponse(FetchService.Ok, _, _, _)) =>
       log.debug("{} fetch succeed", self.path)
       parsers ! Parse(fetchResponse)
-      injector ! Fetcher.WorkFinished
-      context unbecome ()
-
-    case Fetcher.Fetched(FetchResponse(statusCode @ FetchService.NotFound, _, message, _)) =>
-      log.debug("{} fetch failed {} {}", self.path, statusCode, message)
       injector ! Fetcher.WorkFinished
       context unbecome ()
 

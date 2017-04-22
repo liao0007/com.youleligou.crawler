@@ -34,8 +34,3 @@ firewall-cmd --zone=public --add-port=9160/tcp --permanent
 firewall-cmd --zone=public --add-port=7000/tcp --permanent
 firewall-cmd --reload
 ```
-
-### crontab
-```
-*/30 * * * * cat /etc/squid/squid.conf /etc/squid/peers.conf > /etc/squid/squid_combined.conf && docker restart squid
-```
