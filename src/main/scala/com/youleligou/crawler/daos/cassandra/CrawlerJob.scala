@@ -51,5 +51,5 @@ abstract class CrawlerJobs extends CassandraTable[CrawlerJobs, CrawlerJob] with 
 
   def insertOrUpdate(crawlerJob: CrawlerJob): Future[ResultSet] = store(crawlerJob).future()
 
-  def all: Future[List[CrawlerJob]] = select.fetch()
+  def all(): Future[List[CrawlerJob]] = select.fetch()
 }

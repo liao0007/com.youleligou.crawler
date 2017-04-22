@@ -62,5 +62,5 @@ abstract class Foods extends CassandraTable[Foods, Food] with RootConnector {
 
   def insertOrUpdate(food: Food): Future[ResultSet] = store(food).future()
 
-  def all: Future[List[Food]] = select.fetch()
+  def all(): Future[List[Food]] = select.fetch()
 }

@@ -56,6 +56,7 @@ class HttpClientFetchService @Inject()(config: Config, val database: CrawlerData
                                  port = proxyServer("port").toInt,
                                  principal = Some(proxyServer("username")),
                                  password = Some(proxyServer("password"))))
+
       } else
         withForwardedFor
 

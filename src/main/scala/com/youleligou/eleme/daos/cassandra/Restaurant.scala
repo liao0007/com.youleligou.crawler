@@ -93,5 +93,7 @@ abstract class Restaurants extends CassandraTable[Restaurants, Restaurant] with 
 
   def insertOrUpdate(restaurant: Restaurant): Future[ResultSet] = store(restaurant).future()
 
-  def all: Future[List[Restaurant]] = select.fetch()
+  def all(): Future[List[Restaurant]] = select.fetch()
+
+  def allIds(): Future[List[Long]] = select(_.id).fetch()
 }

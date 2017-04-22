@@ -49,8 +49,11 @@ libraryDependencies ++= Seq(
   "com.typesafe.slick" %% "slick-hikaricp"      % "3.2.0",
   "mysql"              % "mysql-connector-java" % "5.1.40",
   // -- cassandra --
-  "com.outworkers" %% "phantom-dsl" % phantomVersion
+  "com.outworkers" %% "phantom-dsl" % phantomVersion,
+  "org.javassist" % "javassist" % "3.22.0-CR1"
 )
+
+enablePlugins(DockerPlugin)
 
 assemblyMergeStrategy in assembly := {
   case PathList("META-INF", xs @ _ *) => MergeStrategy.discard

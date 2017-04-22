@@ -48,5 +48,7 @@ abstract class CrawlerProxyServers extends CassandraTable[CrawlerProxyServers, C
 
   def insertOrUpdate(crawlerProxyServer: CrawlerProxyServer): Future[ResultSet] = store(crawlerProxyServer).future()
 
-  def all: Future[List[CrawlerProxyServer]] = select.fetch()
+  def all(limitOpt: Option[Int] = None): Future[List[CrawlerProxyServer]] = limitOpt.fold(select.fetch()) { limit =>
+    select.limit(limit).fetch()
+  }
 }

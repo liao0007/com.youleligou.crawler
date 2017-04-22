@@ -10,19 +10,6 @@ yum install -y vim
 ```
 echo "
 ############ SQUID CONFIG ############
-acl SSL_ports port 443
-acl Safe_ports port 80          # http
-acl Safe_ports port 21          # ftp
-acl Safe_ports port 443         # https
-acl Safe_ports port 70          # gopher
-acl Safe_ports port 210         # wais
-acl Safe_ports port 1025-65535  # unregistered ports
-acl Safe_ports port 280         # http-mgmt
-acl Safe_ports port 488         # gss-http
-acl Safe_ports port 591         # filemaker
-acl Safe_ports port 777         # multiling http
-acl CONNECT method CONNECT
-
 auth_param basic program /usr/lib64/squid/basic_ncsa_auth /etc/squid/passwords
 auth_param basic realm proxy
 acl authenticated proxy_auth REQUIRED
@@ -31,7 +18,10 @@ http_port *PROXY_PORT*
 
 coredump_dir /var/spool/squid
 cache deny all
+via off
+forwarded_for transparent
 never_direct allow all
+always_direct deny all
 cache_peer vps001.youleligou.com parent *PROXY_PORT* 0 round-robin no-query no-digest connect-fail-limit=999999 login=PASSTHRU
 ############ SQUID CONFIG ############ " > /etc/squid/squid.conf
 ```
@@ -39,7 +29,7 @@ cache_peer vps001.youleligou.com parent *PROXY_PORT* 0 round-robin no-query no-d
 ```
 systemctl enable squid && 
 systemctl restart squid &&
-firewall-cmd --zone=public --add-port=*PROXY_PORT*/tcp --permanent &&
+firewall-cmd --zone=public --add-port=433/tcp --permanent &&
 firewall-cmd --reload
 ```
 * schedule squid restart
@@ -64,22 +54,6 @@ yum install -y vim
 ```
 echo "
 ############ SQUID CONFIG ############
-acl SSL_ports port 443
-acl Safe_ports port 80          # http
-acl Safe_ports port 21          # ftp
-acl Safe_ports port 443         # https
-acl Safe_ports port 70          # gopher
-acl Safe_ports port 210         # wais
-acl Safe_ports port 1025-65535  # unregistered ports
-acl Safe_ports port 280         # http-mgmt
-acl Safe_ports port 488         # gss-http
-acl Safe_ports port 591         # filemaker
-acl Safe_ports port 777         # multiling http
-acl CONNECT method CONNECT
-
-http_access deny !Safe_ports
-http_access deny CONNECT !SSL_ports
-
 auth_param basic program /usr/lib64/squid/basic_ncsa_auth /etc/squid/passwords
 auth_param basic realm proxy
 acl authenticated proxy_auth REQUIRED
@@ -89,8 +63,7 @@ http_port 433
 coredump_dir /var/spool/squid
 cache deny all
 via off
-forwarded_for off
-request_header_access X-Forwarded-For deny all
+forwarded_for transparent
 ############ SQUID CONFIG ############
 " > /etc/squid/squid.conf && 
 htpasswd -c /etc/squid/passwords vps

@@ -15,8 +15,8 @@ import redis.RedisClient
 
 import scala.concurrent.duration.{Duration, MILLISECONDS}
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.Try
 import scala.util.control.NonFatal
+import scala.sys.process._
 
 class ProxyAssistant @Inject()(config: Config, redisClient: RedisClient, val database: CrawlerDatabase, standaloneAhcWSClient: StandaloneAhcWSClient)
     extends Actor
@@ -30,8 +30,8 @@ class ProxyAssistant @Inject()(config: Config, redisClient: RedisClient, val dat
 
   override def receive: Receive = {
     case Run =>
-      log.debug("{} run", self.path)
-      database.crawlerProxyServers.all flatMap { proxyServers =>
+      log.debug("{} start run", self.path)
+      database.crawlerProxyServers.all() flatMap { proxyServers =>
         Future.sequence(proxyServers map { proxyServer =>
           testAvailability(proxyServer) map { testedProxyServer =>
             log.debug("{} {}:{} isLive={}", self.path, testedProxyServer.ip, testedProxyServer.port, testedProxyServer.isLive)
@@ -47,18 +47,23 @@ class ProxyAssistant @Inject()(config: Config, redisClient: RedisClient, val dat
           s"""cache_peer ${liveProxyServers.ip} parent ${liveProxyServers.port} 0 round-robin no-query no-digest"""
         } mkString "\n"
 
-        val writer = new PrintWriter(new File(config.getString("proxy.squid-config-file")))
         try {
-          log.info("{} write to squid config file", self.path)
-          writer.write(squidConfig)
+          val writer = new PrintWriter(new File(config.getString("proxy.squid-config-file")))
+          try {
+            log.info("{} write to squid config file", self.path)
+            writer.write(squidConfig)
 
-//          log.info("{} restart squid", self.path)
-//          config.getString("proxy.squid-reload-command") !
+            log.info("{} restart squid", self.path)
+            config.getString("proxy.squid-reload-command") !
+          } catch {
+            case NonFatal(x) =>
+              log.warning(x.getMessage)
+          } finally {
+            writer.close()
+          }
         } catch {
           case NonFatal(x) =>
             log.warning(x.getMessage)
-        } finally {
-          writer.close()
         }
 
         database.crawlerProxyServers.batchInsertOrUpdate(testedProxyServers)
@@ -67,31 +72,28 @@ class ProxyAssistant @Inject()(config: Config, redisClient: RedisClient, val dat
   }
 
   protected def testAvailability(proxyServer: CrawlerProxyServer)(implicit executor: ExecutionContext): Future[CrawlerProxyServer] = {
-    Try {
-      standaloneAhcWSClient
-        .url("http://www.baidu.com")
-        .withProxyServer(DefaultWSProxyServer(proxyServer.ip, proxyServer.port))
-        .withRequestTimeout(timeout)
-        .get()
-        .map { response =>
-          if (response.status == 200 && response.body.contains("百度一下，你就知道")) {
-            proxyServer.copy(isLive = true, lastVerifiedAt = Some(now), checkCount = 0)
-          } else {
-            proxyServer.copy(isLive = false, lastVerifiedAt = Some(now), checkCount = proxyServer.checkCount + 1)
-          }
-        } recover {
-        case NonFatal(_) =>
+    try {
+      //ping first
+        standaloneAhcWSClient
+          .url("http://www.baidu.com")
+          .withProxyServer(DefaultWSProxyServer(proxyServer.ip, proxyServer.port))
+          .withRequestTimeout(timeout)
+          .get()
+          .map { response =>
+            if (response.status == 200 && response.body.contains("百度一下，你就知道")) {
+              proxyServer.copy(isLive = true, lastVerifiedAt = Some(now), checkCount = 0)
+            } else {
+              proxyServer.copy(isLive = false, lastVerifiedAt = Some(now), checkCount = proxyServer.checkCount + 1)
+            }
+          } recover {
+        case NonFatal(x) =>
+          log.debug("{} {}", self.path, x.getMessage)
           proxyServer.copy(isLive = false, lastVerifiedAt = Some(now), checkCount = proxyServer.checkCount + 1)
       }
-
-    } getOrElse {
-      Future.successful(proxyServer.copy(isLive = false, lastVerifiedAt = Some(now), checkCount = proxyServer.checkCount + 1))
-
-    } recover {
+    } catch {
       case NonFatal(x) =>
-        log.warning("{} {}", self.path, x.getMessage)
-        proxyServer.copy(isLive = false, lastVerifiedAt = Some(now), checkCount = proxyServer.checkCount + 1)
-
+        log.debug("{} {}", self.path, x.getMessage)
+        Future.successful(proxyServer.copy(isLive = false, lastVerifiedAt = Some(now), checkCount = proxyServer.checkCount + 1))
     }
   }
 }

@@ -5,12 +5,13 @@ import akka.pattern.ask
 import akka.util.Timeout
 import com.google.inject.Inject
 import com.google.inject.name.Named
+import com.outworkers.phantom.database.DatabaseProvider
 import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
 import com.youleligou.crawler.actors.Injector
 import com.youleligou.crawler.actors.Injector.{CacheCleared, ClearCache, Tick}
 import com.youleligou.crawler.models.{FetchRequest, UrlInfo}
-import com.youleligou.eleme.daos.mysql.RestaurantRepo
+import com.youleligou.eleme.daos.cassandra.ElemeDatabase
 import redis.RedisClient
 
 import scala.concurrent.duration._
@@ -21,10 +22,11 @@ import scala.concurrent.duration._
   */
 class ElemeCrawlerBootstrap @Inject()(config: Config,
                                       system: ActorSystem,
-                                      restaurantRepo: RestaurantRepo,
+                                      val database: ElemeDatabase,
                                       redisClient: RedisClient,
                                       @Named(Injector.PoolName) injectors: ActorRef)
-    extends LazyLogging {
+    extends LazyLogging
+    with DatabaseProvider[ElemeDatabase] {
 
   import system.dispatcher
 
@@ -56,7 +58,7 @@ class ElemeCrawlerBootstrap @Inject()(config: Config,
     implicit val timeout = Timeout(5.minutes)
     injectors ? ClearCache(foodListJobType) map {
       case CacheCleared(_) =>
-        restaurantRepo.allIds() map { ids =>
+        database.restaurants.allIds map { ids =>
           ids.foreach { id =>
             injectors ! Injector.Inject(
               FetchRequest(
