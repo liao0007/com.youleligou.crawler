@@ -5,7 +5,6 @@ import com.youleligou.core.reps.Repo
 import com.youleligou.crawler.modules._
 import com.youleligou.crawler.services.ParseService
 import com.youleligou.eleme.daos.{FoodDao, RestaurantDao, RestaurantDefinitionDao}
-import com.youleligou.eleme.daos.cassandra.{RestaurantDao, RestaurantDefinitionDao}
 import com.youleligou.eleme.repos.cassandra.{FoodRepo, RestaurantDefinitionRepo, RestaurantRepo}
 import com.youleligou.eleme.services.{food, restaurant}
 import net.codingwell.scalaguice.ScalaModule

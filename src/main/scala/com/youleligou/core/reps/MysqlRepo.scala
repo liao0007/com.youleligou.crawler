@@ -1,6 +1,7 @@
 package com.youleligou.core.reps
 
-import java.sql.Timestamp
+import java.sql.{Date, Timestamp}
+import java.util.UUID
 
 import org.joda.time.{DateTime, LocalDate, LocalTime}
 import slick.jdbc.MySQLProfile.api._
@@ -19,15 +20,4 @@ trait MysqlRepo[T] extends Repo[T] {
 
   def all(): Future[Seq[T]]
 
-}
-
-object MysqlRepo {
-  implicit def dateTime = MappedColumnType.base[DateTime, Timestamp](
-    dt => new Timestamp(dt.getMillis),
-    ts => new DateTime(ts.getTime)
-  )
-  implicit def localDate = MappedColumnType.base[LocalDate, Timestamp](
-    date => new Timestamp(date.toDateTime(new LocalTime(0, 0)).getMillis),
-    ts => new LocalDate(ts.getTime)
-  )
 }

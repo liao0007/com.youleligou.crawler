@@ -4,7 +4,7 @@ import com.google.inject.Inject
 import com.typesafe.config.Config
 import com.youleligou.core.reps.Repo
 import com.youleligou.crawler.daos.JobDao
-import com.youleligou.crawler.models.{FetchRequest, FetchResponse}
+import com.youleligou.crawler.models.{FetchRequest, FetchResponse, Job}
 import com.youleligou.crawler.services.FetchService
 import org.joda.time.DateTime
 import play.api.libs.ws.ahc.StandaloneAhcWSClient
@@ -33,7 +33,7 @@ class HttpClientFetchService @Inject()(config: Config, jobRepo: Repo[JobDao], st
     val FetchRequest(urlInfo, _) = fetchRequest
     val rand                     = new Random(System.currentTimeMillis())
 
-    val crawlerJob = JobDao(
+    val crawlerJob = Job(
       url = urlInfo.url,
       jobName = urlInfo.jobType,
       useProxy = useProxy

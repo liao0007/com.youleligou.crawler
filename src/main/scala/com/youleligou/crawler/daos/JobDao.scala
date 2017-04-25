@@ -1,5 +1,7 @@
 package com.youleligou.crawler.daos
 
+import java.util.UUID
+
 import com.youleligou.crawler.models.Job
 import org.joda.time.DateTime
 
@@ -7,7 +9,7 @@ import org.joda.time.DateTime
   * Created by liangliao on 18/4/17.
   */
 case class JobDao(
-    id: String,
+    id: UUID,
     jobType: String,
     jobName: String,
     url: String,
@@ -24,7 +26,7 @@ object JobDao {
   }
 
   implicit def fromModel(model: Job): JobDao = JobDao(
-    id = model.id.toString,
+    id = model.id,
     jobType = model.jobType,
     jobName = model.jobName,
     url = model.url,

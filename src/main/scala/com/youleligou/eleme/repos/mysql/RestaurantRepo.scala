@@ -6,11 +6,12 @@ import com.youleligou.core.reps.MysqlRepo
 import com.youleligou.eleme.daos.RestaurantDao
 import org.joda.time.{DateTime, LocalDate}
 import slick.jdbc.MySQLProfile.api._
+import com.github.tototoshi.slick.MySQLJodaSupport._
 import slick.lifted.Tag
 
 import scala.concurrent.Future
 import scala.util.control.NonFatal
-
+import scala.concurrent.ExecutionContext.Implicits.global
 /**
   * Created by liangliao on 25/4/17.
   */
@@ -93,7 +94,6 @@ class RestaurantDaoTable(tag: Tag) extends Table[RestaurantDao](tag, "restaurant
   def createdDate        = column[LocalDate]("created_date")
   def createdAt          = column[DateTime]("created_at")
 
-  import MysqlRepo._
   def * =
     (id,
      address,

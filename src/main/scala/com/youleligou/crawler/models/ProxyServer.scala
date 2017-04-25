@@ -11,8 +11,6 @@ import play.api.libs.json._
   * Created by liangliao on 25/4/17.
   */
 case class ProxyServer(
-    id: UUID = UUID.randomUUID(),
-    hash: String,
     ip: String,
     port: Int,
     username: Option[String] = None,

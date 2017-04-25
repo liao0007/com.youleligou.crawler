@@ -5,11 +5,12 @@ import com.youleligou.core.reps.MysqlRepo
 import com.youleligou.eleme.daos.FoodDao
 import org.joda.time.DateTime
 import slick.jdbc.MySQLProfile.api._
+import com.github.tototoshi.slick.MySQLJodaSupport._
 import slick.lifted.Tag
 
 import scala.concurrent.Future
 import scala.util.control.NonFatal
-
+import scala.concurrent.ExecutionContext.Implicits.global
 /**
   * Created by liangliao on 25/4/17.
   */
@@ -74,7 +75,6 @@ class FoodDaoTable(tag: Tag) extends Table[FoodDao](tag, "foods") {
   def satisfyRate  = column[Float]("satisfy_rate")
   def createdAt    = column[DateTime]("created_at")
 
-  import MysqlRepo._
   def * =
     (itemId, restaurantId, categoryId, name, description, monthSales, rating, ratingCount, satisfyCount, satisfyRate, createdAt) <> ((FoodDao.apply _).tupled, FoodDao.unapply)
 

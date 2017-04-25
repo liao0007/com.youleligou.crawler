@@ -15,7 +15,7 @@ case class Job(
     url: String,
     useProxy: Boolean = false,
     createdAt: DateTime = DateTime.now(),
-    completedAt: Option[DateTime],
+    completedAt: Option[DateTime] = None,
     statusCode: Option[Int] = None,
     statusMessage: Option[String] = None
 )
