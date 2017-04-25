@@ -3,9 +3,9 @@ package com.youleligou.crawler.repos.mysql
 import java.sql.Timestamp
 
 import com.google.inject.Inject
-import com.google.inject.name.Named
-import com.typesafe.scalalogging.LazyLogging
+import com.youleligou.core.reps.MysqlRepo
 import com.youleligou.crawler.daos.ProxyServerDao
+import org.joda.time.DateTime
 import slick.jdbc.MySQLProfile.api._
 import slick.lifted.Tag
 
@@ -16,18 +16,17 @@ import scala.util.control.NonFatal
 /**
   * Created by liangliao on 25/4/17.
   */
-class ProxyServerRepo @Inject()(@Named(schemas.CanCan) database: Database) extends LazyLogging {
-  val ProxyServersDao: TableQuery[ProxyServerTable] = TableQuery[ProxyServerTable]
+class ProxyServerRepo @Inject()(val schema: String = "cancan", val database: Database) extends MysqlRepo[ProxyServerDao, ProxyServerTable] {
 
-  def find(id: Long): Future[Option[ProxyServerDao]] =
-    database.run(ProxyServersDao.filter(_.id === id).result.headOption) recover {
+  def find(ip: String): Future[Option[ProxyServerDao]] =
+    database.run(table.filter(_.ip === ip).result.headOption) recover {
       case NonFatal(x) =>
         logger.warn(x.getMessage)
         None
     }
 
-  def delete(id: Long): Future[Int] =
-    database.run(ProxyServersDao.filter(_.id === id).delete) recover {
+  def delete(ip: String): Future[Int] =
+    database.run(table.filter(_.ip === ip).delete) recover {
       case NonFatal(x) =>
         logger.warn(x.getMessage)
         0
@@ -35,7 +34,7 @@ class ProxyServerRepo @Inject()(@Named(schemas.CanCan) database: Database) exten
 
   def all(limitOpt: Option[Int] = None): Future[List[ProxyServerDao]] =
     database.run {
-      val prequery = ProxyServersDao.sortBy(_.checkCount.asc)
+      val prequery = table.sortBy(_.checkCount.asc)
       limitOpt
         .fold(prequery) { limit =>
           prequery.take(limit)
@@ -49,55 +48,47 @@ class ProxyServerRepo @Inject()(@Named(schemas.CanCan) database: Database) exten
         List.empty[ProxyServerDao]
     }
 
-  def all(limit: Int): Future[List[ProxyServerDao]] =
-    database.run(ProxyServersDao.to[List].sortBy(_.lastVerifiedAt.desc).take(limit).result) recover {
+  def all(): Future[Seq[ProxyServerDao]] =
+    database.run(table.to[Seq].result) recover {
       case NonFatal(x) =>
         logger.warn(x.getMessage)
         List.empty[ProxyServerDao]
     }
 
-  def create(proxyServerDao: ProxyServerDao): Future[Long] =
-    database.run(ProxyServerDao returning ProxyServersDao.map(_.id) += proxyServerDao).recover {
-      case t: Throwable =>
-        logger.warn(t.getMessage)
-        0L
-    } recover {
+  def save(proxyServerDao: ProxyServerDao): Future[Any] =
+    database.run(table += proxyServerDao) recover {
       case NonFatal(x) =>
         logger.warn(x.getMessage)
-        0L
     }
 
-  def create(crawlerProxyServers: List[ProxyServerDao]): Future[Option[Int]] =
-    database.run(ProxyServers Dao ++= crawlerProxyServers) recover {
+  def save(proxyServerDaos: Seq[ProxyServerDao]): Future[Option[Int]] =
+    database.run(table ++= proxyServerDaos) recover {
       case NonFatal(x) if !x.getMessage.contains("Duplicate entry") =>
         logger.warn(x.getMessage)
         None
     }
 
-  def insertOrUpdate(crawlerProxyServer: ProxyServerDao): Future[Int] =
+  def insertOrUpdate(proxyServer: ProxyServerDao): Future[Int] =
     database.run {
-      ProxyServersDao.insertOrUpdate(crawlerProxyServer)
+      table.insertOrUpdate(proxyServer)
     } recover {
       case NonFatal(x) =>
         logger.warn(x.getMessage)
         0
     }
 
-  def insertOrUpdate(crawlerProxyServers: Seq[ProxyServerDao]): Future[Any] =
+  def insertOrUpdate(proxyServers: Seq[ProxyServerDao]): Future[Any] =
     database.run {
-      DBIO.sequence(crawlerProxyServers.map(ProxyServersDao.insertOrUpdate))
+      DBIO.sequence(proxyServers.map(table.insertOrUpdate))
     } recover {
       case NonFatal(x) =>
         logger.warn(x.getMessage)
     }
 }
 
-class ProxyServerTable(tag: Tag) extends Table[ProxyServerDao](tag, "crawler_proxy_server") {
-  def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
+class ProxyServerTable(tag: Tag) extends Table[ProxyServerDao](tag, "proxy_server") {
 
-  def hash = column[String]("hash")
-
-  def ip = column[String]("ip")
+  def ip = column[String]("ip", O.PrimaryKey)
 
   def port = column[Int]("port")
 
@@ -115,13 +106,14 @@ class ProxyServerTable(tag: Tag) extends Table[ProxyServerDao](tag, "crawler_pro
 
   def isLive = column[Boolean]("is_live")
 
-  def lastVerifiedAt = column[Timestamp]("last_verified_at")
+  def lastVerifiedAt = column[DateTime]("last_verified_at")
 
   def checkCount = column[Int]("check_count")
 
-  def createdAt = column[Timestamp]("created_at")
+  def createdAt = column[DateTime]("created_at")
 
+  import MysqlRepo._
   def * =
-    (id, hash, ip, port, username.?, password.?, isAnonymous.?, supportedType.?, location.?, reactTime.?, isLive, lastVerifiedAt.?, checkCount) <> ((ProxyServerDao.apply _).tupled, ProxyServerDao.unapply)
+    (ip, port, username.?, password.?, isAnonymous.?, supportedType.?, location.?, reactTime.?, isLive, lastVerifiedAt.?, checkCount, createdAt) <> ((ProxyServerDao.apply _).tupled, ProxyServerDao.unapply)
 
 }

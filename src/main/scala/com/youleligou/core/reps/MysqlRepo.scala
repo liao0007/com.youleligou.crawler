@@ -1,6 +1,9 @@
 package com.youleligou.core.reps
 
-import com.datastax.spark.connector._
+import java.sql.Timestamp
+
+import com.typesafe.scalalogging.LazyLogging
+import org.joda.time.DateTime
 import slick.jdbc.MySQLProfile.api._
 
 import scala.concurrent.Future
@@ -8,20 +11,21 @@ import scala.concurrent.Future
 /**
   * Created by liangliao on 25/4/17.
   */
-trait MysqlRepo[T] extends Repo[T] {
+trait MysqlRepo[T, Table] extends Repo[T] with LazyLogging {
+  val table: TableQuery[Table] = TableQuery[Table]
   val database: Database
 
-  def save(record: T): Future[Unit] = Future {
-    save(Seq(record))
-  }
+  def save(record: T): Future[Unit]
 
-  def save(records: Seq[T]): Future[Unit] = Future {
-    val collection = sparkContext.parallelize(records)
-    collection.saveToCassandra(keyspace, table)
-  }
+  def save(records: Seq[T]): Future[Unit]
 
-  def all(): Future[Seq[T]] = Future {
-    sparkContext.cassandraTable[T](keyspace, table).collect().toSeq
-  }
+  def all(): Future[Seq[T]]
 
+}
+
+object MysqlRepo {
+  implicit def dateTime = MappedColumnType.base[DateTime, Timestamp](
+      dt => new Timestamp(dt.getMillis),
+      ts => new DateTime(ts.getTime)
+    )
 }

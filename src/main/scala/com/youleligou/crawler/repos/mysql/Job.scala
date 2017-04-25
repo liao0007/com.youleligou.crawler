@@ -3,8 +3,8 @@ package com.youleligou.crawler.repos.mysql
 import java.util.UUID
 
 import com.google.inject.Inject
-import com.google.inject.name.Named
 import com.typesafe.scalalogging.LazyLogging
+import com.youleligou.core.reps.MysqlRepo
 import com.youleligou.crawler.daos.JobDao
 import org.joda.time.DateTime
 import slick.jdbc.MySQLProfile.api._
@@ -17,11 +17,10 @@ import scala.util.control.NonFatal
 /**
   * Created by liangliao on 25/4/17.
   */
-class JobDaoRepo @Inject()(@Named("cancan") database: Database) extends LazyLogging {
-  val JobDaos: TableQuery[JobDaoTable] = TableQuery[JobDaoTable]
+class JobDaoRepo @Inject()(val schema: String = "cancan", val database: Database) extends MysqlRepo[JobDao, JobDaoTable] with LazyLogging {
 
   def find(id: Long): Future[Option[JobDao]] =
-    database.run(JobDaos.filter(_.id === id).result.headOption) recover {
+    database.run(table.filter(_.id === id).result.headOption) recover {
       case NonFatal(x) =>
         logger.warn(x.getMessage)
         None
@@ -29,7 +28,7 @@ class JobDaoRepo @Inject()(@Named("cancan") database: Database) extends LazyLogg
 
   def findWithMaxId(jobType: String, jobName: String): Future[Option[JobDao]] =
     database.run(
-      JobDaos
+      table
         .filter(job => job.jobType === jobType && job.jobName === jobName)
         .sortBy(_.id.desc)
         .take(1)
@@ -41,32 +40,27 @@ class JobDaoRepo @Inject()(@Named("cancan") database: Database) extends LazyLogg
     }
 
   def delete(id: Long): Future[Int] =
-    database.run(JobDaos.filter(_.id === id).delete) recover {
+    database.run(table.filter(_.id === id).delete) recover {
       case NonFatal(x) =>
         logger.warn(x.getMessage)
         0
     }
 
-  def all(): Future[List[JobDao]] =
-    database.run(JobDaos.to[List].sortBy(_.id.desc).result) recover {
+  def all(): Future[Seq[JobDao]] =
+    database.run(table.to[Seq].sortBy(_.id.desc).result) recover {
       case NonFatal(x) =>
         logger.warn(x.getMessage)
         List.empty[JobDao]
     }
 
-  def create(job: JobDao): Future[Long] =
-    database.run(JobDaos returning JobDaos.map(_.id) += job).recover {
+  def save(job: JobDao): Future[Any] =
+    database.run(table += job).recover {
       case NonFatal(x) =>
         logger.warn(x.getMessage)
-        0L
-    } recover {
-      case NonFatal(x) =>
-        logger.warn(x.getMessage)
-        0L
     }
 
-  def create(jobs: List[JobDao]): Future[Option[Int]] =
-    database.run(JobDaos ++= jobs) recover {
+  def save(jobs: Seq[JobDao]): Future[Option[Int]] =
+    database.run(table ++= jobs) recover {
       case NonFatal(x) =>
         logger.warn(x.getMessage)
         None
@@ -74,7 +68,7 @@ class JobDaoRepo @Inject()(@Named("cancan") database: Database) extends LazyLogg
 }
 
 class JobDaoTable(tag: Tag) extends Table[JobDao](tag, "job") {
-  def id = column[UUID]("id", O.PrimaryKey)
+  def id = column[String]("id", O.PrimaryKey)
 
   def jobType = column[String]("job_type")
 
@@ -84,13 +78,15 @@ class JobDaoTable(tag: Tag) extends Table[JobDao](tag, "job") {
 
   def useProxy = column[Boolean]("use_proxy")
 
-  def createdAt = column[DateTime]("created_at", SqlType("timestamp not null default CURRENT_TIMESTAMP"))
-
   def statusCode = column[Int]("status_code")
 
   def statusMessage = column[String]("status_message")
 
-  def * =
-    (id, jobType, jobName, url, useProxy, createdAt, statusCode.?, statusMessage.?) <> ((JobDao.apply _).tupled, JobDao.unapply)
+  def createdAt = column[DateTime]("created_at", SqlType("timestamp not null default CURRENT_TIMESTAMP"))
 
+  def completedAt = column[DateTime]("completed_at")
+
+  import MysqlRepo._
+  def * =
+    (id, jobType, jobName, url, useProxy, statusCode.?, statusMessage.?, createdAt, completedAt.?) <> ((JobDao.apply _).tupled, JobDao.unapply)
 }

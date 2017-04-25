@@ -6,16 +6,16 @@ import org.joda.time.DateTime
 case class ProxyServerDao(
     ip: String,
     port: Int,
-    username: Option[String] = None,
-    password: Option[String] = None,
-    isAnonymous: Option[Boolean] = None,
-    supportedType: Option[String] = None,
-    location: Option[String] = None,
-    reactTime: Option[Float] = None,
-    isLive: Boolean = false,
-    lastVerifiedAt: Option[DateTime] = None,
-    checkCount: Int = 0,
-    createdAt: DateTime = DateTime.now()
+    username: Option[String],
+    password: Option[String],
+    isAnonymous: Option[Boolean],
+    supportedType: Option[String],
+    location: Option[String],
+    reactTime: Option[Float],
+    isLive: Boolean,
+    lastVerifiedAt: Option[DateTime],
+    checkCount: Int,
+    createdAt: DateTime
 )
 
 object ProxyServerDao {

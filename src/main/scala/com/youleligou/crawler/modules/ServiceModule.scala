@@ -39,7 +39,6 @@ class ServiceModule extends AbstractModule with ScalaModule {
 
   @Provides
   @Singleton
-  @Named(daos.mysql.schemas.CanCan)
   def provideDatabaseCanCan(system: ActorSystem): MySQLProfile.backend.Database = {
     val database = Database.forConfig("db.cancan")
     system.registerOnTermination({

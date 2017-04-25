@@ -2,6 +2,7 @@ package com.youleligou.crawler.models
 
 import java.sql.Timestamp
 import java.text.SimpleDateFormat
+import java.util.UUID
 
 import org.joda.time.DateTime
 import play.api.libs.json._
@@ -10,7 +11,7 @@ import play.api.libs.json._
   * Created by liangliao on 25/4/17.
   */
 case class ProxyServer(
-    id: Long = 0,
+    id: UUID = UUID.randomUUID(),
     hash: String,
     ip: String,
     port: Int,

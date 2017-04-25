@@ -10,7 +10,6 @@ import scala.concurrent.Future
 trait Repo[T] {
   val schema: String
   val table: String
-  val sparkContext: SparkContext
 
   def save(record: T): Future[Unit]
 
