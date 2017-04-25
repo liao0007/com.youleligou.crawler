@@ -1,16 +1,14 @@
 package com.youleligou.eleme.services.restaurant
 
 import com.google.inject.Inject
-import com.outworkers.phantom.database.DatabaseProvider
-import com.outworkers.phantom.dsl.ResultSet
+import com.youleligou.core.reps.Repo
 import com.youleligou.crawler.models.{FetchResponse, ParseResult, UrlInfo}
-import com.youleligou.eleme.daos.cassandra.{ElemeDatabase, RestaurantDao, RestaurantDefinitionDao}
+import com.youleligou.eleme.daos.cassandra.{RestaurantDao, RestaurantDefinitionDao}
 import com.youleligou.eleme.models.Restaurant
 import play.api.libs.json._
 
-import scala.concurrent.Future
-
-class ParseService @Inject()(val database: ElemeDatabase) extends com.youleligou.crawler.services.ParseService with DatabaseProvider[ElemeDatabase] {
+class ParseService @Inject()(restaurantRepo: Repo[RestaurantDao], restaurantDefinitionRepo: Repo[RestaurantDefinitionDao])
+    extends com.youleligou.crawler.services.ParseService {
 
   final val Step: Int        = 1
   final val Precision: Float = 100F
@@ -44,7 +42,7 @@ class ParseService @Inject()(val database: ElemeDatabase) extends com.youleligou
     Seq(urlInfo.copy(queryParameters = urlInfo.queryParameters + (OffsetKey -> (offset + limit).toString)))
   }
 
-  private def persist(restaurants: Seq[Restaurant]): Seq[Future[ResultSet]] = {
+  private def persist(restaurants: Seq[Restaurant]) = {
     val restaurantDaos: Seq[RestaurantDao] = restaurants
     val restaurantDefinitionDaos: Seq[RestaurantDefinitionDao] = restaurantDaos.map { restaurantDao =>
       RestaurantDefinitionDao(
@@ -59,8 +57,8 @@ class ParseService @Inject()(val database: ElemeDatabase) extends com.youleligou
       )
     }
 
-    database.restaurants.insertOrUpdate(restaurantDaos)
-    database.restaurantDefinitions.insertOrUpdate(restaurantDefinitionDaos)
+    restaurantRepo.save(restaurantDaos)
+    restaurantDefinitionRepo.save(restaurantDefinitionDaos)
   }
 
   /**

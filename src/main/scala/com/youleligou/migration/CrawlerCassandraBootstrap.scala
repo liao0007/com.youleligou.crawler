@@ -2,11 +2,8 @@ package com.youleligou.migration
 
 import akka.actor.ActorSystem
 import com.google.inject.Inject
-import com.outworkers.phantom.dsl.DatabaseProvider
 import com.typesafe.config.Config
 import com.youleligou.crawler.daos.ProxyServerDao
-import com.youleligou.crawler.daos.cassandra.CrawlerDatabase
-import com.youleligou.crawler.daos.mysql.{CrawlerJobRepo, CrawlerProxyServerRepo}
 import org.joda.time.DateTime
 
 /**
@@ -18,7 +15,6 @@ class CrawlerCassandraBootstrap @Inject()(config: Config,
                                           crawlerJobRepo: CrawlerJobRepo,
                                           crawlerProxyServerRepo: CrawlerProxyServerRepo)
     extends DatabaseProvider[CrawlerDatabase] {
-  import system.dispatcher
   def start(): Unit = {
 
     for {

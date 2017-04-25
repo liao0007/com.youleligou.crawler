@@ -1,6 +1,5 @@
 package com.youleligou.crawler.models
 
-import java.sql.Timestamp
 import java.util.UUID
 
 import com.youleligou.crawler.models.Job.FetchJobType

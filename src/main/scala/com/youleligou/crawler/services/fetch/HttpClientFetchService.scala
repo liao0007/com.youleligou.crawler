@@ -1,12 +1,10 @@
 package com.youleligou.crawler.services.fetch
 
 import com.google.inject.Inject
-import com.outworkers.phantom.database.DatabaseProvider
 import com.typesafe.config.Config
+import com.youleligou.core.reps.Repo
 import com.youleligou.crawler.daos.JobDao
-import com.youleligou.crawler.daos.cassandra.CrawlerDatabase
 import com.youleligou.crawler.models.{FetchRequest, FetchResponse}
-import com.youleligou.crawler.repos.cassandra.JobRepo
 import com.youleligou.crawler.services.FetchService
 import org.joda.time.DateTime
 import play.api.libs.ws.ahc.StandaloneAhcWSClient
@@ -21,7 +19,7 @@ import scala.util.control.NonFatal
   * Created by young.yang on 2016/8/28.
   * 采用HttpClient实现的爬取器
   */
-class HttpClientFetchService @Inject()(config: Config, crawlerRep: JobRepo, standaloneAhcWSClient: StandaloneAhcWSClient)
+class HttpClientFetchService @Inject()(config: Config, jobRepo: Repo[JobDao], standaloneAhcWSClient: StandaloneAhcWSClient)
     extends FetchService {
 
   import com.github.andr83.scalaconfig._
@@ -65,7 +63,7 @@ class HttpClientFetchService @Inject()(config: Config, crawlerRep: JobRepo, stan
       clientWithProxy
         .get()
         .map { response =>
-          crawlerRep.save(crawlerJob.copy(statusCode = Some(response.status), statusMessage = Some(response.statusText), completedAt = Some(DateTime.now())))
+          jobRepo.save(crawlerJob.copy(statusCode = Some(response.status), statusMessage = Some(response.statusText), completedAt = Some(DateTime.now())))
 //          database.crawlerJobs.insertOrUpdate(
 //            crawlerJob.copy(statusCode = Some(response.status), statusMessage = Some(response.statusText), completedAt = Some(DateTime.now()))
 //          )
@@ -73,7 +71,7 @@ class HttpClientFetchService @Inject()(config: Config, crawlerRep: JobRepo, stan
         } recover {
         case NonFatal(x) =>
           logger.warn(x.getMessage)
-          crawlerRep.save(crawlerJob.copy(statusCode = Some(999), statusMessage = Some(x.getMessage)))
+          jobRepo.save(crawlerJob.copy(statusCode = Some(999), statusMessage = Some(x.getMessage)))
 //          database.crawlerJobs.insertOrUpdate(crawlerJob.copy(statusCode = Some(999), statusMessage = Some(x.getMessage)))
           x.getMessage match {
             case "Remotely closed" =>
@@ -84,7 +82,7 @@ class HttpClientFetchService @Inject()(config: Config, crawlerRep: JobRepo, stan
       }
     } catch {
       case NonFatal(x) =>
-        crawlerRep.save(crawlerJob.copy(statusCode = Some(999), statusMessage = Some(x.getMessage)))
+        jobRepo.save(crawlerJob.copy(statusCode = Some(999), statusMessage = Some(x.getMessage)))
 //        database.crawlerJobs.insertOrUpdate()
         Future.successful(FetchResponse(FetchService.RemoteClosed, "", x.getMessage, fetchRequest))
     }

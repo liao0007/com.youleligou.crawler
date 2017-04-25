@@ -1,9 +1,8 @@
 package com.youleligou.proxyHunters.youdaili.services.proxyList
 
 import com.google.inject.Inject
-import com.outworkers.phantom.database.DatabaseProvider
+import com.youleligou.core.reps.Repo
 import com.youleligou.crawler.daos.ProxyServerDao
-import com.youleligou.crawler.daos.cassandra.CrawlerDatabase
 import com.youleligou.crawler.models.{FetchResponse, ParseResult, UrlInfo}
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
@@ -15,9 +14,8 @@ import scala.util.control.NonFatal
   * Created by young.yang on 2016/8/31.
   * Jsoup解析器
   */
-class ParseService @Inject()(val database: CrawlerDatabase)
-    extends com.youleligou.crawler.services.ParseService
-    with DatabaseProvider[CrawlerDatabase] {
+class ParseService @Inject()(proxyServerRepo: Repo[ProxyServerDao])
+    extends com.youleligou.crawler.services.ParseService {
 
   private def getChildLinks(content: Document, fetchResponse: FetchResponse) = {
     content.select(".pagebreak li").not(".thisclass").asScala.flatMap { li =>
@@ -27,7 +25,7 @@ class ParseService @Inject()(val database: CrawlerDatabase)
     }
   }
 
-  private def persist(proxyServers: Seq[ProxyServerDao]) = database.crawlerProxyServers.batchInsertOrUpdate(proxyServers)
+  private def persist(proxyServers: Seq[ProxyServerDao]) = proxyServerRepo.save(proxyServers)
 
   /**
     * 解析具体实现

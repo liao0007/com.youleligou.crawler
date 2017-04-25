@@ -1,9 +1,6 @@
 package com.youleligou.eleme.daos.cassandra
 
-import com.google.inject.Inject
-import com.youleligou.core.reps.CassandraRepo
 import com.youleligou.eleme.models.Food
-import org.apache.spark.SparkContext
 import org.joda.time.DateTime
 
 case class FoodDao(
@@ -39,4 +36,4 @@ object FoodDao {
 
 }
 
-class FoodRepo @Inject()(val keyspace: String = "eleme", val table: String = "foods", val sparkContext: SparkContext) extends CassandraRepo[FoodDao]
+

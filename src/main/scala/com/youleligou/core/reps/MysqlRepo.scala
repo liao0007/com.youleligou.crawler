@@ -1,9 +1,8 @@
 package com.youleligou.core.reps
 
 import com.datastax.spark.connector._
-import org.apache.spark.SparkContext
 import slick.jdbc.MySQLProfile.api._
-import slick.lifted.Tag
+
 import scala.concurrent.Future
 
 /**

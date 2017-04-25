@@ -1,19 +1,18 @@
 package com.youleligou.eleme.services.food
 
 import com.google.inject.Inject
-import com.outworkers.phantom.database.DatabaseProvider
-import com.outworkers.phantom.dsl.ResultSet
+import com.youleligou.core.reps.Repo
 import com.youleligou.crawler.models.{FetchResponse, ParseResult, UrlInfo}
-import com.youleligou.eleme.daos.cassandra.ElemeDatabase
+import com.youleligou.eleme.daos.cassandra.FoodDao
 import com.youleligou.eleme.models.Food
 import play.api.libs.json._
 
 import scala.concurrent.Future
 
-class ParseService @Inject()(val database: ElemeDatabase) extends com.youleligou.crawler.services.ParseService with DatabaseProvider[ElemeDatabase] {
+class ParseService @Inject()(foodRepo: Repo[FoodDao]) extends com.youleligou.crawler.services.ParseService {
 
-  private def persist(foods: Seq[Food]): Seq[Future[ResultSet]] = {
-    database.foods.insertOrUpdate(foods)
+  private def persist(foods: Seq[Food]): Future[Unit] = {
+    foodRepo.save(foods)
   }
 
   /**

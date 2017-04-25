@@ -10,7 +10,7 @@ import com.typesafe.scalalogging.LazyLogging
 import com.youleligou.crawler.actors.Injector
 import com.youleligou.crawler.actors.Injector.{CacheCleared, ClearCache, Tick}
 import com.youleligou.crawler.models.{FetchRequest, UrlInfo}
-import com.youleligou.eleme.daos.cassandra.{FoodRepo, RestaurantRepo}
+import com.youleligou.eleme.repos.cassandra.RestaurantRepo
 import redis.RedisClient
 
 import scala.concurrent.duration._

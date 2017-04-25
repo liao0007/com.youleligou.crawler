@@ -2,9 +2,7 @@ package com.youleligou.migration
 
 import akka.actor.ActorSystem
 import com.google.inject.Inject
-import com.outworkers.phantom.dsl.DatabaseProvider
 import com.typesafe.config.Config
-import com.youleligou.eleme.daos.cassandra.ElemeDatabase
 import com.youleligou.eleme.daos.mysql.RestaurantRepo
 
 /**
@@ -12,7 +10,6 @@ import com.youleligou.eleme.daos.mysql.RestaurantRepo
   */
 class ElemeCassandraBootstrap @Inject()(config: Config, system: ActorSystem, val database: ElemeDatabase, restaurantRepo: RestaurantRepo)
     extends DatabaseProvider[ElemeDatabase] {
-  import system.dispatcher
 
   def start(): Unit = {
 

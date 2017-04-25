@@ -8,5 +8,5 @@ import org.apache.spark.SparkContext
 /**
   * Created by liangliao on 25/4/17.
   */
-class ProxyServerRepo @Inject()(val keyspace: String = "crawler", val table: String = "proxyserver", val sparkContext: SparkContext)
+class ProxyServerRepo @Inject()(val keyspace: String = "crawler", val table: String = "proxy_server", val sparkContext: SparkContext)
   extends CassandraRepo[ProxyServerDao]

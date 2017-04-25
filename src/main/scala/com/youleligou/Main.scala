@@ -1,6 +1,7 @@
 package com.youleligou
 
 import com.google.inject.Guice
+import com.youleligou.crawler.CrawlerModule
 import com.youleligou.crawler.modules.{ActorModule, AkkaModule, ConfigModule, ServiceModule}
 import com.youleligou.eleme.ElemeModule
 import com.youleligou.proxyHunters.xicidaili.XiCiDaiLiModule
@@ -16,6 +17,7 @@ object Main extends App {
     new AkkaModule,
     new ServiceModule,
     new ActorModule,
+    new CrawlerModule,
     new ElemeModule,
     new XiCiDaiLiModule,
     new YouDaiLiModule

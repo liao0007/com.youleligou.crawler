@@ -5,9 +5,9 @@ import java.io.{File, PrintWriter}
 import akka.actor.{Actor, ActorLogging}
 import com.google.inject.Inject
 import com.typesafe.config.Config
+import com.youleligou.core.reps.Repo
 import com.youleligou.crawler.actors.ProxyAssistant._
 import com.youleligou.crawler.daos.ProxyServerDao
-import com.youleligou.crawler.repos.cassandra.ProxyServerRepo
 import org.joda.time.DateTime
 import play.api.libs.ws.DefaultWSProxyServer
 import play.api.libs.ws.ahc.StandaloneAhcWSClient
@@ -18,7 +18,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.sys.process._
 import scala.util.control.NonFatal
 
-class ProxyAssistant @Inject()(config: Config, redisClient: RedisClient, proxyServerRepo: ProxyServerRepo, standaloneAhcWSClient: StandaloneAhcWSClient)
+class ProxyAssistant @Inject()(config: Config, redisClient: RedisClient, proxyServerRepo: Repo[ProxyServerDao], standaloneAhcWSClient: StandaloneAhcWSClient)
     extends Actor
     with ActorLogging {
   import context.dispatcher
@@ -30,7 +30,7 @@ class ProxyAssistant @Inject()(config: Config, redisClient: RedisClient, proxySe
   override def receive: Receive = {
     case Run =>
       log.debug("{} start run", self.path)
-      database.crawlerProxyServers.all() flatMap { proxyServers =>
+      proxyServerRepo.all() flatMap { proxyServers =>
         Future.sequence(proxyServers map { proxyServer =>
           testAvailability(proxyServer) map { testedProxyServer =>
             log.debug("{} {}:{} isLive={}", self.path, testedProxyServer.ip, testedProxyServer.port, testedProxyServer.isLive)
@@ -65,7 +65,7 @@ class ProxyAssistant @Inject()(config: Config, redisClient: RedisClient, proxySe
             log.warning(x.getMessage)
         }
 
-        database.crawlerProxyServers.batchInsertOrUpdate(testedProxyServers)
+        proxyServerRepo.save(testedProxyServers)
       }
 
   }

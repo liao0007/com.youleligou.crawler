@@ -1,10 +1,6 @@
 package com.youleligou.eleme.daos.cassandra
 
-import com.datastax.spark.connector._
-import com.google.inject.Inject
-import com.youleligou.core.reps.CassandraRepo
 import com.youleligou.eleme.models.Restaurant
-import org.apache.spark.SparkContext
 import org.joda.time.{DateTime, LocalDate}
 
 case class RestaurantDao(
@@ -59,9 +55,4 @@ object RestaurantDao {
   implicit def convertSeq(source: Seq[Restaurant])(implicit converter: Restaurant => RestaurantDao): Seq[RestaurantDao] = source map converter
 }
 
-class RestaurantRepo @Inject()(val keyspace: String = "eleme", val table: String = "restaurants", val sparkContext: SparkContext)
-    extends CassandraRepo[RestaurantDao] {
 
-  def allIds(): Seq[Long] = sparkContext.cassandraTable[Long](keyspace, table).select("id").collect().toSeq
-
-}

@@ -1,6 +1,5 @@
 package com.youleligou.crawler.repos.mysql
 
-import java.sql.Timestamp
 import java.util.UUID
 
 import com.google.inject.Inject
@@ -8,10 +7,9 @@ import com.google.inject.name.Named
 import com.typesafe.scalalogging.LazyLogging
 import com.youleligou.crawler.daos.JobDao
 import org.joda.time.DateTime
-import slick.lifted.Tag
-import slick.sql.SqlProfile.ColumnOption.SqlType
 import slick.jdbc.MySQLProfile.api._
 import slick.lifted.Tag
+import slick.sql.SqlProfile.ColumnOption.SqlType
 
 import scala.concurrent.Future
 import scala.util.control.NonFatal
