@@ -3,7 +3,7 @@ package com.youleligou.eleme.repos.mysql
 import com.google.inject.Inject
 import com.typesafe.scalalogging.LazyLogging
 import com.youleligou.core.reps.MysqlRepo
-import com.youleligou.eleme.daos.RestaurantDao
+import com.youleligou.eleme.daos.RestaurantSnapshotDao
 import org.joda.time.{DateTime, LocalDate}
 import slick.jdbc.MySQLProfile.api._
 import com.github.tototoshi.slick.MySQLJodaSupport._
@@ -16,10 +16,10 @@ import scala.concurrent.ExecutionContext.Implicits.global
   * Created by liangliao on 25/4/17.
   */
 class RestaurantDaoRepo @Inject()(val schema: String = "cancan", val table: String = "restaurant", val database: Database)
-    extends MysqlRepo[RestaurantDao] {
+    extends MysqlRepo[RestaurantSnapshotDao] {
   val RestaurantDaos: TableQuery[RestaurantDaoTable] = TableQuery[RestaurantDaoTable]
 
-  def find(id: Long): Future[Option[RestaurantDao]] =
+  def find(id: Long): Future[Option[RestaurantSnapshotDao]] =
     database.run(RestaurantDaos.filter(_.id === id).result.headOption) recover {
       case NonFatal(x) =>
         logger.warn(x.getMessage)
@@ -33,11 +33,11 @@ class RestaurantDaoRepo @Inject()(val schema: String = "cancan", val table: Stri
         0
     }
 
-  def all(): Future[Seq[RestaurantDao]] =
+  def all(): Future[Seq[RestaurantSnapshotDao]] =
     database.run(RestaurantDaos.to[Seq].result) recover {
       case NonFatal(x) =>
         logger.warn(x.getMessage)
-        List.empty[RestaurantDao]
+        List.empty[RestaurantSnapshotDao]
     }
 
   def allIds(): Future[List[Long]] =
@@ -47,20 +47,20 @@ class RestaurantDaoRepo @Inject()(val schema: String = "cancan", val table: Stri
         List.empty[Long]
     }
 
-  def save(restaurant: RestaurantDao): Future[Any] =
+  def save(restaurant: RestaurantSnapshotDao): Future[Any] =
     database.run(RestaurantDaos += restaurant) recover {
       case NonFatal(x) =>
         logger.warn(x.getMessage)
     }
 
-  def save(restaurants: Seq[RestaurantDao]): Future[Option[Int]] =
+  def save(restaurants: Seq[RestaurantSnapshotDao]): Future[Option[Int]] =
     database.run(RestaurantDaos ++= restaurants) recover {
       case NonFatal(x) if !x.getMessage.contains("Duplicate entry") =>
         logger.warn(x.getMessage)
         None
     }
 
-  def insertOrUpdate(restaurant: RestaurantDao): Future[Int] =
+  def insertOrUpdate(restaurant: RestaurantSnapshotDao): Future[Int] =
     database.run {
       RestaurantDaos.insertOrUpdate(restaurant)
     } recover {
@@ -70,7 +70,7 @@ class RestaurantDaoRepo @Inject()(val schema: String = "cancan", val table: Stri
     }
 }
 
-class RestaurantDaoTable(tag: Tag) extends Table[RestaurantDao](tag, "restaurant") {
+class RestaurantDaoTable(tag: Tag) extends Table[RestaurantSnapshotDao](tag, "restaurant") {
   def id                 = column[Long]("id", O.PrimaryKey)
   def address            = column[String]("address")
   def averageCost        = column[String]("average_cost")
@@ -116,6 +116,6 @@ class RestaurantDaoTable(tag: Tag) extends Table[RestaurantDao](tag, "restaurant
      companyName.?,
      status,
      createdDate,
-     createdAt) <> ((RestaurantDao.apply _).tupled, RestaurantDao.unapply)
+     createdAt) <> ((RestaurantSnapshotDao.apply _).tupled, RestaurantSnapshotDao.unapply)
 
 }

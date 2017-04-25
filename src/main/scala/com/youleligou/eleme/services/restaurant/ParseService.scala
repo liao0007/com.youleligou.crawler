@@ -3,12 +3,12 @@ package com.youleligou.eleme.services.restaurant
 import com.google.inject.Inject
 import com.youleligou.core.reps.Repo
 import com.youleligou.crawler.models.{FetchResponse, ParseResult, UrlInfo}
-import com.youleligou.eleme.daos.{RestaurantDao, RestaurantDefinitionDao}
+import com.youleligou.eleme.daos.{RestaurantSnapshotDao, RestaurantDao}
 import com.youleligou.eleme.daos.cassandra.RestaurantDefinitionDao
 import com.youleligou.eleme.models.Restaurant
 import play.api.libs.json._
 
-class ParseService @Inject()(restaurantRepo: Repo[RestaurantDao], restaurantDefinitionRepo: Repo[RestaurantDefinitionDao])
+class ParseService @Inject()(restaurantRepo: Repo[RestaurantSnapshotDao], restaurantDefinitionRepo: Repo[RestaurantDao])
     extends com.youleligou.crawler.services.ParseService {
 
   final val Step: Int        = 1
@@ -44,9 +44,9 @@ class ParseService @Inject()(restaurantRepo: Repo[RestaurantDao], restaurantDefi
   }
 
   private def persist(restaurants: Seq[Restaurant]) = {
-    val restaurantDaos: Seq[RestaurantDao] = restaurants
-    val restaurantDefinitionDaos: Seq[RestaurantDefinitionDao] = restaurantDaos.map { restaurantDao =>
-      RestaurantDefinitionDao(
+    val restaurantDaos: Seq[RestaurantSnapshotDao] = restaurants
+    val restaurantDefinitionDaos: Seq[RestaurantDao] = restaurantDaos.map { restaurantDao =>
+      RestaurantDao(
         id = restaurantDao.id,
         address = restaurantDao.address,
         latitude = restaurantDao.latitude,
