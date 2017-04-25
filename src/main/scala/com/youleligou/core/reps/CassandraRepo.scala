@@ -17,17 +17,17 @@ abstract class CassandraRepo[T](implicit classTag: ClassTag[T], typeTag: TypeTag
 
   override val schema: String = keyspace
 
-  def save(record: T): Future[Unit] = Future {
+  def save(record: T): Future[Any] = Future {
     save(Seq(record))
   }
 
-  def save(records: Seq[T]): Future[Unit] = Future {
+  def save(records: Seq[T]): Future[Any] = Future {
     val collection = sparkContext.parallelize(records)
     collection.saveToCassandra(keyspace, table)
   }
 
-  def all(): Future[Seq[T]] = Future {
-    sparkContext.cassandraTable[T](keyspace, table).collect().toSeq
-  }
+//  def all(): Future[Seq[T]] = Future {
+//    sparkContext.cassandraTable[T](keyspace, table).collect().toSeq
+//  }
 
 }

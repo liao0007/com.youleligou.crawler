@@ -33,10 +33,10 @@ mkdir /var/data && mkdir /var/data/cassandra
 chcon -Rt svirt_sandbox_file_t /var/data/cassandra
 
 //first node
-docker run --restart=always -p 9042:9042 -p 9160:9160 -p 7000:7000 --name cassandra -v /var/data/cassandra:/var/lib/cassandra -d -e CASSANDRA_BROADCAST_ADDRESS=192.168.1.32 cassandra
+docker run --restart=always -p 9042:9042 -p 9160:9160 -p 7000:7000 --name cassandra -v /var/data/cassandra:/var/lib/cassandra -d -e CASSANDRA_BROADCAST_ADDRESS=192.168.1.31 -e CASSANDRA_CLUSTER_NAME="YOLO CASSANDRA CLUSTER" cassandra
 
 //subsequent nodes
-docker run --restart=always -p 9042:9042 -p 9160:9160 -p 7000:7000 --name cassandra -v /var/data/cassandra:/var/lib/cassandra -d -e CASSANDRA_SEEDS=192.168.1.31 -e CASSANDRA_BROADCAST_ADDRESS=192.168.1.34 cassandra
+docker run --restart=always -p 9042:9042 -p 9160:9160 -p 7000:7000 --name cassandra -v /var/data/cassandra:/var/lib/cassandra -d -e CASSANDRA_SEEDS=192.168.1.31 -e CASSANDRA_BROADCAST_ADDRESS=192.168.1.34 -e CASSANDRA_CLUSTER_NAME="YOLO CASSANDRA CLUSTER" cassandra
 
 //open ports for each node
 firewall-cmd --zone=public --add-port=9042/tcp --permanent
@@ -62,6 +62,7 @@ firewall-cmd --reload
 ```
 firewall-cmd --zone=public --add-port=6066/tcp --permanent
 firewall-cmd --zone=public --add-port=7077/tcp --permanent
+firewall-cmd --zone=public --add-port=4040/tcp --permanent
 firewall-cmd --zone=public --add-port=8080/tcp --permanent
 firewall-cmd --reload
 ./sbin/start-master.sh -h 192.168.1.31

@@ -58,7 +58,7 @@ libraryDependencies ++= Seq(
   "com.datastax.spark" %% "spark-cassandra-connector" % "2.0.1"
 )
 
-enablePlugins(DockerPlugin)
+dependencyOverrides ++= Set("com.fasterxml.jackson.core" % "jackson-databind" % "2.6.5")
 
 assemblyMergeStrategy in assembly := {
   case PathList("META-INF", xs @ _ *) => MergeStrategy.discard

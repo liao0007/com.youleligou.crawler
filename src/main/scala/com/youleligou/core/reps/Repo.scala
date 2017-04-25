@@ -11,9 +11,9 @@ trait Repo[T] extends LazyLogging {
   val schema: String
   val table: String
 
-  def save(record: T): Future[Unit]
+  def save(record: T): Future[Any]
 
-  def save(records: Seq[T]): Future[Unit]
+  def save(records: Seq[T]): Future[Any]
 
   def all(): Future[Seq[T]]
 }

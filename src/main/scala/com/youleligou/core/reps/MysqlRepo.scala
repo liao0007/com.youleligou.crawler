@@ -10,9 +10,9 @@ import scala.concurrent.Future
 abstract class MysqlRepo[T] extends Repo[T] {
   val database: Database
 
-  def save(record: T): Future[Unit]
+  def save(record: T): Future[Any]
 
-  def save(records: Seq[T]): Future[Unit]
+  def save(records: Seq[T]): Future[Any]
 
   def all(): Future[Seq[T]]
 

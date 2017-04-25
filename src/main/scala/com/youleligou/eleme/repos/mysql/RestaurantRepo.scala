@@ -52,11 +52,10 @@ class RestaurantDaoRepo @Inject()(val schema: String = "cancan", val table: Stri
         logger.warn(x.getMessage)
     }
 
-  def save(restaurants: Seq[RestaurantSnapshotDao]): Future[Option[Int]] =
+  def save(restaurants: Seq[RestaurantSnapshotDao]): Future[Any] =
     database.run(RestaurantDaos ++= restaurants) recover {
       case NonFatal(x) if !x.getMessage.contains("Duplicate entry") =>
         logger.warn(x.getMessage)
-        None
     }
 
   def insertOrUpdate(restaurant: RestaurantSnapshotDao): Future[Int] =

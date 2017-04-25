@@ -13,6 +13,7 @@ import slick.lifted.Tag
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.control.NonFatal
+
 /**
   * Created by liangliao on 25/4/17.
   */
@@ -59,11 +60,10 @@ class JobDaoRepo @Inject()(val schema: String = "cancan", val table: String = "j
         logger.warn(x.getMessage)
     }
 
-  def save(jobs: Seq[JobDao]): Future[Option[Int]] =
+  def save(jobs: Seq[JobDao]): Future[Any] =
     database.run(JobDaos ++= jobs) recover {
       case NonFatal(x) =>
         logger.warn(x.getMessage)
-        None
     }
 }
 

@@ -61,11 +61,10 @@ class ProxyServerRepo @Inject()(val schema: String = "cancan", val table: String
         logger.warn(x.getMessage)
     }
 
-  def save(proxyServerDaos: Seq[ProxyServerDao]): Future[Option[Int]] =
+  def save(proxyServerDaos: Seq[ProxyServerDao]): Future[Any] =
     database.run(ProxyServerDaos ++= proxyServerDaos) recover {
       case NonFatal(x) if !x.getMessage.contains("Duplicate entry") =>
         logger.warn(x.getMessage)
-        None
     }
 
   def insertOrUpdate(proxyServer: ProxyServerDao): Future[Int] =

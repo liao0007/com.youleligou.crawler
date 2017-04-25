@@ -11,9 +11,7 @@ import scala.concurrent.Future
 
 class ParseService @Inject()(foodSnapshotRepo: Repo[FoodSnapshotDao]) extends com.youleligou.crawler.services.ParseService {
 
-  private def persist(foodSnapshots: Seq[FoodSnapshot]): Future[Unit] = {
-    foodSnapshotRepo.save(foodSnapshots)
-  }
+  private def persist(foodSnapshots: Seq[FoodSnapshot]): Future[Any] = foodSnapshotRepo.save(foodSnapshots)
 
   /**
     * 解析具体实现

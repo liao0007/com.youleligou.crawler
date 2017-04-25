@@ -7,6 +7,8 @@ import com.youleligou.eleme.daos.{RestaurantDao, RestaurantSnapshotDao}
 import com.youleligou.eleme.models.RestaurantSnapshot
 import play.api.libs.json._
 
+import scala.concurrent.Future
+
 class ParseService @Inject()(restaurantSnapshotRepo: Repo[RestaurantSnapshotDao], restaurantRepo: Repo[RestaurantDao])
     extends com.youleligou.crawler.services.ParseService {
 
@@ -42,7 +44,7 @@ class ParseService @Inject()(restaurantSnapshotRepo: Repo[RestaurantSnapshotDao]
     Seq(urlInfo.copy(queryParameters = urlInfo.queryParameters + (OffsetKey -> (offset + limit).toString)))
   }
 
-  private def persist(restaurants: Seq[RestaurantSnapshot]) = {
+  private def persist(restaurants: Seq[RestaurantSnapshot]): Future[Any] = {
     val restaurantSnapshotDaos: Seq[RestaurantSnapshotDao] = restaurants
     val restaurantDaos: Seq[RestaurantDao] = restaurantSnapshotDaos.map { restaurantDao =>
       RestaurantDao(
