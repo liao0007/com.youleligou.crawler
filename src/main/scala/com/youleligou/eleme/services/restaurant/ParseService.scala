@@ -3,12 +3,11 @@ package com.youleligou.eleme.services.restaurant
 import com.google.inject.Inject
 import com.youleligou.core.reps.Repo
 import com.youleligou.crawler.models.{FetchResponse, ParseResult, UrlInfo}
-import com.youleligou.eleme.daos.{RestaurantSnapshotDao, RestaurantDao}
-import com.youleligou.eleme.daos.cassandra.RestaurantDefinitionDao
-import com.youleligou.eleme.models.Restaurant
+import com.youleligou.eleme.daos.{RestaurantDao, RestaurantSnapshotDao}
+import com.youleligou.eleme.models.RestaurantSnapshot
 import play.api.libs.json._
 
-class ParseService @Inject()(restaurantRepo: Repo[RestaurantSnapshotDao], restaurantDefinitionRepo: Repo[RestaurantDao])
+class ParseService @Inject()(restaurantSnapshotRepo: Repo[RestaurantSnapshotDao], restaurantRepo: Repo[RestaurantDao])
     extends com.youleligou.crawler.services.ParseService {
 
   final val Step: Int        = 1
@@ -43,9 +42,9 @@ class ParseService @Inject()(restaurantRepo: Repo[RestaurantSnapshotDao], restau
     Seq(urlInfo.copy(queryParameters = urlInfo.queryParameters + (OffsetKey -> (offset + limit).toString)))
   }
 
-  private def persist(restaurants: Seq[Restaurant]) = {
-    val restaurantDaos: Seq[RestaurantSnapshotDao] = restaurants
-    val restaurantDefinitionDaos: Seq[RestaurantDao] = restaurantDaos.map { restaurantDao =>
+  private def persist(restaurants: Seq[RestaurantSnapshot]) = {
+    val restaurantSnapshotDaos: Seq[RestaurantSnapshotDao] = restaurants
+    val restaurantDaos: Seq[RestaurantDao] = restaurantSnapshotDaos.map { restaurantDao =>
       RestaurantDao(
         id = restaurantDao.id,
         address = restaurantDao.address,
@@ -58,8 +57,8 @@ class ParseService @Inject()(restaurantRepo: Repo[RestaurantSnapshotDao], restau
       )
     }
 
+    restaurantSnapshotRepo.save(restaurantSnapshotDaos)
     restaurantRepo.save(restaurantDaos)
-    restaurantDefinitionRepo.save(restaurantDefinitionDaos)
   }
 
   /**
@@ -69,8 +68,8 @@ class ParseService @Inject()(restaurantRepo: Repo[RestaurantSnapshotDao], restau
     val restaurants = Json.parse(fetchResponse.content) match {
       case JsArray(restaurantsJsValue) =>
         restaurantsJsValue.flatMap { restaurant =>
-          restaurant.validate[Restaurant] match {
-            case restaurant: JsSuccess[Restaurant] =>
+          restaurant.validate[RestaurantSnapshot] match {
+            case restaurant: JsSuccess[RestaurantSnapshot] =>
               Some(restaurant.value)
             case error: JsError =>
               logger.warn("parse restaurant failed, {}", error.errors.toString())
@@ -79,7 +78,7 @@ class ParseService @Inject()(restaurantRepo: Repo[RestaurantSnapshotDao], restau
         }
       case _ =>
         logger.warn("parse restaurant failed, url {}", fetchResponse.fetchRequest.urlInfo.url)
-        Seq.empty[Restaurant]
+        Seq.empty[RestaurantSnapshot]
     }
 
     persist(restaurants)

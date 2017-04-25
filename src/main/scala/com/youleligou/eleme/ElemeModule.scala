@@ -4,8 +4,8 @@ import com.google.inject._
 import com.youleligou.core.reps.Repo
 import com.youleligou.crawler.modules._
 import com.youleligou.crawler.services.ParseService
-import com.youleligou.eleme.daos.{FoodSnapshotDao, RestaurantSnapshotDao, RestaurantDao}
-import com.youleligou.eleme.repos.cassandra.{FoodRepo, RestaurantDefinitionRepo, RestaurantRepo}
+import com.youleligou.eleme.daos.{FoodSnapshotDao, RestaurantDao, RestaurantSnapshotDao}
+import com.youleligou.eleme.repos.cassandra.{FoodSnapshotRepo, RestaurantRepo, RestaurantSnapshotRepo}
 import com.youleligou.eleme.services.{food, restaurant}
 import net.codingwell.scalaguice.ScalaModule
 
@@ -14,9 +14,9 @@ import net.codingwell.scalaguice.ScalaModule
   */
 class ElemeModule extends AbstractModule with ScalaModule with GuiceAkkaActorRefProvider {
   override def configure() {
-    bind[Repo[FoodSnapshotDao]].to[FoodRepo]
-    bind[Repo[RestaurantSnapshotDao]].to[RestaurantRepo]
-    bind[Repo[RestaurantDao]].to[RestaurantDefinitionRepo]
+    bind[Repo[FoodSnapshotDao]].to[FoodSnapshotRepo]
+    bind[Repo[RestaurantSnapshotDao]].to[RestaurantSnapshotRepo]
+    bind[Repo[RestaurantDao]].to[RestaurantRepo]
 
     bind[ParseService].annotatedWithName(classOf[food.ParseService].getName).to[food.ParseService]
     bind[ParseService].annotatedWithName(classOf[restaurant.ParseService].getName).to[restaurant.ParseService]

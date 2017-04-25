@@ -10,7 +10,7 @@ import com.typesafe.scalalogging.LazyLogging
 import com.youleligou.crawler.actors.Injector
 import com.youleligou.crawler.actors.Injector.{CacheCleared, ClearCache, Tick}
 import com.youleligou.crawler.models.{FetchRequest, UrlInfo}
-import com.youleligou.eleme.repos.cassandra.RestaurantRepo
+import com.youleligou.eleme.repos.cassandra.RestaurantSnapshotRepo
 import redis.RedisClient
 
 import scala.concurrent.duration._
@@ -22,7 +22,7 @@ import scala.concurrent.duration._
 class ElemeCrawlerBootstrap @Inject()(config: Config,
                                       system: ActorSystem,
                                       redisClient: RedisClient,
-                                      restaurantRepo: RestaurantRepo,
+                                      restaurantRepo: RestaurantSnapshotRepo,
                                       @Named(Injector.PoolName) injectors: ActorRef)
     extends LazyLogging {
 

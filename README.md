@@ -1,4 +1,10 @@
 # com.youleligou.crawler
+Stacks:
+* ES
+* SPARK
+* CASSANDRA
+* AKKA
+
 
 UI Managers
 * Kibana http://192.168.1.31:5601

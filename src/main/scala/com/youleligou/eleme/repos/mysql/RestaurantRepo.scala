@@ -1,17 +1,16 @@
 package com.youleligou.eleme.repos.mysql
 
+import com.github.tototoshi.slick.MySQLJodaSupport._
 import com.google.inject.Inject
-import com.typesafe.scalalogging.LazyLogging
 import com.youleligou.core.reps.MysqlRepo
 import com.youleligou.eleme.daos.RestaurantSnapshotDao
 import org.joda.time.{DateTime, LocalDate}
 import slick.jdbc.MySQLProfile.api._
-import com.github.tototoshi.slick.MySQLJodaSupport._
 import slick.lifted.Tag
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.control.NonFatal
-import scala.concurrent.ExecutionContext.Implicits.global
 /**
   * Created by liangliao on 25/4/17.
   */

@@ -5,7 +5,7 @@ import java.sql.Timestamp
 import com.google.inject.Inject
 import com.youleligou.core.reps.Repo
 import com.youleligou.crawler.daos.ProxyServerDao
-import com.youleligou.crawler.models.{FetchResponse, ParseResult, UrlInfo}
+import com.youleligou.crawler.models.{FetchResponse, ParseResult, ProxyServer, UrlInfo}
 import org.joda.time.DateTime
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
@@ -35,13 +35,13 @@ class ParseService @Inject()(proxyServerRepo: Repo[ProxyServerDao]) extends com.
   override def parse(fetchResponse: FetchResponse): ParseResult = {
     val parsedContent: Document = Jsoup.parse(fetchResponse.content)
 
-    val proxyServers: Seq[ProxyServerDao] =
+    val proxyServers: Seq[ProxyServer] =
       parsedContent.select("#ip_list tbody tr").asScala.drop(1).flatMap { tr =>
         val tds = tr.select("td").asScala
         try {
           val Seq(_, ip, port, location, isAnonymous, supportedType, _, _, _, lastVerifiedAt) = tds.map(_.text())
           Some(
-            ProxyServerDao(
+            ProxyServer(
               ip = ip,
               port = port.toInt,
               isAnonymous = Some(isAnonymous contains "高匿"),

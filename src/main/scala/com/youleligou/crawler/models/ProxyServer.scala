@@ -2,7 +2,6 @@ package com.youleligou.crawler.models
 
 import java.sql.Timestamp
 import java.text.SimpleDateFormat
-import java.util.UUID
 
 import org.joda.time.DateTime
 import play.api.libs.json._

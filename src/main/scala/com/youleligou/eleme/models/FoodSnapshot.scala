@@ -7,7 +7,7 @@ import play.api.libs.json.{JsPath, Reads}
 /**
   * Created by liangliao on 23/4/17.
   */
-case class Food(
+case class FoodSnapshot(
     itemId: Long,
     restaurantId: Long,
     categoryId: Long,
@@ -20,8 +20,8 @@ case class Food(
     satisfyRate: Float
 )
 
-object Food {
-  implicit val restaurantReads: Reads[Food] = (
+object FoodSnapshot {
+  implicit val restaurantReads: Reads[FoodSnapshot] = (
     (JsPath \ "item_id").read[String].map(_.toLong) and
       (JsPath \ "restaurant_id").read[Long] and
       (JsPath \ "category_id").read[Long] and
@@ -32,5 +32,5 @@ object Food {
       (JsPath \ "rating_count").read[Int] and
       (JsPath \ "satisfy_count").read[Int] and
       (JsPath \ "satisfy_rate").read[Float]
-  )(Food.apply _)
+  )(FoodSnapshot.apply _)
 }

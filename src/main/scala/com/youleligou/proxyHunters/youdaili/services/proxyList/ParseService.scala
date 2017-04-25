@@ -3,7 +3,7 @@ package com.youleligou.proxyHunters.youdaili.services.proxyList
 import com.google.inject.Inject
 import com.youleligou.core.reps.Repo
 import com.youleligou.crawler.daos.ProxyServerDao
-import com.youleligou.crawler.models.{FetchResponse, ParseResult, UrlInfo}
+import com.youleligou.crawler.models.{FetchResponse, ParseResult, ProxyServer, UrlInfo}
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 
@@ -32,7 +32,7 @@ class ParseService @Inject()(proxyServerRepo: Repo[ProxyServerDao])
     */
   override def parse(fetchResponse: FetchResponse): ParseResult = {
     val document = Jsoup.parse(fetchResponse.content)
-    val proxyServers: Seq[ProxyServerDao] = document
+    val proxyServers: Seq[ProxyServer] = document
       .select(".content")
       .text()
       .split("#")
@@ -43,7 +43,7 @@ class ParseService @Inject()(proxyServerRepo: Repo[ProxyServerDao])
       try {
         val pattern(ip, port, supportedType) = urlsString
         Some(
-          ProxyServerDao(
+          ProxyServer(
             ip = ip,
             port = port.toInt,
             supportedType = Some(supportedType)

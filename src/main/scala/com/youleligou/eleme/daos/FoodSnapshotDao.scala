@@ -1,6 +1,6 @@
 package com.youleligou.eleme.daos
 
-import com.youleligou.eleme.models.Food
+import com.youleligou.eleme.models.FoodSnapshot
 import org.joda.time.DateTime
 
 case class FoodSnapshotDao(
@@ -19,7 +19,7 @@ case class FoodSnapshotDao(
 
 object FoodSnapshotDao {
 
-  implicit def fromModel(model: com.youleligou.eleme.models.Food): FoodSnapshotDao = FoodSnapshotDao(
+  implicit def fromModel(model: FoodSnapshot): FoodSnapshotDao = FoodSnapshotDao(
     itemId = model.itemId,
     restaurantId = model.restaurantId,
     categoryId = model.categoryId,
@@ -32,6 +32,6 @@ object FoodSnapshotDao {
     satisfyRate = model.satisfyRate
   )
 
-  implicit def convertSeq(source: Seq[Food])(implicit converter: Food => FoodSnapshotDao): Seq[FoodSnapshotDao] = source map converter
+  implicit def convertSeq(source: Seq[FoodSnapshot])(implicit converter: FoodSnapshot => FoodSnapshotDao): Seq[FoodSnapshotDao] = source map converter
 
 }

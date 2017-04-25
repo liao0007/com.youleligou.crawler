@@ -1,22 +1,18 @@
 package com.youleligou.crawler.repos.mysql
 
-import java.sql.{Date, Timestamp}
 import java.util.UUID
 
+import com.github.tototoshi.slick.MySQLJodaSupport._
 import com.google.inject.Inject
-import com.typesafe.scalalogging.LazyLogging
 import com.youleligou.core.reps.MysqlRepo
 import com.youleligou.crawler.daos.JobDao
-import com.youleligou.eleme.repos.mysql.FoodDaoTable
 import org.joda.time.DateTime
 import slick.jdbc.MySQLProfile.api._
-import com.github.tototoshi.slick.MySQLJodaSupport._
 import slick.lifted.Tag
-import slick.sql.SqlProfile.ColumnOption.SqlType
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.control.NonFatal
-import scala.concurrent.ExecutionContext.Implicits.global
 /**
   * Created by liangliao on 25/4/17.
   */

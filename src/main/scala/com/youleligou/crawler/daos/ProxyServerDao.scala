@@ -1,6 +1,6 @@
 package com.youleligou.crawler.daos
 
-import com.youleligou.crawler.models.{Job, ProxyServer}
+import com.youleligou.crawler.models.ProxyServer
 import org.joda.time.DateTime
 
 case class ProxyServerDao(
@@ -38,5 +38,5 @@ object ProxyServerDao {
     createdAt = model.createdAt
   )
 
-  implicit def convertSeq(source: Seq[Job])(implicit converter: Job => ProxyServerDao): Seq[ProxyServerDao] = source map converter
+  implicit def convertSeq(source: Seq[ProxyServer])(implicit converter: ProxyServer => ProxyServerDao): Seq[ProxyServerDao] = source map converter
 }

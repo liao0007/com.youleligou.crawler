@@ -4,15 +4,15 @@ import com.google.inject.Inject
 import com.youleligou.core.reps.Repo
 import com.youleligou.crawler.models.{FetchResponse, ParseResult, UrlInfo}
 import com.youleligou.eleme.daos.FoodSnapshotDao
-import com.youleligou.eleme.models.Food
+import com.youleligou.eleme.models.FoodSnapshot
 import play.api.libs.json._
 
 import scala.concurrent.Future
 
-class ParseService @Inject()(foodRepo: Repo[FoodSnapshotDao]) extends com.youleligou.crawler.services.ParseService {
+class ParseService @Inject()(foodSnapshotRepo: Repo[FoodSnapshotDao]) extends com.youleligou.crawler.services.ParseService {
 
-  private def persist(foods: Seq[Food]): Future[Unit] = {
-    foodRepo.save(foods)
+  private def persist(foodSnapshots: Seq[FoodSnapshot]): Future[Unit] = {
+    foodSnapshotRepo.save(foodSnapshots)
   }
 
   /**
@@ -23,7 +23,7 @@ class ParseService @Inject()(foodRepo: Repo[FoodSnapshotDao]) extends com.youlel
       Json.parse(fetchResponse.content) \\ "foods" flatMap {
         case JsArray(value) =>
           value flatMap { item =>
-            item.validate[Food].asOpt
+            item.validate[FoodSnapshot].asOpt
           }
         case _ => None
       }

@@ -3,9 +3,7 @@ package com.youleligou.crawler.modules
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import com.google.inject._
-import com.google.inject.name.Named
 import com.typesafe.config.Config
-import com.youleligou.crawler.daos
 import com.youleligou.crawler.services._
 import com.youleligou.crawler.services.fetch.HttpClientFetchService
 import com.youleligou.crawler.services.filter.DefaultFilterService
