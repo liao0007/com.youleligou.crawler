@@ -57,6 +57,10 @@ class ServiceModule extends AbstractModule with ScalaModule {
 //      .set("spark.cassandra.auth.password", "cassandra")
 
     val sc = new SparkContext(config.getString("spark.master"), config.getString("spark.appName"), conf)
+    config.getStringList("spark.dependentJar").asScala foreach { jar =>
+      sc.addJar(jar)
+    }
+
     system.registerOnTermination({
       sc.stop()
     })

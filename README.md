@@ -15,7 +15,7 @@ high volume crawler based on akka
 
 ## deploy
 ```
-sbt assembly; scp ./target/scala-2.12/com.youleligou.crawler-assembly-1.0-SNAPSHOT.jar root@192.168.1.31:/root
+sbt assembly && scp ./target/scala-2.11/com.youleligou.crawler-assembly-1.0-SNAPSHOT.jar root@192.168.1.31:/root
 ```
 
 ### dependent services

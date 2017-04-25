@@ -17,7 +17,9 @@ import scala.util.control.NonFatal
 /**
   * Created by liangliao on 25/4/17.
   */
-class JobDaoRepo @Inject()(val schema: String = "cancan", val table: String = "job", val database: Database) extends MysqlRepo[JobDao] {
+class JobDaoRepo @Inject()(val database: Database) extends MysqlRepo[JobDao] {
+  val schema: String                   = "cancan"
+  val table: String                    = "job"
   val JobDaos: TableQuery[JobDaoTable] = TableQuery[JobDaoTable]
 
   def find(id: UUID): Future[Option[JobDao]] =

@@ -11,11 +11,13 @@ import slick.lifted.Tag
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.control.NonFatal
+
 /**
   * Created by liangliao on 25/4/17.
   */
-class ProxyServerRepo @Inject()(val schema: String = "cancan", val table: String = "proxy_server", val database: Database)
-    extends MysqlRepo[ProxyServerDao] {
+class ProxyServerRepo @Inject()(val database: Database) extends MysqlRepo[ProxyServerDao] {
+  val schema: String                                = "cancan"
+  val table: String                                 = "proxy_server"
   val ProxyServerDaos: TableQuery[ProxyServerTable] = TableQuery[ProxyServerTable]
 
   def find(ip: String): Future[Option[ProxyServerDao]] =

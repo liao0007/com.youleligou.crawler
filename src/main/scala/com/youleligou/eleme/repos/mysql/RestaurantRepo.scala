@@ -11,11 +11,13 @@ import slick.lifted.Tag
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.control.NonFatal
+
 /**
   * Created by liangliao on 25/4/17.
   */
-class RestaurantDaoRepo @Inject()(val schema: String = "cancan", val table: String = "restaurant", val database: Database)
-    extends MysqlRepo[RestaurantSnapshotDao] {
+class RestaurantDaoRepo @Inject()(val database: Database) extends MysqlRepo[RestaurantSnapshotDao] {
+  val schema: String                                 = "cancan"
+  val table: String                                  = "restaurant"
   val RestaurantDaos: TableQuery[RestaurantDaoTable] = TableQuery[RestaurantDaoTable]
 
   def find(id: Long): Future[Option[RestaurantSnapshotDao]] =
