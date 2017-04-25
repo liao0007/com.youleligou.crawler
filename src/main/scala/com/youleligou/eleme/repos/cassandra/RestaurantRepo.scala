@@ -3,7 +3,7 @@ package com.youleligou.eleme.repos.cassandra
 import com.datastax.spark.connector._
 import com.google.inject.Inject
 import com.youleligou.core.reps.CassandraRepo
-import com.youleligou.eleme.daos.cassandra.RestaurantDao
+import com.youleligou.eleme.daos.RestaurantDao
 import org.apache.spark.SparkContext
 
 /**

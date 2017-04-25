@@ -1,4 +1,4 @@
-package com.youleligou.eleme.daos.cassandra
+package com.youleligou.eleme.daos
 
 import com.youleligou.eleme.models.Restaurant
 import org.joda.time.{DateTime, LocalDate}
@@ -21,8 +21,8 @@ case class RestaurantDao(
     rating: Float,
     ratingCount: Int,
     recentOrderNum: Int,
-    licensesNumber: Option[String] = None,
-    companyName: Option[String] = None,
+    licensesNumber: Option[String],
+    companyName: Option[String],
     status: Int,
     createdDate: LocalDate = LocalDate.now(),
     createdAt: DateTime = DateTime.now()
@@ -54,5 +54,3 @@ object RestaurantDao {
 
   implicit def convertSeq(source: Seq[Restaurant])(implicit converter: Restaurant => RestaurantDao): Seq[RestaurantDao] = source map converter
 }
-
-

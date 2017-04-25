@@ -3,7 +3,7 @@ package com.youleligou.eleme.services.food
 import com.google.inject.Inject
 import com.youleligou.core.reps.Repo
 import com.youleligou.crawler.models.{FetchResponse, ParseResult, UrlInfo}
-import com.youleligou.eleme.daos.cassandra.FoodDao
+import com.youleligou.eleme.daos.FoodDao
 import com.youleligou.eleme.models.Food
 import play.api.libs.json._
 

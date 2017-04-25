@@ -17,7 +17,7 @@ import scala.util.control.NonFatal
 /**
   * Created by liangliao on 25/4/17.
   */
-class JobDaoRepo @Inject()(val schema: String = "cancan", val database: Database) extends MysqlRepo[JobDao, JobDaoTable] with LazyLogging {
+class JobDaoRepo @Inject()(val schema: String = "cancan", val database: Database) extends MysqlRepo[JobDao, JobDaoTable] {
 
   def find(id: Long): Future[Option[JobDao]] =
     database.run(table.filter(_.id === id).result.headOption) recover {

@@ -1,4 +1,4 @@
-package com.youleligou.eleme.daos.cassandra
+package com.youleligou.eleme.daos
 
 import org.joda.time.DateTime
 
@@ -12,5 +12,3 @@ case class RestaurantDefinitionDao(
     companyName: Option[String] = None,
     createdAt: DateTime = DateTime.now()
 )
-
-

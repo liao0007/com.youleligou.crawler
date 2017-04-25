@@ -1,4 +1,4 @@
-package com.youleligou.eleme.daos.cassandra
+package com.youleligou.eleme.daos
 
 import com.youleligou.eleme.models.Food
 import org.joda.time.DateTime
@@ -35,5 +35,3 @@ object FoodDao {
   implicit def convertSeq(source: Seq[Food])(implicit converter: Food => FoodDao): Seq[FoodDao] = source map converter
 
 }
-
-

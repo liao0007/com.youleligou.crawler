@@ -2,8 +2,7 @@ package com.youleligou.core.reps
 
 import java.sql.Timestamp
 
-import com.typesafe.scalalogging.LazyLogging
-import org.joda.time.DateTime
+import org.joda.time.{DateTime, LocalDate, LocalTime}
 import slick.jdbc.MySQLProfile.api._
 
 import scala.concurrent.Future
@@ -11,8 +10,7 @@ import scala.concurrent.Future
 /**
   * Created by liangliao on 25/4/17.
   */
-trait MysqlRepo[T, Table] extends Repo[T] with LazyLogging {
-  val table: TableQuery[Table] = TableQuery[Table]
+trait MysqlRepo[T] extends Repo[T] {
   val database: Database
 
   def save(record: T): Future[Unit]
@@ -25,7 +23,11 @@ trait MysqlRepo[T, Table] extends Repo[T] with LazyLogging {
 
 object MysqlRepo {
   implicit def dateTime = MappedColumnType.base[DateTime, Timestamp](
-      dt => new Timestamp(dt.getMillis),
-      ts => new DateTime(ts.getTime)
-    )
+    dt => new Timestamp(dt.getMillis),
+    ts => new DateTime(ts.getTime)
+  )
+  implicit def localDate = MappedColumnType.base[LocalDate, Timestamp](
+    date => new Timestamp(date.toDateTime(new LocalTime(0, 0)).getMillis),
+    ts => new LocalDate(ts.getTime)
+  )
 }

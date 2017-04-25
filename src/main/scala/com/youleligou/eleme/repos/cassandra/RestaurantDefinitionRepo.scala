@@ -2,7 +2,7 @@ package com.youleligou.eleme.repos.cassandra
 
 import com.google.inject.Inject
 import com.youleligou.core.reps.CassandraRepo
-import com.youleligou.eleme.daos.cassandra.RestaurantDefinitionDao
+import com.youleligou.eleme.daos.RestaurantDefinitionDao
 import org.apache.spark.SparkContext
 
 /**

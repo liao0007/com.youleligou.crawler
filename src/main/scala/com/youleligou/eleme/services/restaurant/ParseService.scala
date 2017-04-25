@@ -3,7 +3,8 @@ package com.youleligou.eleme.services.restaurant
 import com.google.inject.Inject
 import com.youleligou.core.reps.Repo
 import com.youleligou.crawler.models.{FetchResponse, ParseResult, UrlInfo}
-import com.youleligou.eleme.daos.cassandra.{RestaurantDao, RestaurantDefinitionDao}
+import com.youleligou.eleme.daos.{RestaurantDao, RestaurantDefinitionDao}
+import com.youleligou.eleme.daos.cassandra.RestaurantDefinitionDao
 import com.youleligou.eleme.models.Restaurant
 import play.api.libs.json._
 

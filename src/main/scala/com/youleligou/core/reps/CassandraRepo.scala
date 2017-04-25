@@ -4,11 +4,14 @@ import com.datastax.spark.connector._
 import org.apache.spark.SparkContext
 
 import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.reflect.ClassTag
+import scala.reflect.runtime.universe._
 
 /**
   * Created by liangliao on 25/4/17.
   */
-trait CassandraRepo[T] extends Repo[T] {
+abstract class CassandraRepo[T](implicit tag: ClassTag[T]) extends Repo[T] {
   val keyspace: String
   val sparkContext: SparkContext
 
