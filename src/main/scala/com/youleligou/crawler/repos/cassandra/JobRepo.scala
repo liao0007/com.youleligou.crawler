@@ -13,5 +13,4 @@ import scala.concurrent.Future
 class JobRepo @Inject()(val sparkContext: SparkContext) extends CassandraRepo[JobDao] {
   val keyspace: String                    = "crawler"
   val table: String                       = "jobs"
-  override def all(): Future[Seq[JobDao]] = ???
 }

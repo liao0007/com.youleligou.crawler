@@ -17,9 +17,4 @@ class RestaurantSnapshotRepo @Inject()(val sparkContext: SparkContext) extends C
   val table: String    = "restaurant_snapshots"
 
   def allIds(): Seq[Long] = sparkContext.cassandraTable[Long](keyspace, table).select("id").collect().toSeq
-
-  def all(): Future[Seq[RestaurantSnapshotDao]] = Future {
-    sparkContext.cassandraTable[RestaurantSnapshotDao](keyspace, table).collect().toSeq
-  }
-
 }

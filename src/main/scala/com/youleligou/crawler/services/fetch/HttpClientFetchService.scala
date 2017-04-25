@@ -64,15 +64,11 @@ class HttpClientFetchService @Inject()(config: Config, jobRepo: Repo[JobDao], st
         .get()
         .map { response =>
           jobRepo.save(crawlerJob.copy(statusCode = Some(response.status), statusMessage = Some(response.statusText), completedAt = Some(DateTime.now())))
-//          database.crawlerJobs.insertOrUpdate(
-//            crawlerJob.copy(statusCode = Some(response.status), statusMessage = Some(response.statusText), completedAt = Some(DateTime.now()))
-//          )
           FetchResponse(response.status, response.body, response.statusText, fetchRequest)
         } recover {
         case NonFatal(x) =>
           logger.warn(x.getMessage)
           jobRepo.save(crawlerJob.copy(statusCode = Some(999), statusMessage = Some(x.getMessage)))
-//          database.crawlerJobs.insertOrUpdate(crawlerJob.copy(statusCode = Some(999), statusMessage = Some(x.getMessage)))
           x.getMessage match {
             case "Remotely closed" =>
               FetchResponse(FetchService.RemoteClosed, "", x.getMessage, fetchRequest)
@@ -83,7 +79,6 @@ class HttpClientFetchService @Inject()(config: Config, jobRepo: Repo[JobDao], st
     } catch {
       case NonFatal(x) =>
         jobRepo.save(crawlerJob.copy(statusCode = Some(999), statusMessage = Some(x.getMessage)))
-//        database.crawlerJobs.insertOrUpdate()
         Future.successful(FetchResponse(FetchService.RemoteClosed, "", x.getMessage, fetchRequest))
     }
   }

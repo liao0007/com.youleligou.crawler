@@ -19,7 +19,4 @@ import scala.concurrent.ExecutionContext.Implicits.global
 class RestaurantRepo @Inject()(val sparkContext: SparkContext) extends CassandraRepo[RestaurantDao] {
   val keyspace: String = "eleme"
   val table: String    = "restaurants"
-  def all(): Future[Seq[RestaurantDao]] = Future {
-    sparkContext.cassandraTable[RestaurantDao](keyspace, table).collect().toSeq
-  }
 }

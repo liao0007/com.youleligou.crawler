@@ -9,16 +9,10 @@ import com.google.inject.Inject
 import com.youleligou.core.reps.CassandraRepo
 import org.apache.spark.SparkContext
 
-import scala.concurrent.Future
-import scala.concurrent.ExecutionContext.Implicits.global
-
 /**
   * Created by liangliao on 25/4/17.
   */
 class FoodSnapshotRepo @Inject()(val sparkContext: SparkContext) extends CassandraRepo[FoodSnapshotDao] {
   val keyspace: String = "eleme"
   val table: String    = "food_snapshots"
-  def all(): Future[Seq[FoodSnapshotDao]] = Future {
-    sparkContext.cassandraTable[FoodSnapshotDao](keyspace, table).collect().toSeq
-  }
 }

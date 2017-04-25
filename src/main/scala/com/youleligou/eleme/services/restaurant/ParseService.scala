@@ -46,16 +46,16 @@ class ParseService @Inject()(restaurantSnapshotRepo: Repo[RestaurantSnapshotDao]
 
   private def persist(restaurants: Seq[RestaurantSnapshot]): Future[Any] = {
     val restaurantSnapshotDaos: Seq[RestaurantSnapshotDao] = restaurants
-    val restaurantDaos: Seq[RestaurantDao] = restaurantSnapshotDaos.map { restaurantDao =>
+    val restaurantDaos: Seq[RestaurantDao] = restaurantSnapshotDaos.map { restaurantSnapshotDao =>
       RestaurantDao(
-        id = restaurantDao.id,
-        address = restaurantDao.address,
-        latitude = restaurantDao.latitude,
-        longitude = restaurantDao.longitude,
-        name = restaurantDao.name,
-        licensesNumber = restaurantDao.licensesNumber,
-        companyName = restaurantDao.companyName,
-        createdAt = restaurantDao.createdAt
+        id = restaurantSnapshotDao.id,
+        address = restaurantSnapshotDao.address,
+        latitude = restaurantSnapshotDao.latitude,
+        longitude = restaurantSnapshotDao.longitude,
+        name = restaurantSnapshotDao.name,
+        licensesNumber = restaurantSnapshotDao.licensesNumber,
+        companyName = restaurantSnapshotDao.companyName,
+        createdAt = restaurantSnapshotDao.createdAt
       )
     }
 

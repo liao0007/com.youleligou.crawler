@@ -13,5 +13,4 @@ import scala.concurrent.Future
 class ProxyServerRepo @Inject()(val sparkContext: SparkContext) extends CassandraRepo[ProxyServerDao] {
   val keyspace: String                            = "crawler"
   val table: String                               = "proxy_server"
-  override def all(): Future[Seq[ProxyServerDao]] = ???
 }
