@@ -1,10 +1,10 @@
 package com.youleligou.eleme.daos.cassandra
 
-import com.outworkers.phantom.dsl._
+import com.google.inject.Inject
+import com.youleligou.core.reps.CassandraRepo
 import com.youleligou.eleme.models.Food
+import org.apache.spark.SparkContext
 import org.joda.time.DateTime
-
-import scala.concurrent.Future
 
 case class FoodDao(
     itemId: Long,
@@ -38,29 +38,5 @@ object FoodDao {
   implicit def convertSeq(source: Seq[Food])(implicit converter: Food => FoodDao): Seq[FoodDao] = source map converter
 
 }
-abstract class Foods extends CassandraTable[Foods, FoodDao] with RootConnector {
-  object restaurantId extends LongColumn(this) with PartitionKey
-  object itemId       extends LongColumn(this)
-  object categoryId   extends LongColumn(this)
-  object name         extends StringColumn(this)
-  object description  extends StringColumn(this)
-  object monthSales   extends IntColumn(this)
-  object rating       extends FloatColumn(this)
-  object ratingCount  extends IntColumn(this)
-  object satisfyCount extends IntColumn(this)
-  object satisfyRate  extends FloatColumn(this)
-  object createdAt    extends DateTimeColumn(this) with ClusteringOrder with Descending
 
-  def batchInsertOrUpdate(foods: Seq[FoodDao]): Future[ResultSet] =
-    Batch.unlogged
-      .add(foods.map { food =>
-        store(food)
-      }.iterator)
-      .future()
-
-  def insertOrUpdate(foods: Seq[FoodDao]): Seq[Future[ResultSet]] = foods.map(insertOrUpdate)
-
-  def insertOrUpdate(food: FoodDao): Future[ResultSet] = store(food).future()
-
-  def all(): Future[List[FoodDao]] = select.fetch()
-}
+class FoodRepo @Inject()(val keyspace: String = "eleme", val table: String = "foods", val sparkContext: SparkContext) extends CassandraRepo[FoodDao]

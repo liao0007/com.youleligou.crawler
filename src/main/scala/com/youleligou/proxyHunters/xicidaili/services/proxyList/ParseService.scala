@@ -4,7 +4,8 @@ import java.sql.Timestamp
 
 import com.google.inject.Inject
 import com.outworkers.phantom.database.DatabaseProvider
-import com.youleligou.crawler.daos.cassandra.{CrawlerDatabase, CrawlerProxyServer}
+import com.youleligou.crawler.daos.ProxyServerDao
+import com.youleligou.crawler.daos.cassandra.CrawlerDatabase
 import com.youleligou.crawler.models.{FetchResponse, ParseResult, UrlInfo}
 import org.joda.time.DateTime
 import org.jsoup.Jsoup
@@ -29,7 +30,7 @@ class ParseService @Inject()(val database: CrawlerDatabase)
     }
   }
 
-  private def persist(proxyServers: Seq[CrawlerProxyServer]) = database.crawlerProxyServers.batchInsertOrUpdate(proxyServers)
+  private def persist(proxyServers: Seq[ProxyServerDao]) = database.crawlerProxyServers.batchInsertOrUpdate(proxyServers)
 
   /**
     * 解析具体实现
@@ -37,13 +38,13 @@ class ParseService @Inject()(val database: CrawlerDatabase)
   override def parse(fetchResponse: FetchResponse): ParseResult = {
     val parsedContent: Document = Jsoup.parse(fetchResponse.content)
 
-    val proxyServers: Seq[CrawlerProxyServer] =
+    val proxyServers: Seq[ProxyServerDao] =
       parsedContent.select("#ip_list tbody tr").asScala.drop(1).flatMap { tr =>
         val tds = tr.select("td").asScala
         try {
           val Seq(_, ip, port, location, isAnonymous, supportedType, _, _, _, lastVerifiedAt) = tds.map(_.text())
           Some(
-            CrawlerProxyServer(
+            ProxyServerDao(
               ip = ip,
               port = port.toInt,
               isAnonymous = Some(isAnonymous contains "高匿"),

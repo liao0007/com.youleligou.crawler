@@ -4,7 +4,8 @@ import akka.actor.ActorSystem
 import com.google.inject.Inject
 import com.outworkers.phantom.dsl.DatabaseProvider
 import com.typesafe.config.Config
-import com.youleligou.crawler.daos.cassandra.{CrawlerDatabase, CrawlerProxyServer}
+import com.youleligou.crawler.daos.ProxyServerDao
+import com.youleligou.crawler.daos.cassandra.CrawlerDatabase
 import com.youleligou.crawler.daos.mysql.{CrawlerJobRepo, CrawlerProxyServerRepo}
 import org.joda.time.DateTime
 
@@ -27,7 +28,7 @@ class CrawlerCassandraBootstrap @Inject()(config: Config,
     } yield {
       proxyServers foreach { proxyServer =>
         database.crawlerProxyServers
-          .store(CrawlerProxyServer(
+          .store(ProxyServerDao(
             ip = proxyServer.ip,
             port = proxyServer.port,
             username = proxyServer.username,

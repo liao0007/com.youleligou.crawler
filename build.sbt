@@ -4,7 +4,7 @@ organization := "com.youleligou"
 
 version := "1.0-SNAPSHOT"
 
-scalaVersion := "2.12.1"
+scalaVersion := "2.11.8"
 
 updateOptions := updateOptions.value.withCachedResolution(true)
 
@@ -49,8 +49,12 @@ libraryDependencies ++= Seq(
   "com.typesafe.slick" %% "slick-hikaricp"      % "3.2.0",
   "mysql"              % "mysql-connector-java" % "5.1.40",
   // -- cassandra --
-  "com.outworkers" %% "phantom-dsl" % phantomVersion,
-  "org.javassist" % "javassist" % "3.22.0-CR1"
+//  "com.outworkers" %% "phantom-dsl" % phantomVersion,
+//  "org.javassist"  % "javassist"    % "3.22.0-CR1",
+  // -- spark --
+  "org.apache.spark" %% "spark-core" % "2.1.0",
+  "org.apache.spark" %% "spark-sql" % "2.1.0",
+  "com.datastax.spark" %% "spark-cassandra-connector" % "2.0.1"
 )
 
 enablePlugins(DockerPlugin)

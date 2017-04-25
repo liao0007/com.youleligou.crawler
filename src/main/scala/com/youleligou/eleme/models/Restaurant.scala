@@ -20,7 +20,7 @@ case class Restaurant(
     latitude: Float,
     longitude: Float,
     name: String,
-    phone: String,
+    phone: Option[String],
     promotionInfo: String,
     rating: Float,
     ratingCount: Int,
@@ -32,19 +32,19 @@ case class Restaurant(
 object Restaurant {
   implicit val restaurantReads: Reads[Restaurant] = (
     (JsPath \ "id").read[Long] and
-      (JsPath \ "address").read[String].map(_.trim) and
-      (JsPath \ "average_cost").readNullable[String].map(_.map(_.trim)) and
-      (JsPath \ "description").read[String].map(_.trim) and
+      (JsPath \ "address").read[String] and
+      (JsPath \ "average_cost").readNullable[String] and
+      (JsPath \ "description").read[String] and
       (JsPath \ "float_delivery_fee").read[Float] and
       (JsPath \ "float_minimum_order_amount").read[Float] and
-      (JsPath \ "image_path").read[String].map(_.trim) and
+      (JsPath \ "image_path").read[String] and
       (JsPath \ "is_new").read[Boolean](false) and
       (JsPath \ "is_premium").read[Boolean](false) and
       (JsPath \ "latitude").read[Float] and
       (JsPath \ "longitude").read[Float] and
-      (JsPath \ "name").read[String].map(_.trim) and
-      (JsPath \ "phone").read[String].map(_.trim) and
-      (JsPath \ "promotion_info").read[String].map(_.trim) and
+      (JsPath \ "name").read[String] and
+      (JsPath \ "phone").readNullable[String] and
+      (JsPath \ "promotion_info").read[String] and
       (JsPath \ "rating").read[Float] and
       (JsPath \ "rating_count").read[Int] and
       (JsPath \ "recent_order_num").read[Int] and

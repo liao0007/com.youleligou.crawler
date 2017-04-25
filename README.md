@@ -1,5 +1,9 @@
 # com.youleligou.crawler
 
+UI Managers
+* Kibana http://192.168.1.31:5601
+* Spark http://192.168.1.31:8080
+
 high volume crawler based on akka
 
 
@@ -33,4 +37,33 @@ firewall-cmd --zone=public --add-port=9042/tcp --permanent
 firewall-cmd --zone=public --add-port=9160/tcp --permanent
 firewall-cmd --zone=public --add-port=7000/tcp --permanent
 firewall-cmd --reload
+```
+
+# config elastic search
+```
+sysctl -w vm.max_map_count=262144
+
+docker run --restart=always -p 9200:9200 -p 9300:9300 --name elas -e http.host=0.0.0.0 -e transport.host=127.0.0.1 -d docker.elastic.co/elasticsearch/elasticsearch:5.3.1
+docker run --restart=always -p 5601:5601 --name kibana -e ELASTICSEARCH_URL=http://192.168.1.31:9200 -d docker.elastic.co/kibana/kibana:5.3.1
+firewall-cmd --zone=public --add-port=9200/tcp --permanent
+firewall-cmd --zone=public --add-port=9300/tcp --permanent
+firewall-cmd --zone=public --add-port=5601/tcp --permanent
+firewall-cmd --reload
+```
+
+# config elastic spark
+* master
+```
+firewall-cmd --zone=public --add-port=6066/tcp --permanent
+firewall-cmd --zone=public --add-port=7077/tcp --permanent
+firewall-cmd --zone=public --add-port=8080/tcp --permanent
+firewall-cmd --reload
+./sbin/start-master.sh -h 192.168.1.31
+```
+* slave
+```
+firewall-cmd --zone=public --add-port=7077/tcp --permanent
+firewall-cmd --zone=public --add-port=8081/tcp --permanent
+firewall-cmd --reload
+./sbin/start-slave.sh -h 192.168.1.32 192.168.1.31:7077
 ```

@@ -3,8 +3,10 @@ package com.youleligou.crawler.services.fetch
 import com.google.inject.Inject
 import com.outworkers.phantom.database.DatabaseProvider
 import com.typesafe.config.Config
-import com.youleligou.crawler.daos.cassandra.{CrawlerDatabase, CrawlerJob}
+import com.youleligou.crawler.daos.JobDao
+import com.youleligou.crawler.daos.cassandra.CrawlerDatabase
 import com.youleligou.crawler.models.{FetchRequest, FetchResponse}
+import com.youleligou.crawler.repos.cassandra.JobRepo
 import com.youleligou.crawler.services.FetchService
 import org.joda.time.DateTime
 import play.api.libs.ws.ahc.StandaloneAhcWSClient
@@ -19,9 +21,8 @@ import scala.util.control.NonFatal
   * Created by young.yang on 2016/8/28.
   * 采用HttpClient实现的爬取器
   */
-class HttpClientFetchService @Inject()(config: Config, val database: CrawlerDatabase, standaloneAhcWSClient: StandaloneAhcWSClient)
-    extends FetchService
-    with DatabaseProvider[CrawlerDatabase] {
+class HttpClientFetchService @Inject()(config: Config, crawlerRep: JobRepo, standaloneAhcWSClient: StandaloneAhcWSClient)
+    extends FetchService {
 
   import com.github.andr83.scalaconfig._
   val useProxy: Boolean                = config.getBoolean("crawler.fetch.useProxy")
@@ -34,7 +35,7 @@ class HttpClientFetchService @Inject()(config: Config, val database: CrawlerData
     val FetchRequest(urlInfo, _) = fetchRequest
     val rand                     = new Random(System.currentTimeMillis())
 
-    val crawlerJob = CrawlerJob(
+    val crawlerJob = JobDao(
       url = urlInfo.url,
       jobName = urlInfo.jobType,
       useProxy = useProxy
@@ -64,14 +65,16 @@ class HttpClientFetchService @Inject()(config: Config, val database: CrawlerData
       clientWithProxy
         .get()
         .map { response =>
-          database.crawlerJobs.insertOrUpdate(
-            crawlerJob.copy(statusCode = Some(response.status), statusMessage = Some(response.statusText), completedAt = Some(DateTime.now()))
-          )
+          crawlerRep.save(crawlerJob.copy(statusCode = Some(response.status), statusMessage = Some(response.statusText), completedAt = Some(DateTime.now())))
+//          database.crawlerJobs.insertOrUpdate(
+//            crawlerJob.copy(statusCode = Some(response.status), statusMessage = Some(response.statusText), completedAt = Some(DateTime.now()))
+//          )
           FetchResponse(response.status, response.body, response.statusText, fetchRequest)
         } recover {
         case NonFatal(x) =>
           logger.warn(x.getMessage)
-          database.crawlerJobs.insertOrUpdate(crawlerJob.copy(statusCode = Some(999), statusMessage = Some(x.getMessage)))
+          crawlerRep.save(crawlerJob.copy(statusCode = Some(999), statusMessage = Some(x.getMessage)))
+//          database.crawlerJobs.insertOrUpdate(crawlerJob.copy(statusCode = Some(999), statusMessage = Some(x.getMessage)))
           x.getMessage match {
             case "Remotely closed" =>
               FetchResponse(FetchService.RemoteClosed, "", x.getMessage, fetchRequest)
@@ -81,7 +84,8 @@ class HttpClientFetchService @Inject()(config: Config, val database: CrawlerData
       }
     } catch {
       case NonFatal(x) =>
-        database.crawlerJobs.insertOrUpdate(crawlerJob.copy(statusCode = Some(999), statusMessage = Some(x.getMessage)))
+        crawlerRep.save(crawlerJob.copy(statusCode = Some(999), statusMessage = Some(x.getMessage)))
+//        database.crawlerJobs.insertOrUpdate()
         Future.successful(FetchResponse(FetchService.RemoteClosed, "", x.getMessage, fetchRequest))
     }
   }

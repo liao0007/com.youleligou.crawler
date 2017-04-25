@@ -2,7 +2,8 @@ package com.youleligou.proxyHunters.youdaili.services.proxyList
 
 import com.google.inject.Inject
 import com.outworkers.phantom.database.DatabaseProvider
-import com.youleligou.crawler.daos.cassandra.{CrawlerDatabase, CrawlerProxyServer}
+import com.youleligou.crawler.daos.ProxyServerDao
+import com.youleligou.crawler.daos.cassandra.CrawlerDatabase
 import com.youleligou.crawler.models.{FetchResponse, ParseResult, UrlInfo}
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
@@ -26,14 +27,14 @@ class ParseService @Inject()(val database: CrawlerDatabase)
     }
   }
 
-  private def persist(proxyServers: Seq[CrawlerProxyServer]) = database.crawlerProxyServers.batchInsertOrUpdate(proxyServers)
+  private def persist(proxyServers: Seq[ProxyServerDao]) = database.crawlerProxyServers.batchInsertOrUpdate(proxyServers)
 
   /**
     * 解析具体实现
     */
   override def parse(fetchResponse: FetchResponse): ParseResult = {
     val document = Jsoup.parse(fetchResponse.content)
-    val proxyServers: Seq[CrawlerProxyServer] = document
+    val proxyServers: Seq[ProxyServerDao] = document
       .select(".content")
       .text()
       .split("#")
@@ -44,7 +45,7 @@ class ParseService @Inject()(val database: CrawlerDatabase)
       try {
         val pattern(ip, port, supportedType) = urlsString
         Some(
-          CrawlerProxyServer(
+          ProxyServerDao(
             ip = ip,
             port = port.toInt,
             supportedType = Some(supportedType)

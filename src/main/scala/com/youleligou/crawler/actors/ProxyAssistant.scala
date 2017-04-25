@@ -4,10 +4,10 @@ import java.io.{File, PrintWriter}
 
 import akka.actor.{Actor, ActorLogging}
 import com.google.inject.Inject
-import com.outworkers.phantom.database.DatabaseProvider
 import com.typesafe.config.Config
 import com.youleligou.crawler.actors.ProxyAssistant._
-import com.youleligou.crawler.daos.cassandra.{CrawlerDatabase, CrawlerProxyServer}
+import com.youleligou.crawler.daos.ProxyServerDao
+import com.youleligou.crawler.repos.cassandra.ProxyServerRepo
 import org.joda.time.DateTime
 import play.api.libs.ws.DefaultWSProxyServer
 import play.api.libs.ws.ahc.StandaloneAhcWSClient
@@ -18,10 +18,9 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.sys.process._
 import scala.util.control.NonFatal
 
-class ProxyAssistant @Inject()(config: Config, redisClient: RedisClient, val database: CrawlerDatabase, standaloneAhcWSClient: StandaloneAhcWSClient)
+class ProxyAssistant @Inject()(config: Config, redisClient: RedisClient, proxyServerRepo: ProxyServerRepo, standaloneAhcWSClient: StandaloneAhcWSClient)
     extends Actor
-    with ActorLogging
-    with DatabaseProvider[CrawlerDatabase] {
+    with ActorLogging {
   import context.dispatcher
 
   val timeout = Duration(config.getInt("crawler.proxy-assistant.timeout"), MILLISECONDS)
@@ -71,7 +70,7 @@ class ProxyAssistant @Inject()(config: Config, redisClient: RedisClient, val dat
 
   }
 
-  protected def testAvailability(proxyServer: CrawlerProxyServer)(implicit executor: ExecutionContext): Future[CrawlerProxyServer] = {
+  protected def testAvailability(proxyServer: ProxyServerDao)(implicit executor: ExecutionContext): Future[ProxyServerDao] = {
     try {
       //ping first
         standaloneAhcWSClient

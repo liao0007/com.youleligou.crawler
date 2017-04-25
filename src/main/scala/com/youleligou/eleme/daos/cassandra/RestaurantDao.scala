@@ -1,11 +1,11 @@
 package com.youleligou.eleme.daos.cassandra
 
-import com.outworkers.phantom.dsl._
-import com.youleligou.crawler.daos.cassandra.CrawlerJob
+import com.datastax.spark.connector._
+import com.google.inject.Inject
+import com.youleligou.core.reps.CassandraRepo
 import com.youleligou.eleme.models.Restaurant
+import org.apache.spark.SparkContext
 import org.joda.time.{DateTime, LocalDate}
-
-import scala.concurrent.Future
 
 case class RestaurantDao(
     id: Long,
@@ -20,7 +20,7 @@ case class RestaurantDao(
     latitude: Float,
     longitude: Float,
     name: String,
-    phone: String,
+    phone: Option[String],
     promotionInfo: String,
     rating: Float,
     ratingCount: Int,
@@ -59,42 +59,9 @@ object RestaurantDao {
   implicit def convertSeq(source: Seq[Restaurant])(implicit converter: Restaurant => RestaurantDao): Seq[RestaurantDao] = source map converter
 }
 
-abstract class Restaurants extends CassandraTable[Restaurants, RestaurantDao] with RootConnector {
-  object id                 extends LongColumn(this) with PartitionKey
-  object address            extends StringColumn(this)
-  object averageCost        extends OptionalStringColumn(this)
-  object description        extends StringColumn(this)
-  object deliveryFee        extends FloatColumn(this)
-  object minimumOrderAmount extends FloatColumn(this)
-  object imagePath          extends StringColumn(this)
-  object isNew              extends BooleanColumn(this)
-  object isPremium          extends BooleanColumn(this)
-  object latitude           extends FloatColumn(this)
-  object longitude          extends FloatColumn(this)
-  object name               extends StringColumn(this)
-  object phone              extends StringColumn(this)
-  object promotionInfo      extends StringColumn(this)
-  object rating             extends FloatColumn(this)
-  object ratingCount        extends IntColumn(this)
-  object recentOrderNum     extends IntColumn(this)
-  object licensesNumber     extends OptionalStringColumn(this)
-  object companyName        extends OptionalStringColumn(this)
-  object status             extends IntColumn(this)
-  object createdDate        extends LocalDateColumn(this) with ClusteringOrder with Descending
-  object createdAt          extends DateTimeColumn(this)
+class RestaurantRepo @Inject()(val keyspace: String = "eleme", val table: String = "restaurants", val sparkContext: SparkContext)
+    extends CassandraRepo[RestaurantDao] {
 
-  def batchInsertOrUpdate(restaurants: Seq[CrawlerJob]): Future[ResultSet] =
-    Batch.unlogged
-      .add(restaurants.map { restaurant =>
-        store(restaurant)
-      }.iterator)
-      .future()
+  def allIds(): Seq[Long] = sparkContext.cassandraTable[Long](keyspace, table).select("id").collect().toSeq
 
-  def insertOrUpdate(restaurants: Seq[RestaurantDao]): Seq[Future[ResultSet]] = restaurants.map(insertOrUpdate)
-
-  def insertOrUpdate(restaurant: RestaurantDao): Future[ResultSet] = store(restaurant).future()
-
-  def all(): Future[List[RestaurantDao]] = select.fetch()
-
-  def allIds(): Future[List[Long]] = select(_.id).fetch()
 }
