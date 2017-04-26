@@ -6,6 +6,7 @@ import com.youleligou.crawler.modules.{ActorModule, AkkaModule, ConfigModule, Se
 import com.youleligou.eleme.ElemeModule
 import com.youleligou.proxyHunters.xicidaili.XiCiDaiLiModule
 import com.youleligou.proxyHunters.youdaili.YouDaiLiModule
+import org.apache.spark.SparkContext
 
 /**
   * Created by liangliao on 31/3/17.
@@ -24,7 +25,7 @@ object Main extends App {
   )
 
   import net.codingwell.scalaguice.InjectorExtensions._
-  injector.instance[ElemeCrawlerBootstrap].startRestaurant()
+
   if (args.contains("eleme/restaurant"))
     injector.instance[ElemeCrawlerBootstrap].startRestaurant()
 

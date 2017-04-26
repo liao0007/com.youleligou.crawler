@@ -1,6 +1,9 @@
 .idea/
 target/
 log
-/src/main/resources/cache.conf
-/src/main/resources/database.conf
+/src/main/resources/redis.conf
+/src/main/resources/slick.conf
 /src/main/resources/proxy.conf
+/src/main/resources/spark.conf
+/src/main/resources/cassandra.conf
+/src/main/resources/es.conf

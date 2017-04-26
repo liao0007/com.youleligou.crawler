@@ -53,6 +53,7 @@ class ParseService @Inject()(restaurantSnapshotRepo: Repo[RestaurantSnapshotDao]
         latitude = restaurantSnapshotDao.latitude,
         longitude = restaurantSnapshotDao.longitude,
         name = restaurantSnapshotDao.name,
+        imagePath = restaurantSnapshotDao.imagePath,
         licensesNumber = restaurantSnapshotDao.licensesNumber,
         companyName = restaurantSnapshotDao.companyName,
         createdAt = restaurantSnapshotDao.createdAt
