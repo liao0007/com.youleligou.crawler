@@ -78,6 +78,7 @@ class HttpClientFetchService @Inject()(config: Config, jobRepo: Repo[JobDao], st
       }
     } catch {
       case NonFatal(x) =>
+        logger.warn(x.getMessage)
         jobRepo.save(crawlerJob.copy(statusCode = Some(999), statusMessage = Some(x.getMessage)))
         Future.successful(FetchResponse(FetchService.RemoteClosed, "", x.getMessage, fetchRequest))
     }

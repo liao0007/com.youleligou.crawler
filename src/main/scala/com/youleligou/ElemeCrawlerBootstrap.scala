@@ -48,7 +48,7 @@ class ElemeCrawlerBootstrap @Inject()(config: Config,
                                       force = true)
         }
 
-        system.scheduler.schedule(10.seconds,
+        system.scheduler.schedule(60.seconds,
                                   FiniteDuration(restaurantListConfig.getInt("interval"), MILLISECONDS),
                                   injectors,
                                   Tick(restaurantListJobType))
@@ -77,7 +77,7 @@ class ElemeCrawlerBootstrap @Inject()(config: Config,
           )
 
         }
-        system.scheduler.schedule(5.seconds, FiniteDuration(foodListConfig.getInt("interval"), MILLISECONDS), injectors, Tick(foodListJobType))
+        system.scheduler.schedule(60.seconds, FiniteDuration(foodListConfig.getInt("interval"), MILLISECONDS), injectors, Tick(foodListJobType))
       case _ => logger.warn("food injector cache clear failed")
     }
 

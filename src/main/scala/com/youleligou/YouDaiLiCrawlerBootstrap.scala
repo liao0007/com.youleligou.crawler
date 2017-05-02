@@ -35,7 +35,7 @@ class YouDaiLiCrawlerBootstrap @Inject()(config: Config, system: ActorSystem, @N
                                      force = true)
       }
 
-      system.scheduler.schedule(0.seconds,
+      system.scheduler.schedule(60.seconds,
                                 FiniteDuration(proxyPageConfig.getInt("interval"), MILLISECONDS),
                                 injectors,
                                 Tick(proxyPageConfig.getString("jobType")))

@@ -17,7 +17,7 @@ class ProxyAssistantBootstrap @Inject()(config: Config, system: ActorSystem, @Na
   extends LazyLogging {
   import system.dispatcher
   def start(): Unit = {
-    system.scheduler.schedule(0.second, FiniteDuration(config.getInt("crawler.proxy-assistant.interval"), MILLISECONDS), proxyAssistantActor, Run)
+    system.scheduler.schedule(60.second, FiniteDuration(config.getInt("crawler.proxy-assistant.interval"), MILLISECONDS), proxyAssistantActor, Run)
   }
 }
 

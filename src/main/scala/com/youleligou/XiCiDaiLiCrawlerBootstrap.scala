@@ -33,7 +33,7 @@ class XiCiDaiLiCrawlerBootstrap @Inject()(config: Config, system: ActorSystem, @
                                       force = true)
         }
 
-        system.scheduler.schedule(1.seconds,
+        system.scheduler.schedule(60.seconds,
                                   FiniteDuration(proxyListConfig.getInt("interval"), MILLISECONDS),
                                   injectors,
                                   Injector.Tick(proxyListJobType))

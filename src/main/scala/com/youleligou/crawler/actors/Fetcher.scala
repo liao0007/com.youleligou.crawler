@@ -46,14 +46,12 @@ class Fetcher @Inject()(config: Config, fetchService: FetchService, @Named(Injec
 
     case Fetcher.Fetched(FetchResponse(statusCode @ FetchService.RemoteClosed, _, message, fetchRequest)) if fetchRequest.retry < MaxRetry =>
       log.debug("{} fetch failed {} {}, retry without incr", self.path, statusCode, message)
-      Thread.sleep(1000) //wait 1s and re-inject job
       injectors ! Injector.Inject(fetchRequest, force = true)
       injector ! Fetcher.WorkFinished
       context unbecome ()
 
     case Fetcher.Fetched(FetchResponse(statusCode @ _, _, message, fetchRequest)) if fetchRequest.retry < MaxRetry =>
       log.debug("{} fetch failed {} {}, retry", self.path, statusCode, message)
-      Thread.sleep(1000) //wait 1s and re-inject job
       injectors ! Injector.Inject(fetchRequest.copy(retry = fetchRequest.retry + 1), force = true)
       injector ! Fetcher.WorkFinished
       context unbecome ()
