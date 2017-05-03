@@ -5,7 +5,7 @@ import com.youleligou.core.reps.{CassandraRepo, ElasticSearchRepo}
 import com.youleligou.crawler.modules._
 import com.youleligou.crawler.services.ParseService
 import com.youleligou.eleme.daos.{FoodSnapshotDao, RestaurantDao, RestaurantSearchDao, RestaurantSnapshotDao}
-import com.youleligou.eleme.services.{foods, restaurants}
+import com.youleligou.eleme.services.{menu, restaurants}
 import net.codingwell.scalaguice.ScalaModule
 
 /**
@@ -19,7 +19,7 @@ class ElemeModule extends AbstractModule with ScalaModule with GuiceAkkaActorRef
 
     bind[ElasticSearchRepo[RestaurantSearchDao]].to[repos.elasticsearch.RestaurantRepo]
 
-    bind[ParseService].annotatedWithName(classOf[foods.ParseService].getName).to[foods.ParseService]
+    bind[ParseService].annotatedWithName(classOf[menu.ParseService].getName).to[menu.ParseService]
     bind[ParseService].annotatedWithName(classOf[restaurants.ParseService].getName).to[restaurants.ParseService]
   }
 }

@@ -24,19 +24,32 @@ object Main extends App {
 
   import net.codingwell.scalaguice.InjectorExtensions._
 
-  if (args.contains("eleme/restaurant/start"))
+  injector.instance[ElemeCrawlerBootstrap].startMenu()
+
+  /*
+  restaurant
+   */
+  if (args.contains("eleme/restaurants/start"))
     injector.instance[ElemeCrawlerBootstrap].startRestaurant()
-  if (args.contains("eleme/restaurant/clean"))
+
+  if (args.contains("eleme/restaurants/clean"))
     injector.instance[ElemeCrawlerBootstrap].cleanRestaurant()
-  if (args.contains("eleme/restaurant/index"))
+
+  if (args.contains("eleme/restaurants/index"))
     injector.instance[ElemeCrawlerBootstrap].indexRestaurant()
 
-  if (args.contains("eleme/food/start"))
-    injector.instance[ElemeCrawlerBootstrap].startFood()
+  /*
+  menu
+   */
+  if (args.contains("eleme/menu/start"))
+    injector.instance[ElemeCrawlerBootstrap].startMenu()
 
-  if (args.contains("eleme/food/clean"))
-    injector.instance[ElemeCrawlerBootstrap].cleanFood()
+  if (args.contains("eleme/menu/clean"))
+    injector.instance[ElemeCrawlerBootstrap].cleanMenu()
 
+  /*
+  proxy
+   */
   if (args.contains("proxy/assistant"))
     injector.instance[ProxyAssistantBootstrap].start()
 

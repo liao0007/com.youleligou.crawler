@@ -26,7 +26,7 @@ case class RestaurantSnapshotDao(
     licensesNumber: Option[String],
     companyName: Option[String],
     status: Int,
-    createdDate: java.sql.Date = Date.valueOf(LocalDate.now()),
+    createdDate: java.sql.Date = java.sql.Date.valueOf(LocalDate.now()),
     createdAt: java.util.Date = Timestamp.valueOf(LocalDateTime.now())
 )
 
