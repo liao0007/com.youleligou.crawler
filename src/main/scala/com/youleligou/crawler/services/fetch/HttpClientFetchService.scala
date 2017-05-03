@@ -1,5 +1,8 @@
 package com.youleligou.crawler.services.fetch
 
+import java.sql.Timestamp
+import java.time.LocalDateTime
+
 import com.google.inject.Inject
 import com.typesafe.config.Config
 import com.youleligou.core.reps.Repo
@@ -63,7 +66,7 @@ class HttpClientFetchService @Inject()(config: Config, jobRepo: Repo[JobDao], st
       clientWithProxy
         .get()
         .map { response =>
-          jobRepo.save(crawlerJob.copy(statusCode = Some(response.status), statusMessage = Some(response.statusText), completedAt = Some(DateTime.now())))
+          jobRepo.save(crawlerJob.copy(statusCode = Some(response.status), statusMessage = Some(response.statusText), completedAt = Some(Timestamp.valueOf(LocalDateTime.now()))))
           FetchResponse(response.status, response.body, response.statusText, fetchRequest)
         } recover {
         case NonFatal(x) =>

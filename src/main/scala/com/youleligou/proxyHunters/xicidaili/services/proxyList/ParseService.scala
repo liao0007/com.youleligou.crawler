@@ -48,7 +48,7 @@ class ParseService @Inject()(proxyServerRepo: Repo[ProxyServerDao]) extends com.
               supportedType = Some(supportedType),
               location = Some(location),
               reactTime = """[1-9]+""".r.findFirstIn(tds(6).select(".bar").attr("title")).map(_.toFloat),
-              lastVerifiedAt = Some(new DateTime(new Timestamp(format.parse(lastVerifiedAt).getTime)))
+              lastVerifiedAt = Some(new Timestamp(format.parse(lastVerifiedAt).getTime))
             ))
         } catch {
           case NonFatal(x) =>

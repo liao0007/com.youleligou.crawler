@@ -1,5 +1,7 @@
 package com.youleligou.eleme.repos.mysql
 
+import java.sql.{Date, Timestamp}
+
 import com.github.tototoshi.slick.MySQLJodaSupport._
 import com.google.inject.Inject
 import com.youleligou.core.reps.MysqlRepo
@@ -15,10 +17,10 @@ import scala.util.control.NonFatal
 /**
   * Created by liangliao on 25/4/17.
   */
-class RestaurantDaoRepo @Inject()(val database: Database) extends MysqlRepo[RestaurantSnapshotDao] {
+class RestaurantSnapshotRepo @Inject()(val database: Database) extends MysqlRepo[RestaurantSnapshotDao] {
   val schema: String                                 = "cancan"
   val table: String                                  = "restaurant"
-  val RestaurantDaos: TableQuery[RestaurantDaoTable] = TableQuery[RestaurantDaoTable]
+  val RestaurantDaos: TableQuery[RestaurantSnapshotTable] = TableQuery[RestaurantSnapshotTable]
 
   def find(id: Long): Future[Option[RestaurantSnapshotDao]] =
     database.run(RestaurantDaos.filter(_.id === id).result.headOption) recover {
@@ -70,7 +72,7 @@ class RestaurantDaoRepo @Inject()(val database: Database) extends MysqlRepo[Rest
     }
 }
 
-class RestaurantDaoTable(tag: Tag) extends Table[RestaurantSnapshotDao](tag, "restaurant") {
+class RestaurantSnapshotTable(tag: Tag) extends Table[RestaurantSnapshotDao](tag, "restaurant_snapshots") {
   def id                 = column[Long]("id", O.PrimaryKey)
   def address            = column[String]("address")
   def averageCost        = column[String]("average_cost")
@@ -91,8 +93,8 @@ class RestaurantDaoTable(tag: Tag) extends Table[RestaurantSnapshotDao](tag, "re
   def licensesNumber     = column[String]("licenses_number")
   def companyName        = column[String]("company_name")
   def status             = column[Int]("status")
-  def createdDate        = column[LocalDate]("created_date")
-  def createdAt          = column[DateTime]("created_at")
+  def createdDate        = column[Date]("created_date")
+  def createdAt          = column[Timestamp]("created_at")
 
   def * =
     (id,

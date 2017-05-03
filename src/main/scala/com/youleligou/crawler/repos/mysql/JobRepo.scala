@@ -1,5 +1,6 @@
 package com.youleligou.crawler.repos.mysql
 
+import java.sql.Timestamp
 import java.util.UUID
 
 import com.github.tototoshi.slick.MySQLJodaSupport._
@@ -17,10 +18,10 @@ import scala.util.control.NonFatal
 /**
   * Created by liangliao on 25/4/17.
   */
-class JobDaoRepo @Inject()(val database: Database) extends MysqlRepo[JobDao] {
-  val schema: String                   = "cancan"
-  val table: String                    = "job"
-  val JobDaos: TableQuery[JobDaoTable] = TableQuery[JobDaoTable]
+class JobRepo @Inject()(val database: Database) extends MysqlRepo[JobDao] {
+  val schema: String                = "cancan"
+  val table: String                 = "jobs"
+  val JobDaos: TableQuery[JobTable] = TableQuery[JobTable]
 
   def find(id: UUID): Future[Option[JobDao]] =
     database.run(JobDaos.filter(_.id === id).result.headOption) recover {
@@ -69,7 +70,7 @@ class JobDaoRepo @Inject()(val database: Database) extends MysqlRepo[JobDao] {
     }
 }
 
-class JobDaoTable(tag: Tag) extends Table[JobDao](tag, "job") {
+class JobTable(tag: Tag) extends Table[JobDao](tag, "jobs") {
   def id = column[UUID]("id", O.PrimaryKey)
 
   def jobType = column[String]("job_type")
@@ -84,10 +85,10 @@ class JobDaoTable(tag: Tag) extends Table[JobDao](tag, "job") {
 
   def statusMessage = column[String]("status_message")
 
-  def createdAt = column[DateTime]("created_at")
+  def createdAt = column[Timestamp]("created_at")
 
-  def completedAt = column[DateTime]("completed_at")
+  def completedAt = column[Timestamp]("completed_at")
 
   def * =
-    (id, jobType, jobName, url, useProxy, statusCode.?, statusMessage.?, createdAt, completedAt.?) <> ((JobDao.apply _).tupled, JobDao.unapply)
+    (id, jobType, jobName, url, useProxy, statusCode.?, statusMessage.?, completedAt.?, createdAt) <> ((JobDao.apply _).tupled, JobDao.unapply)
 }

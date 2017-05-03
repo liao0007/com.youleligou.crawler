@@ -1,5 +1,7 @@
 package com.youleligou.eleme.repos.mysql
 
+import java.sql.Timestamp
+
 import com.github.tototoshi.slick.MySQLJodaSupport._
 import com.google.inject.Inject
 import com.youleligou.core.reps.MysqlRepo
@@ -15,10 +17,10 @@ import scala.util.control.NonFatal
 /**
   * Created by liangliao on 25/4/17.
   */
-class FoodDaoRepo @Inject()(val database: Database) extends MysqlRepo[FoodSnapshotDao] {
+class FoodSnapshotRepo @Inject()(val database: Database) extends MysqlRepo[FoodSnapshotDao] {
   val schema: String                     = "cancan"
-  val table: String                      = "foods"
-  val FoodDaos: TableQuery[FoodDaoTable] = TableQuery[FoodDaoTable]
+  val table: String                      = "food_snapshots"
+  val FoodDaos: TableQuery[FoodSnapshotTable] = TableQuery[FoodSnapshotTable]
 
   def find(itemId: Long): Future[Option[FoodSnapshotDao]] =
     database.run(FoodDaos.filter(_.itemId === itemId).result.headOption) recover {
@@ -64,7 +66,7 @@ class FoodDaoRepo @Inject()(val database: Database) extends MysqlRepo[FoodSnapsh
 
 }
 
-class FoodDaoTable(tag: Tag) extends Table[FoodSnapshotDao](tag, "foods") {
+class FoodSnapshotTable(tag: Tag) extends Table[FoodSnapshotDao](tag, "food_snapshots") {
   def itemId       = column[Long]("item_id", O.PrimaryKey)
   def restaurantId = column[Long]("restaurant_id")
   def categoryId   = column[Long]("category_id")
@@ -75,7 +77,7 @@ class FoodDaoTable(tag: Tag) extends Table[FoodSnapshotDao](tag, "foods") {
   def ratingCount  = column[Int]("rating_count")
   def satisfyCount = column[Int]("satisfy_count")
   def satisfyRate  = column[Float]("satisfy_rate")
-  def createdAt    = column[DateTime]("created_at")
+  def createdAt    = column[Timestamp]("created_at")
 
   def * =
     (itemId, restaurantId, categoryId, name, description, monthSales, rating, ratingCount, satisfyCount, satisfyRate, createdAt) <> ((FoodSnapshotDao.apply _).tupled, FoodSnapshotDao.unapply)

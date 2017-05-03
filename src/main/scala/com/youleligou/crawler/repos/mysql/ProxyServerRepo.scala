@@ -1,5 +1,7 @@
 package com.youleligou.crawler.repos.mysql
 
+import java.sql.Timestamp
+
 import com.github.tototoshi.slick.MySQLJodaSupport._
 import com.google.inject.Inject
 import com.youleligou.core.reps.MysqlRepo
@@ -17,7 +19,7 @@ import scala.util.control.NonFatal
   */
 class ProxyServerRepo @Inject()(val database: Database) extends MysqlRepo[ProxyServerDao] {
   val schema: String                                = "cancan"
-  val table: String                                 = "proxy_server"
+  val table: String                                 = "proxy_servers"
   val ProxyServerDaos: TableQuery[ProxyServerTable] = TableQuery[ProxyServerTable]
 
   def find(ip: String): Future[Option[ProxyServerDao]] =
@@ -87,7 +89,7 @@ class ProxyServerRepo @Inject()(val database: Database) extends MysqlRepo[ProxyS
     }
 }
 
-class ProxyServerTable(tag: Tag) extends Table[ProxyServerDao](tag, "proxy_server") {
+class ProxyServerTable(tag: Tag) extends Table[ProxyServerDao](tag, "proxy_servers") {
 
   def ip = column[String]("ip", O.PrimaryKey)
 
@@ -107,13 +109,13 @@ class ProxyServerTable(tag: Tag) extends Table[ProxyServerDao](tag, "proxy_serve
 
   def isLive = column[Boolean]("is_live")
 
-  def lastVerifiedAt = column[DateTime]("last_verified_at")
+  def lastVerifiedAt = column[Timestamp]("last_verified_at")
 
   def checkCount = column[Int]("check_count")
 
-  def createdAt = column[DateTime]("created_at")
+  def createdAt = column[Timestamp]("created_at")
 
   def * =
-    (ip, port, username.?, password.?, isAnonymous.?, supportedType.?, location.?, reactTime.?, isLive, lastVerifiedAt.?, checkCount, createdAt) <> ((ProxyServerDao.apply _).tupled, ProxyServerDao.unapply)
+    (ip, port, username.?, password.?, isAnonymous.?, supportedType.?, location.?, reactTime.?, isLive, checkCount, lastVerifiedAt.?, createdAt) <> ((ProxyServerDao.apply _).tupled, ProxyServerDao.unapply)
 
 }

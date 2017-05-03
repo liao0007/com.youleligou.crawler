@@ -1,6 +1,8 @@
 package com.youleligou.crawler.actors
 
 import java.io.{File, PrintWriter}
+import java.sql.Timestamp
+import java.time.LocalDateTime
 
 import akka.actor.{Actor, ActorLogging}
 import com.google.inject.Inject
@@ -18,14 +20,17 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.sys.process._
 import scala.util.control.NonFatal
 
-class ProxyAssistant @Inject()(config: Config, redisClient: RedisClient, proxyServerRepo: Repo[ProxyServerDao], standaloneAhcWSClient: StandaloneAhcWSClient)
+class ProxyAssistant @Inject()(config: Config,
+                               redisClient: RedisClient,
+                               proxyServerRepo: Repo[ProxyServerDao],
+                               standaloneAhcWSClient: StandaloneAhcWSClient)
     extends Actor
     with ActorLogging {
   import context.dispatcher
 
   val timeout = Duration(config.getInt("crawler.proxy-assistant.timeout"), MILLISECONDS)
 
-  private def now = DateTime.now()
+  private def now = Timestamp.valueOf(LocalDateTime.now())
 
   override def receive: Receive = {
     case Run =>
@@ -73,18 +78,18 @@ class ProxyAssistant @Inject()(config: Config, redisClient: RedisClient, proxySe
   protected def testAvailability(proxyServer: ProxyServerDao)(implicit executor: ExecutionContext): Future[ProxyServerDao] = {
     try {
       //ping first
-        standaloneAhcWSClient
-          .url("http://www.baidu.com")
-          .withProxyServer(DefaultWSProxyServer(proxyServer.ip, proxyServer.port))
-          .withRequestTimeout(timeout)
-          .get()
-          .map { response =>
-            if (response.status == 200 && response.body.contains("百度一下，你就知道")) {
-              proxyServer.copy(isLive = true, lastVerifiedAt = Some(now), checkCount = 0)
-            } else {
-              proxyServer.copy(isLive = false, lastVerifiedAt = Some(now), checkCount = proxyServer.checkCount + 1)
-            }
-          } recover {
+      standaloneAhcWSClient
+        .url("http://www.baidu.com")
+        .withProxyServer(DefaultWSProxyServer(proxyServer.ip, proxyServer.port))
+        .withRequestTimeout(timeout)
+        .get()
+        .map { response =>
+          if (response.status == 200 && response.body.contains("百度一下，你就知道")) {
+            proxyServer.copy(isLive = true, lastVerifiedAt = Some(now), checkCount = 0)
+          } else {
+            proxyServer.copy(isLive = false, lastVerifiedAt = Some(now), checkCount = proxyServer.checkCount + 1)
+          }
+        } recover {
         case NonFatal(x) =>
           log.debug("{} {}", self.path, x.getMessage)
           proxyServer.copy(isLive = false, lastVerifiedAt = Some(now), checkCount = proxyServer.checkCount + 1)

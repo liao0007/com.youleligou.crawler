@@ -1,6 +1,7 @@
 package com.youleligou.crawler.daos
 
 import java.sql.Timestamp
+import java.time.LocalDateTime
 import java.util.UUID
 
 import com.youleligou.crawler.models.Job
@@ -18,7 +19,7 @@ case class JobDao(
     statusCode: Option[Int],
     statusMessage: Option[String],
     completedAt: Option[Timestamp] = None,
-    createdAt: Timestamp = new Timestamp(DateTime.now().getMillis)
+    createdAt: Timestamp = Timestamp.valueOf(LocalDateTime.now())
 )
 
 object JobDao {
