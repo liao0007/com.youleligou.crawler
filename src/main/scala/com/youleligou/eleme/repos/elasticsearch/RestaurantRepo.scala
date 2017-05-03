@@ -7,6 +7,7 @@ import org.apache.spark.SparkContext
 import org.elasticsearch.spark.rdd.EsSpark
 
 import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits._
 import scala.util.control.NonFatal
 
 /**

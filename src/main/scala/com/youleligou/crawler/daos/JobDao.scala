@@ -18,6 +18,7 @@ case class JobDao(
     statusCode: Option[Int],
     statusMessage: Option[String],
     completedAt: Option[Date] = None,
+    //spark cassandra connector not support java.sql.Timestamp, use java.util.Date instead
     createdAt: Date = Timestamp.valueOf(LocalDateTime.now())
 )
 
