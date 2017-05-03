@@ -2,9 +2,9 @@ package com.youleligou.crawler.daos
 
 import java.sql.Timestamp
 import java.time.LocalDateTime
+import java.util.Date
 
 import com.youleligou.crawler.models.ProxyServer
-import org.joda.time.DateTime
 
 case class ProxyServerDao(
     ip: String,
@@ -17,8 +17,8 @@ case class ProxyServerDao(
     reactTime: Option[Float],
     isLive: Boolean,
     checkCount: Int,
-    lastVerifiedAt: Option[Timestamp],
-    createdAt: Timestamp = Timestamp.valueOf(LocalDateTime.now())
+    lastVerifiedAt: Option[Date],
+    createdAt: Date = Timestamp.valueOf(LocalDateTime.now())
 )
 
 object ProxyServerDao {

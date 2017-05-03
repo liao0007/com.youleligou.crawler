@@ -2,10 +2,9 @@ package com.youleligou.crawler.daos
 
 import java.sql.Timestamp
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.{Date, UUID}
 
 import com.youleligou.crawler.models.Job
-import org.joda.time.DateTime
 
 /**
   * Created by liangliao on 18/4/17.
@@ -18,8 +17,8 @@ case class JobDao(
     useProxy: Boolean,
     statusCode: Option[Int],
     statusMessage: Option[String],
-    completedAt: Option[Timestamp] = None,
-    createdAt: Timestamp = Timestamp.valueOf(LocalDateTime.now())
+    completedAt: Option[Date] = None,
+    createdAt: Date = Timestamp.valueOf(LocalDateTime.now())
 )
 
 object JobDao {

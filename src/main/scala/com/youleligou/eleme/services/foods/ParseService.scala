@@ -1,7 +1,7 @@
 package com.youleligou.eleme.services.foods
 
 import com.google.inject.Inject
-import com.youleligou.core.reps.{CassandraRepo, Repo}
+import com.youleligou.core.reps.CassandraRepo
 import com.youleligou.crawler.models.{FetchResponse, ParseResult, UrlInfo}
 import com.youleligou.eleme.daos.FoodSnapshotDao
 import com.youleligou.eleme.models.FoodSnapshot

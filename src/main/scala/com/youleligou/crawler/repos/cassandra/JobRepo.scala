@@ -5,8 +5,6 @@ import com.youleligou.core.reps.CassandraRepo
 import com.youleligou.crawler.daos.JobDao
 import org.apache.spark.SparkContext
 
-import scala.concurrent.Future
-
 /**
   * Created by liangliao on 25/4/17.
   */

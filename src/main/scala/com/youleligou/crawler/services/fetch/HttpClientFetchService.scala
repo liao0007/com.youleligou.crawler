@@ -9,7 +9,6 @@ import com.youleligou.core.reps.Repo
 import com.youleligou.crawler.daos.JobDao
 import com.youleligou.crawler.models.{FetchRequest, FetchResponse, Job}
 import com.youleligou.crawler.services.FetchService
-import org.joda.time.DateTime
 import play.api.libs.ws.ahc.StandaloneAhcWSClient
 import play.api.libs.ws.{DefaultWSProxyServer, StandaloneWSRequest}
 

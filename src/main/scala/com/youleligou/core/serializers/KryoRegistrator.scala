@@ -2,9 +2,7 @@ package com.youleligou.core.serializers
 
 import com.youleligou.crawler.daos.{JobDao, ProxyServerDao}
 import com.youleligou.eleme.daos.{FoodSnapshotDao, RestaurantDao, RestaurantSnapshotDao}
-import de.javakaffee.kryoserializers.jodatime.JodaDateTimeSerializer
-import de.javakaffee.kryoserializers.jodatime.JodaLocalDateSerializer
-import de.javakaffee.kryoserializers.jodatime.JodaLocalDateTimeSerializer
+import de.javakaffee.kryoserializers.jodatime.{JodaDateTimeSerializer, JodaLocalDateSerializer, JodaLocalDateTimeSerializer}
 import org.joda.time.{DateTime, LocalDate, LocalDateTime}
 
 /**

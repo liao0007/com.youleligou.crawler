@@ -26,7 +26,7 @@ class ElemeCrawlerBootstrap @Inject()(config: Config,
                                       system: ActorSystem,
                                       redisClient: RedisClient,
                                       restaurantRepo: RestaurantRepo,
-                                      restaurantEsRepo: ElasticSearchRepo[Restaurant],
+                                      restaurantEsRepo: ElasticSearchRepo[RestaurantDao],
                                       @Named(Injector.PoolName) injectors: ActorRef)
     extends LazyLogging {
 
@@ -66,18 +66,7 @@ class ElemeCrawlerBootstrap @Inject()(config: Config,
 
   def indexRestaurant(): Unit = {
     restaurantRepo.all() flatMap { restaurantDaos =>
-      val restaurants = restaurantDaos map { restaurantDao =>
-        Restaurant(
-          id = restaurantDao.id,
-          name = restaurantDao.name,
-          address = restaurantDao.address,
-          imagePath = restaurantDao.imagePath,
-          latitude = restaurantDao.latitude,
-          longitude = restaurantDao.longitude,
-          identification = Some(Identification(restaurantDao.licensesNumber, restaurantDao.companyName))
-        )
-      }
-      restaurantEsRepo.save(restaurants)
+      restaurantEsRepo.save(restaurantDaos)
     }
   }
 

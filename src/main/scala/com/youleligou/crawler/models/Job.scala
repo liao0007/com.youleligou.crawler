@@ -1,8 +1,7 @@
 package com.youleligou.crawler.models
 
 import java.sql.Timestamp
-import java.time.Instant
-import java.util.UUID
+import java.util.{Date, UUID}
 
 import com.youleligou.crawler.models.Job.FetchJobType
 
@@ -17,7 +16,7 @@ case class Job(
     useProxy: Boolean = false,
     statusCode: Option[Int] = None,
     statusMessage: Option[String] = None,
-    completedAt: Option[Timestamp] = None
+    completedAt: Option[Date] = None
 )
 
 object Job {

@@ -6,7 +6,6 @@ import com.google.inject.Inject
 import com.youleligou.core.reps.Repo
 import com.youleligou.crawler.daos.ProxyServerDao
 import com.youleligou.crawler.models.{FetchResponse, ParseResult, ProxyServer, UrlInfo}
-import org.joda.time.DateTime
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 

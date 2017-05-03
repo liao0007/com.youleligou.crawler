@@ -1,10 +1,10 @@
 package com.youleligou.eleme.daos
 
 import java.sql.Timestamp
-import java.time.{Instant, LocalDateTime}
+import java.time.LocalDateTime
+import java.util.Date
 
 import com.youleligou.eleme.models.Restaurant
-import org.joda.time.DateTime
 
 case class RestaurantDao(
     id: Long,
@@ -15,7 +15,7 @@ case class RestaurantDao(
     longitude: Float,
     licensesNumber: Option[String] = None,
     companyName: Option[String] = None,
-    createdAt: Timestamp = Timestamp.valueOf(LocalDateTime.now())
+    createdAt: Date = Timestamp.valueOf(LocalDateTime.now())
 )
 
 object RestaurantDao {

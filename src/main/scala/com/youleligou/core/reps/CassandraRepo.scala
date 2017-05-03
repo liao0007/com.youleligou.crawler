@@ -7,6 +7,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.reflect.ClassTag
 import scala.reflect.runtime.universe._
+import scala.util.control.NonFatal
 
 /**
   * Created by liangliao on 25/4/17.
@@ -21,13 +22,22 @@ abstract class CassandraRepo[T <: Serializable](implicit classTag: ClassTag[T], 
     save(Seq(record))
   }
 
-  def save(records: Seq[T]): Future[Any] = Future {
-    val collection = sparkContext.parallelize(records)
-    collection.saveToCassandra(keyspace, table)
-  }
+  def save(records: Seq[T]): Future[Any] =
+    Future {
+      val collection = sparkContext.parallelize(records)
+      collection.saveToCassandra(keyspace, table)
+    } recover {
+      case NonFatal(x) =>
+        logger.warn("{} {}", this.getClass, x.getMessage)
+    }
 
-  def all(): Future[Seq[T]] = Future {
-    sparkContext.cassandraTable[T](keyspace, table).collect().toSeq
-  }
+  def all(): Future[Seq[T]] =
+    Future {
+      sparkContext.cassandraTable[T](keyspace, table).collect().toSeq
+    } recover {
+      case NonFatal(x) =>
+        logger.warn("{} {}", this.getClass, x.getMessage)
+        Seq.empty[T]
+    }
 
 }

@@ -1,7 +1,7 @@
 package com.youleligou.eleme.services.restaurants
 
 import com.google.inject.Inject
-import com.youleligou.core.reps.{CassandraRepo, ElasticSearchRepo, Repo}
+import com.youleligou.core.reps.{CassandraRepo, ElasticSearchRepo}
 import com.youleligou.crawler.models.{FetchResponse, ParseResult, UrlInfo}
 import com.youleligou.eleme.daos.{RestaurantDao, RestaurantSnapshotDao}
 import com.youleligou.eleme.models.{Restaurant, RestaurantSnapshot}
@@ -11,7 +11,7 @@ import scala.concurrent.Future
 
 class ParseService @Inject()(restaurantSnapshotRepo: CassandraRepo[RestaurantSnapshotDao],
                              restaurantRepo: CassandraRepo[RestaurantDao],
-                             restaurantEsRepo: ElasticSearchRepo[Restaurant])
+                             restaurantEsRepo: ElasticSearchRepo[RestaurantDao])
     extends com.youleligou.crawler.services.ParseService {
 
   final val Step: Int        = 1

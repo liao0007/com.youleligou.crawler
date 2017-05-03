@@ -10,7 +10,6 @@ import com.typesafe.config.Config
 import com.youleligou.core.reps.Repo
 import com.youleligou.crawler.actors.ProxyAssistant._
 import com.youleligou.crawler.daos.ProxyServerDao
-import org.joda.time.DateTime
 import play.api.libs.ws.DefaultWSProxyServer
 import play.api.libs.ws.ahc.StandaloneAhcWSClient
 import redis.RedisClient

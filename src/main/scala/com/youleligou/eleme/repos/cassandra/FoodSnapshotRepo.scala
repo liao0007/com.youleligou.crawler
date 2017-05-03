@@ -2,11 +2,7 @@ package com.youleligou.eleme.repos.cassandra
 
 import com.google.inject.Inject
 import com.youleligou.core.reps.CassandraRepo
-import com.youleligou.eleme.daos.{FoodSnapshotDao, RestaurantDao, RestaurantSnapshotDao}
-import org.apache.spark.SparkContext
-import com.datastax.spark.connector._
-import com.google.inject.Inject
-import com.youleligou.core.reps.CassandraRepo
+import com.youleligou.eleme.daos.FoodSnapshotDao
 import org.apache.spark.SparkContext
 
 /**
