@@ -4,7 +4,7 @@ import java.sql.Timestamp
 import java.time.LocalDateTime
 import java.util.Date
 
-import com.youleligou.eleme.models.Restaurant
+import com.youleligou.eleme.models.{Identification, Restaurant}
 
 case class RestaurantDao(
     id: Long,
@@ -30,6 +30,18 @@ object RestaurantDao {
     companyName = model.identification.flatMap(_.companyName)
   )
 
-  implicit def convertSeq(source: Seq[Restaurant])(implicit converter: Restaurant => RestaurantDao): Seq[RestaurantDao] =
+  implicit def toModel(dao: RestaurantDao): Restaurant = Restaurant(
+    id = dao.id,
+    name = dao.name,
+    address = dao.address,
+    imagePath = dao.imagePath,
+    latitude = dao.latitude,
+    longitude = dao.longitude,
+    identification = Some(Identification(dao.licensesNumber, dao.companyName))
+  )
+
+  implicit def convertDaoSeq(source: Seq[Restaurant])(implicit converter: Restaurant => RestaurantDao): Seq[RestaurantDao] =
+    source map converter
+  implicit def convertToModelSeq(source: Seq[RestaurantDao])(implicit converter: RestaurantDao => Restaurant): Seq[Restaurant] =
     source map converter
 }

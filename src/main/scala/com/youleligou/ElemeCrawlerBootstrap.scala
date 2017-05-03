@@ -11,11 +11,12 @@ import com.youleligou.core.reps.ElasticSearchRepo
 import com.youleligou.crawler.actors.Injector
 import com.youleligou.crawler.actors.Injector.{CacheCleared, ClearCache, Tick}
 import com.youleligou.crawler.models.{FetchRequest, UrlInfo}
-import com.youleligou.eleme.daos.RestaurantDao
+import com.youleligou.eleme.daos.{RestaurantDao, RestaurantSearchDao}
 import com.youleligou.eleme.models.{Identification, Restaurant}
 import com.youleligou.eleme.repos.cassandra.RestaurantRepo
 import redis.RedisClient
 
+import scala.concurrent.Future
 import scala.concurrent.duration._
 
 /**
@@ -26,7 +27,7 @@ class ElemeCrawlerBootstrap @Inject()(config: Config,
                                       system: ActorSystem,
                                       redisClient: RedisClient,
                                       restaurantRepo: RestaurantRepo,
-                                      restaurantEsRepo: ElasticSearchRepo[RestaurantDao],
+                                      restaurantEsRepo: ElasticSearchRepo[RestaurantSearchDao],
                                       @Named(Injector.PoolName) injectors: ActorRef)
     extends LazyLogging {
 
@@ -66,7 +67,9 @@ class ElemeCrawlerBootstrap @Inject()(config: Config,
 
   def indexRestaurant(): Unit = {
     restaurantRepo.all() flatMap { restaurantDaos =>
-      restaurantEsRepo.save(restaurantDaos)
+      val restaurants: Seq[Restaurant]                   = restaurantDaos
+      val restaurantSearchDaos: Seq[RestaurantSearchDao] = restaurants
+      restaurantEsRepo.save(restaurantSearchDaos)
     }
   }
 
