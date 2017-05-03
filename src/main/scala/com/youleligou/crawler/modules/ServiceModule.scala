@@ -10,6 +10,7 @@ import com.youleligou.crawler.services.filter.DefaultFilterService
 import com.youleligou.crawler.services.hash.Md5HashService
 import com.youleligou.crawler.services.index.ElasticIndexService
 import net.codingwell.scalaguice.ScalaModule
+import org.apache.spark.serializer.KryoSerializer
 import org.apache.spark.{SparkConf, SparkContext}
 import play.api.libs.ws.ahc.StandaloneAhcWSClient
 import redis.RedisClient
@@ -52,9 +53,16 @@ class ServiceModule extends AbstractModule with ScalaModule {
   @Singleton
   def provideCrawlerSparkContext(config: Config, system: ActorSystem): SparkContext = {
     val conf = new SparkConf(true)
+      // spark
+      .set("spark.serializer", classOf[KryoSerializer].getName)
+      .set("spark.kryo.registrator", "com.youleligou.core.serializers.KryoRegistrator")
+      .set("spark.kryo.unsafe", "true")
+      // cassandra
       .set("spark.cassandra.connection.host", config.getStringList("cassandra.contactPoints").asScala.mkString(","))
 //      .set("spark.cassandra.auth.username", "cassandra")
 //      .set("spark.cassandra.auth.password", "cassandra")
+
+      // elastic search
       .set("es.nodes", config.getString("es.nodes.contactPoints"))
       .set("es.index.auto.create", config.getBoolean("es.index.auto.create").toString)
       .set("es.net.http.auth.user", config.getString("es.net.http.auth.user"))

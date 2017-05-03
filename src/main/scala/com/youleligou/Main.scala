@@ -6,12 +6,10 @@ import com.youleligou.crawler.modules.{ActorModule, AkkaModule, ConfigModule, Se
 import com.youleligou.eleme.ElemeModule
 import com.youleligou.proxyHunters.xicidaili.XiCiDaiLiModule
 import com.youleligou.proxyHunters.youdaili.YouDaiLiModule
-import org.apache.spark.SparkContext
 
 /**
   * Created by liangliao on 31/3/17.
   */
-
 object Main extends App {
   val injector = Guice.createInjector(
     new ConfigModule,
@@ -26,11 +24,20 @@ object Main extends App {
 
   import net.codingwell.scalaguice.InjectorExtensions._
 
-  if (args.contains("eleme/restaurant"))
-    injector.instance[ElemeCrawlerBootstrap].startRestaurant()
+  injector.instance[ElemeCrawlerBootstrap].indexRestaurant()
 
-  if (args.contains("eleme/food"))
+  if (args.contains("eleme/restaurant/start"))
+    injector.instance[ElemeCrawlerBootstrap].startRestaurant()
+  if (args.contains("eleme/restaurant/clean"))
+    injector.instance[ElemeCrawlerBootstrap].cleanRestaurant()
+  if (args.contains("eleme/restaurant/index"))
+    injector.instance[ElemeCrawlerBootstrap].indexRestaurant()
+
+  if (args.contains("eleme/food/start"))
     injector.instance[ElemeCrawlerBootstrap].startFood()
+
+  if (args.contains("eleme/food/clean"))
+    injector.instance[ElemeCrawlerBootstrap].cleanFood()
 
   if (args.contains("proxy/assistant"))
     injector.instance[ProxyAssistantBootstrap].start()

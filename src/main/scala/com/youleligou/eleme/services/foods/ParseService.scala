@@ -1,7 +1,7 @@
-package com.youleligou.eleme.services.food
+package com.youleligou.eleme.services.foods
 
 import com.google.inject.Inject
-import com.youleligou.core.reps.Repo
+import com.youleligou.core.reps.{CassandraRepo, Repo}
 import com.youleligou.crawler.models.{FetchResponse, ParseResult, UrlInfo}
 import com.youleligou.eleme.daos.FoodSnapshotDao
 import com.youleligou.eleme.models.FoodSnapshot
@@ -9,7 +9,7 @@ import play.api.libs.json._
 
 import scala.concurrent.Future
 
-class ParseService @Inject()(foodSnapshotRepo: Repo[FoodSnapshotDao]) extends com.youleligou.crawler.services.ParseService {
+class ParseService @Inject()(foodSnapshotRepo: CassandraRepo[FoodSnapshotDao]) extends com.youleligou.crawler.services.ParseService {
 
   private def persist(foodSnapshots: Seq[FoodSnapshot]): Future[Any] = foodSnapshotRepo.save(foodSnapshots)
 

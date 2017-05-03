@@ -1,5 +1,6 @@
 package com.youleligou.crawler.daos
 
+import java.sql.Timestamp
 import java.util.UUID
 
 import com.youleligou.crawler.models.Job
@@ -16,8 +17,8 @@ case class JobDao(
     useProxy: Boolean,
     statusCode: Option[Int],
     statusMessage: Option[String],
-    createdAt: DateTime,
-    completedAt: Option[DateTime]
+    completedAt: Option[Timestamp] = None,
+    createdAt: Timestamp = new Timestamp(DateTime.now().getMillis)
 )
 
 object JobDao {
@@ -33,7 +34,6 @@ object JobDao {
     useProxy = model.useProxy,
     statusCode = model.statusCode,
     statusMessage = model.statusMessage,
-    createdAt = model.createdAt,
     completedAt = model.completedAt
   )
 

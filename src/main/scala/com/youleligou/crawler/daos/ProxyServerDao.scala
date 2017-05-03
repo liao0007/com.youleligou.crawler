@@ -1,5 +1,7 @@
 package com.youleligou.crawler.daos
 
+import java.sql.Timestamp
+
 import com.youleligou.crawler.models.ProxyServer
 import org.joda.time.DateTime
 
@@ -13,9 +15,9 @@ case class ProxyServerDao(
     location: Option[String],
     reactTime: Option[Float],
     isLive: Boolean,
-    lastVerifiedAt: Option[DateTime],
     checkCount: Int,
-    createdAt: DateTime
+    lastVerifiedAt: Option[Timestamp],
+    createdAt: Timestamp = new Timestamp(DateTime.now().getMillis)
 )
 
 object ProxyServerDao {
@@ -34,8 +36,7 @@ object ProxyServerDao {
     reactTime = model.reactTime,
     isLive = model.isLive,
     lastVerifiedAt = model.lastVerifiedAt,
-    checkCount = model.checkCount,
-    createdAt = model.createdAt
+    checkCount = model.checkCount
   )
 
   implicit def convertSeq(source: Seq[ProxyServer])(implicit converter: ProxyServer => ProxyServerDao): Seq[ProxyServerDao] = source map converter

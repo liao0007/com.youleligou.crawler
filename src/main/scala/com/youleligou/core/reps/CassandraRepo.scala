@@ -1,7 +1,6 @@
 package com.youleligou.core.reps
 
 import com.datastax.spark.connector._
-import com.datastax.spark.connector.rdd.reader.{ClassBasedRowReaderFactory, RowReaderFactory}
 import org.apache.spark.SparkContext
 
 import scala.concurrent.ExecutionContext.Implicits.global

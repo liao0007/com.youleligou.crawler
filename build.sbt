@@ -63,8 +63,12 @@ libraryDependencies ++= Seq(
   "com.datastax.spark" %% "spark-cassandra-connector" % "2.0.1",
   //  "io.netty" % "netty-transport-native-epoll" % "4.1.9.Final", // disabled due to java8 bug for spark
 
-  //elastic search
-  "org.elasticsearch" % "elasticsearch-spark-20_2.11" % "5.3.1"
+  // -- elastic search --
+  "org.elasticsearch" % "elasticsearch-spark-20_2.11" % "5.3.1",
+
+  // -- serializer --
+  "de.javakaffee" % "kryo-serializers" % "0.41"
+
 )
 
 dependencyOverrides ++= Set(

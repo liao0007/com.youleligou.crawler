@@ -1,5 +1,8 @@
 package com.youleligou.eleme.daos
 
+import java.sql.Timestamp
+import java.time.Instant
+
 import com.youleligou.eleme.models.FoodSnapshot
 import org.joda.time.DateTime
 
@@ -14,7 +17,7 @@ case class FoodSnapshotDao(
     ratingCount: Int,
     satisfyCount: Int,
     satisfyRate: Float,
-    createdAt: DateTime = DateTime.now()
+    createdAt: Timestamp = new Timestamp(DateTime.now().getMillis)
 )
 
 object FoodSnapshotDao {

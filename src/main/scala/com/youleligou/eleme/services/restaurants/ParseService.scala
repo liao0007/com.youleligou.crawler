@@ -1,15 +1,17 @@
-package com.youleligou.eleme.services.restaurant
+package com.youleligou.eleme.services.restaurants
 
 import com.google.inject.Inject
-import com.youleligou.core.reps.Repo
+import com.youleligou.core.reps.{CassandraRepo, ElasticSearchRepo, Repo}
 import com.youleligou.crawler.models.{FetchResponse, ParseResult, UrlInfo}
 import com.youleligou.eleme.daos.{RestaurantDao, RestaurantSnapshotDao}
-import com.youleligou.eleme.models.RestaurantSnapshot
+import com.youleligou.eleme.models.{Restaurant, RestaurantSnapshot}
 import play.api.libs.json._
 
 import scala.concurrent.Future
 
-class ParseService @Inject()(restaurantSnapshotRepo: Repo[RestaurantSnapshotDao], restaurantRepo: Repo[RestaurantDao])
+class ParseService @Inject()(restaurantSnapshotRepo: CassandraRepo[RestaurantSnapshotDao],
+                             restaurantRepo: CassandraRepo[RestaurantDao],
+                             restaurantEsRepo: ElasticSearchRepo[Restaurant])
     extends com.youleligou.crawler.services.ParseService {
 
   final val Step: Int        = 1
@@ -44,31 +46,35 @@ class ParseService @Inject()(restaurantSnapshotRepo: Repo[RestaurantSnapshotDao]
     Seq(urlInfo.copy(queryParameters = urlInfo.queryParameters + (OffsetKey -> (offset + limit).toString)))
   }
 
-  private def persist(restaurants: Seq[RestaurantSnapshot]): Future[Any] = {
-    val restaurantSnapshotDaos: Seq[RestaurantSnapshotDao] = restaurants
-    val restaurantDaos: Seq[RestaurantDao] = restaurantSnapshotDaos.map { restaurantSnapshotDao =>
-      RestaurantDao(
-        id = restaurantSnapshotDao.id,
-        address = restaurantSnapshotDao.address,
-        latitude = restaurantSnapshotDao.latitude,
-        longitude = restaurantSnapshotDao.longitude,
-        name = restaurantSnapshotDao.name,
-        imagePath = restaurantSnapshotDao.imagePath,
-        licensesNumber = restaurantSnapshotDao.licensesNumber,
-        companyName = restaurantSnapshotDao.companyName,
-        createdAt = restaurantSnapshotDao.createdAt
+  private def persist(restaurantSnapshots: Seq[RestaurantSnapshot]): Future[Any] = {
+    val restaurants: Seq[Restaurant] = restaurantSnapshots map { restaurantSnapshot =>
+      Restaurant(
+        id = restaurantSnapshot.id,
+        address = restaurantSnapshot.address,
+        latitude = restaurantSnapshot.latitude,
+        longitude = restaurantSnapshot.longitude,
+        name = restaurantSnapshot.name,
+        imagePath = restaurantSnapshot.imagePath,
+        identification = restaurantSnapshot.identification
       )
     }
 
+    val restaurantSnapshotDaos: Seq[RestaurantSnapshotDao] = restaurantSnapshots
+    val restaurantDaos: Seq[RestaurantDao]                 = restaurants
+
+    //persist into cassandra
     restaurantSnapshotRepo.save(restaurantSnapshotDaos)
     restaurantRepo.save(restaurantDaos)
+
+    //es
+    restaurantEsRepo.save(restaurants)
   }
 
   /**
     * 解析具体实现
     */
   override def parse(fetchResponse: FetchResponse): ParseResult = {
-    val restaurants = Json.parse(fetchResponse.content) match {
+    val restaurants: Seq[RestaurantSnapshot] = Json.parse(fetchResponse.content) match {
       case JsArray(restaurantsJsValue) =>
         restaurantsJsValue.flatMap { restaurant =>
           restaurant.validate[RestaurantSnapshot] match {

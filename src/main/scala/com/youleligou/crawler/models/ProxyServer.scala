@@ -2,6 +2,7 @@ package com.youleligou.crawler.models
 
 import java.sql.Timestamp
 import java.text.SimpleDateFormat
+import java.time.Instant
 
 import org.joda.time.DateTime
 import play.api.libs.json._
@@ -20,8 +21,7 @@ case class ProxyServer(
     reactTime: Option[Float] = None,
     isLive: Boolean = false,
     checkCount: Int = 0,
-    lastVerifiedAt: Option[DateTime] = None,
-    createdAt: DateTime = DateTime.now()
+    lastVerifiedAt: Option[Timestamp] = None
 )
 
 object ProxyServer {

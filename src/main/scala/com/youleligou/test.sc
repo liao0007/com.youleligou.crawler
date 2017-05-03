@@ -1,3 +1,4 @@
+import org.apache.spark.serializer.KryoSerializer
 import org.joda.time.LocalDate
 
-LocalDate.now()
+classOf[KryoSerializer].getName

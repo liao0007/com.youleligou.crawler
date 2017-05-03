@@ -1,5 +1,9 @@
 package com.youleligou.eleme.daos
 
+import java.sql.Timestamp
+import java.time.Instant
+import java.util.Date
+
 import com.youleligou.eleme.models.RestaurantSnapshot
 import org.joda.time.{DateTime, LocalDate}
 
@@ -24,8 +28,8 @@ case class RestaurantSnapshotDao(
     licensesNumber: Option[String],
     companyName: Option[String],
     status: Int,
-    createdDate: LocalDate = LocalDate.now(),
-    createdAt: DateTime = DateTime.now()
+    createdDate: Date = LocalDate.now().toDate,
+    createdAt: Timestamp = new Timestamp(DateTime.now().getMillis)
 )
 
 object RestaurantSnapshotDao {
@@ -52,5 +56,6 @@ object RestaurantSnapshotDao {
     status = model.status
   )
 
-  implicit def convertSeq(source: Seq[RestaurantSnapshot])(implicit converter: RestaurantSnapshot => RestaurantSnapshotDao): Seq[RestaurantSnapshotDao] = source map converter
+  implicit def convertSeq(source: Seq[RestaurantSnapshot])(
+      implicit converter: RestaurantSnapshot => RestaurantSnapshotDao): Seq[RestaurantSnapshotDao] = source map converter
 }

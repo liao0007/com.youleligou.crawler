@@ -17,7 +17,3 @@ trait IndexService extends LazyLogging {
     */
   def index(page: ParseResult): Unit
 }
-
-object IndexService {
-
-}

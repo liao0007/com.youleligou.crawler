@@ -1,9 +1,10 @@
 package com.youleligou.crawler.models
 
+import java.sql.Timestamp
+import java.time.Instant
 import java.util.UUID
 
 import com.youleligou.crawler.models.Job.FetchJobType
-import org.joda.time.DateTime
 
 /**
   * Created by liangliao on 25/4/17.
@@ -14,10 +15,9 @@ case class Job(
     jobName: String,
     url: String,
     useProxy: Boolean = false,
-    createdAt: DateTime = DateTime.now(),
-    completedAt: Option[DateTime] = None,
     statusCode: Option[Int] = None,
-    statusMessage: Option[String] = None
+    statusMessage: Option[String] = None,
+    completedAt: Option[Timestamp] = None
 )
 
 object Job {

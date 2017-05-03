@@ -15,6 +15,4 @@ import scala.concurrent.ExecutionContext.Implicits.global
 class RestaurantSnapshotRepo @Inject()(val sparkContext: SparkContext) extends CassandraRepo[RestaurantSnapshotDao] {
   val keyspace: String = "eleme"
   val table: String    = "restaurant_snapshots"
-
-  def allIds(): Seq[Long] = sparkContext.cassandraTable[Long](keyspace, table).select("id").collect().toSeq
 }
