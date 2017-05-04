@@ -11,9 +11,10 @@ import com.youleligou.core.reps.ElasticSearchRepo
 import com.youleligou.crawler.actors.Injector
 import com.youleligou.crawler.actors.Injector.{CacheCleared, ClearCache, Tick}
 import com.youleligou.crawler.models.{FetchRequest, UrlInfo}
-import com.youleligou.eleme.daos.RestaurantSearchDao
+import com.youleligou.eleme.daos.RestaurantSearch
 import com.youleligou.eleme.models.Restaurant
 import com.youleligou.eleme.repos.cassandra.RestaurantRepo
+import org.apache.spark.SparkContext
 import redis.RedisClient
 
 import scala.concurrent.duration._
@@ -26,7 +27,8 @@ class ElemeCrawlerBootstrap @Inject()(config: Config,
                                       system: ActorSystem,
                                       redisClient: RedisClient,
                                       restaurantRepo: RestaurantRepo,
-                                      restaurantEsRepo: ElasticSearchRepo[RestaurantSearchDao],
+                                      restaurantEsRepo: ElasticSearchRepo[RestaurantSearch],
+                                      sparkContext: SparkContext,
                                       @Named(Injector.PoolName) injectors: ActorRef)
     extends LazyLogging {
 
@@ -38,7 +40,7 @@ class ElemeCrawlerBootstrap @Inject()(config: Config,
   /**
     * 爬虫启动函数
     */
-  def cleanRestaurant(): Unit = {
+  def cleanRestaurants(): Unit = {
     val restaurantsJobType = restaurantsJobConfig.getString("jobType")
     implicit val timeout   = Timeout(10.minutes)
     injectors ? ClearCache(restaurantsJobType) map {
@@ -47,7 +49,7 @@ class ElemeCrawlerBootstrap @Inject()(config: Config,
     }
   }
 
-  def startRestaurant(): Unit = {
+  def startRestaurants(): Unit = {
     val restaurantsJobType = restaurantsJobConfig.getString("jobType")
     import com.github.andr83.scalaconfig._
     val seeds = restaurantsJobConfig.as[Seq[UrlInfo]]("seed")
@@ -61,10 +63,10 @@ class ElemeCrawlerBootstrap @Inject()(config: Config,
     system.scheduler.schedule(60.seconds, FiniteDuration(restaurantsJobConfig.getInt("interval"), MILLISECONDS), injectors, Tick(restaurantsJobType))
   }
 
-  def indexRestaurant(): Unit = {
+  def indexRestaurants(): Unit = {
     restaurantRepo.all() flatMap { restaurantDaos =>
-      val restaurants: Seq[Restaurant]                   = restaurantDaos
-      val restaurantSearchDaos: Seq[RestaurantSearchDao] = restaurants
+      val restaurants: Seq[Restaurant]                = restaurantDaos
+      val restaurantSearchDaos: Seq[RestaurantSearch] = restaurants
       restaurantEsRepo.save(restaurantSearchDaos)
     }
   }
@@ -85,7 +87,8 @@ class ElemeCrawlerBootstrap @Inject()(config: Config,
       injectors ! Injector.Inject(
         FetchRequest(
           urlInfo = UrlInfo(
-            domain = s"http://mainsite-restapi.ele.me/shopping/v2/menu?restaurant_id=$id",
+            domain = "http://mainsite-restapi.ele.me",
+            path = s"/shopping/v2/menu?restaurant_id=$id",
             jobType = menuJobType,
             services = Map(
               "ParseService" -> "com.youleligou.eleme.services.menu.ParseService"

@@ -9,7 +9,7 @@ import play.api.libs.json.Json
   * @param domain domain
   */
 case class UrlInfo(domain: String,
-                   path: String = "",
+                   path: String,
                    queryParameters: Map[String, String] = Map.empty[String, String],
                    urlType: String = UrlInfoType.Generated,
                    jobType: String,

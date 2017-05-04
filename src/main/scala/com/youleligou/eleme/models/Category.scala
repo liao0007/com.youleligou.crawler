@@ -5,9 +5,9 @@ import play.api.libs.json.Reads._
 import play.api.libs.json.{JsPath, Reads}
 
 /**
-  * Created by liangliao on 3/5/17.
+  * Created by liangliao on 4/5/17.
   */
-case class MenuSnapshot(
+case class Category(
     id: Long,
     typ: Int,
     isActivity: Option[Boolean] = None,
@@ -15,11 +15,11 @@ case class MenuSnapshot(
     description: String,
     iconUrl: String,
     name: String,
-    foods: Seq[FoodSnapshot]
+    foods: Seq[Food]
 )
 
-object MenuSnapshot {
-  implicit val menuReads: Reads[MenuSnapshot] = (
+object Category {
+  implicit val categoryReads: Reads[Category] = (
     (JsPath \ "id").read[Long] and
       (JsPath \ "type").read[Int] and
       (JsPath \ "is_activity").readNullable[Boolean] and
@@ -27,6 +27,6 @@ object MenuSnapshot {
       (JsPath \ "description").read[String] and
       (JsPath \ "icon_url").read[String] and
       (JsPath \ "name").read[String] and
-      (JsPath \ "foods").read[Seq[FoodSnapshot]]
-  )(MenuSnapshot.apply _)
+      (JsPath \ "foods").read[Seq[Food]]
+  )(Category.apply _)
 }

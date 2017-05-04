@@ -32,16 +32,29 @@ object RestaurantDao {
 
   implicit def toModel(dao: RestaurantDao): Restaurant = Restaurant(
     id = dao.id,
-    name = dao.name,
     address = dao.address,
+    averageCost = None,
+    description = "",
+    deliveryFee = 0,
+    minimumOrderAmount = 0,
     imagePath = dao.imagePath,
+    isNew = false,
+    isPremium = false,
     latitude = dao.latitude,
     longitude = dao.longitude,
-    identification = Some(Identification(dao.licensesNumber, dao.companyName))
+    name = dao.name,
+    phone = None,
+    promotionInfo = "",
+    rating = 0,
+    ratingCount = 0,
+    recentOrderNum = 0,
+    identification = Some(Identification(dao.licensesNumber, dao.companyName)),
+    status = 0
   )
 
   implicit def convertDaoSeq(source: Seq[Restaurant])(implicit converter: Restaurant => RestaurantDao): Seq[RestaurantDao] =
     source map converter
+
   implicit def convertToModelSeq(source: Seq[RestaurantDao])(implicit converter: RestaurantDao => Restaurant): Seq[Restaurant] =
     source map converter
 }

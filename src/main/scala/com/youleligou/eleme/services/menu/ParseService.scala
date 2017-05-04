@@ -1,34 +1,55 @@
 package com.youleligou.eleme.services.menu
 
 import com.google.inject.Inject
-import com.youleligou.core.reps.CassandraRepo
+import com.youleligou.core.reps.{CassandraRepo, ElasticSearchRepo}
 import com.youleligou.crawler.models.{FetchResponse, ParseResult, UrlInfo}
-import com.youleligou.eleme.daos.FoodSnapshotDao
-import com.youleligou.eleme.models.{FoodSnapshot, MenuSnapshot}
+import com.youleligou.eleme.daos.{FoodSnapshotDao, FoodSnapshotSearch}
+import com.youleligou.eleme.models.{Category, Restaurant}
+import com.youleligou.eleme.repos.cassandra.RestaurantRepo
 import play.api.libs.json._
 
-class ParseService @Inject()(foodSnapshotRepo: CassandraRepo[FoodSnapshotDao]) extends com.youleligou.crawler.services.ParseService {
+import scala.util.control.NonFatal
 
-  private def persist(foodSnapshotDaos: Seq[FoodSnapshotDao]) = foodSnapshotRepo.save(foodSnapshotDaos)
+class ParseService @Inject()(restaurantRepo: RestaurantRepo,
+                             foodSnapshotRepo: CassandraRepo[FoodSnapshotDao],
+                             foodSnapshotSearchRepo: ElasticSearchRepo[FoodSnapshotSearch])
+    extends com.youleligou.crawler.services.ParseService {
+
+  private def persist(categories: Seq[Category], fetchResponse: FetchResponse) = {
+    foodSnapshotRepo.save(categories.flatMap(_.foods))
+
+    try {
+      val pattern               = """.*restaurant_id=(\d*)""".r
+      val pattern(restaurantId) = fetchResponse.fetchRequest.urlInfo.path
+
+      restaurantRepo.findById(restaurantId.toLong) map { restaurantDao =>
+        implicit val restaurantModel: Restaurant = restaurantDao
+        val foodSearches: Seq[FoodSnapshotSearch] = categories flatMap { implicit category =>
+          val foods: Seq[FoodSnapshotSearch] = category.foods
+          foods
+        }
+        foodSnapshotSearchRepo.save(foodSearches)
+      }
+    } catch {
+      case NonFatal(x) =>
+        logger.warn("{} {}", this.getClass, x.getMessage)
+    }
+
+  }
 
   /**
     * 解析具体实现
     */
   override def parse(fetchResponse: FetchResponse): ParseResult = {
-    val menuSnapshots: Seq[MenuSnapshot] = Json.parse(fetchResponse.content) match {
+    val categories: Seq[Category] = Json.parse(fetchResponse.content) match {
       case JsArray(value) =>
         value flatMap { item =>
-          item.validate[MenuSnapshot].asOpt
+          item.validate[Category].asOpt
         }
-      case _ => Seq.empty[MenuSnapshot]
+      case _ => Seq.empty[Category]
     }
 
-    val foodSnapshotDaos: Seq[FoodSnapshotDao] = menuSnapshots flatMap { implicit menuSnapshot =>
-      val foodSnapshotDaos: Seq[FoodSnapshotDao] = menuSnapshot.foods
-      foodSnapshotDaos
-    }
-
-    persist(foodSnapshotDaos)
+    persist(categories, fetchResponse)
 
     ParseResult(
       fetchResponse = fetchResponse,

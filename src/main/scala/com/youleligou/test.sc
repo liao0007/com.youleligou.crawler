@@ -1,3 +1,6 @@
-import org.apache.spark.serializer.KryoSerializer
 
-classOf[KryoSerializer].getName
+
+
+
+val pattern = """.*restaurant_id=(\d*)""".r
+val pattern(nu) = "123restaurant_id=123"

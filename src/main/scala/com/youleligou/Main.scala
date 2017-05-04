@@ -28,13 +28,13 @@ object Main extends App {
   restaurant
    */
   if (args.contains("eleme/restaurants/start"))
-    injector.instance[ElemeCrawlerBootstrap].startRestaurant()
+    injector.instance[ElemeCrawlerBootstrap].startRestaurants()
 
   if (args.contains("eleme/restaurants/clean"))
-    injector.instance[ElemeCrawlerBootstrap].cleanRestaurant()
+    injector.instance[ElemeCrawlerBootstrap].cleanRestaurants()
 
   if (args.contains("eleme/restaurants/index"))
-    injector.instance[ElemeCrawlerBootstrap].indexRestaurant()
+    injector.instance[ElemeCrawlerBootstrap].indexRestaurants()
 
   /*
   menu

@@ -13,5 +13,6 @@ class RestaurantRepo @Inject()(val sparkContext: SparkContext) extends Cassandra
   val keyspace: String = "eleme"
   val table: String    = "restaurants"
 
-  def allIds(): Seq[Long] = sparkContext.cassandraTable[Long](keyspace, table).select("id").collect().toSeq
+  def findById(id: Long): Option[RestaurantDao] = sparkContext.cassandraTable[RestaurantDao](keyspace, table).filter(_.id == id).collect().headOption
+  def allIds(): Seq[Long]                       = sparkContext.cassandraTable[Long](keyspace, table).select("id").collect().toSeq
 }

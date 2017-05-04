@@ -1,16 +1,14 @@
 package com.youleligou.eleme.daos
 
-import java.sql.{Date, Timestamp}
+import java.sql.Timestamp
 import java.time.{LocalDate, LocalDateTime}
-import java.util.Date
 
-import com.youleligou.eleme.models.{FoodSnapshot, MenuSnapshot}
+import com.youleligou.eleme.models.Food
 
 case class FoodSnapshotDao(
     itemId: Long,
     restaurantId: Long,
     categoryId: Long,
-    categoryName: String,
     name: String,
     description: String,
     monthSales: Int,
@@ -24,11 +22,10 @@ case class FoodSnapshotDao(
 
 object FoodSnapshotDao {
 
-  implicit def fromModel(model: FoodSnapshot)(implicit menuModel: MenuSnapshot): FoodSnapshotDao = FoodSnapshotDao(
+  implicit def fromModel(model: Food): FoodSnapshotDao = FoodSnapshotDao(
     itemId = model.itemId,
     restaurantId = model.restaurantId,
     categoryId = model.categoryId,
-    categoryName = menuModel.name,
     name = model.name,
     description = model.description,
     monthSales = model.monthSales,
@@ -38,7 +35,7 @@ object FoodSnapshotDao {
     satisfyRate = model.satisfyRate
   )
 
-  implicit def convertSeq(source: Seq[FoodSnapshot])(implicit converter: FoodSnapshot => FoodSnapshotDao): Seq[FoodSnapshotDao] =
+  implicit def convertSeq(source: Seq[Food])(implicit converter: Food => FoodSnapshotDao): Seq[FoodSnapshotDao] =
     source map converter
 
 }
