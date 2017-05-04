@@ -39,6 +39,7 @@ object Main extends App {
   /*
   menu
    */
+  injector.instance[ElemeCrawlerBootstrap].startMenu()
   if (args.contains("eleme/menu/start"))
     injector.instance[ElemeCrawlerBootstrap].startMenu()
 

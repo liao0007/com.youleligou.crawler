@@ -1,51 +1,9 @@
 package com.youleligou.eleme.daos
 
-import java.sql.Timestamp
+import java.sql.{Date, Timestamp}
 import java.time.{LocalDate, LocalDateTime}
 
 import com.youleligou.eleme.models.{Category, Food, Restaurant}
-
-/*
-class for elastic search
-
-PUT eleme
-{
-    "settings" : {
-        "number_of_shards" : 3
-    },
-    "mappings": {
-      "restaurant": {
-        "properties": {
-          "address": {
-            "type": "text",
-            "fields": {
-              "keyword": {
-                "type": "keyword",
-                "ignore_above": 256
-              }
-            }
-          },
-          "id": {
-            "type": "long"
-          },
-          "location": {
-            "type": "geo_point"
-          },
-          "name": {
-            "type": "text",
-            "fields": {
-              "keyword": {
-                "type": "keyword",
-                "ignore_above": 256
-              }
-            }
-          }
-        }
-      }
-    }
-}
-
- */
 
 case class CategorySearch(
     id: Long,
@@ -87,6 +45,7 @@ object CategorySearch {
 }
 
 case class FoodSnapshotSearch(
+    id: String,
     itemId: Long,
     name: String,
     restaurant: RestaurantSearch,
@@ -99,12 +58,13 @@ case class FoodSnapshotSearch(
     satisfyRate: Float,
     createdDate: java.sql.Date = java.sql.Date.valueOf(LocalDate.now()),
     createdAt: java.util.Date = Timestamp.valueOf(LocalDateTime.now())
-) {
-  def id = s"$itemId - ${createdDate.toString}"
-}
+)
 
 object FoodSnapshotSearch {
+  val createdDate: Date = java.sql.Date.valueOf(LocalDate.now())
+
   implicit def fromModel(model: Food)(implicit restaurantModel: Restaurant, categoryModel: Category): FoodSnapshotSearch = FoodSnapshotSearch(
+    id = s"${model.itemId}-$createdDate",
     itemId = model.itemId,
     name = model.name,
     restaurant = restaurantModel,
@@ -114,7 +74,8 @@ object FoodSnapshotSearch {
     rating = model.rating,
     ratingCount = model.ratingCount,
     satisfyCount = model.satisfyCount,
-    satisfyRate = model.satisfyRate
+    satisfyRate = model.satisfyRate,
+    createdDate = createdDate
   )
 
   implicit def toModel(dao: FoodSnapshotSearch): Food = Food(

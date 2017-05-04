@@ -14,8 +14,8 @@ import scala.util.control.NonFatal
   * Created by liangliao on 25/4/17.
   */
 class FoodSnapshotRepo @Inject()(val sparkContext: SparkContext) extends ElasticSearchRepo[FoodSnapshotSearch] {
-  override val index: String = "eleme"
-  override val typ: String   = "food_snapshot"
+  override val index: String = "eleme-food"
+  override val typ: String   = "snapshot"
 
   override def save(records: Seq[FoodSnapshotSearch]): Future[Any] =
     Future {

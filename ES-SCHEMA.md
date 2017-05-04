@@ -1,10 +1,72 @@
 ```
-PUT eleme
+PUT eleme-restaurant
 {
-  "eleme": {
-    "aliases": {},
-    "mappings": {
-      "food_snapshot": {
+  "mappings": {
+      "latest": {
+        "properties": {
+          "address": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            }
+          },
+          "id": {
+            "type": "long"
+          },
+          "identification": {
+            "properties": {
+              "companyName": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "type": "keyword",
+                    "ignore_above": 256
+                  }
+                }
+              },
+              "licensesNumber": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "type": "keyword",
+                    "ignore_above": 256
+                  }
+                }
+              }
+            }
+          },
+          "location": {
+            "type": "geo_point"
+          },
+          "name": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            }
+          }
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_shards": "3",
+        "number_of_replicas": "1"
+      }
+    }
+}
+```
+
+```
+PUT eleme-food
+{
+  "mappings": {
+      "snapshot": {
         "properties": {
           "category": {
             "properties": {
@@ -63,6 +125,9 @@ PUT eleme
                 "ignore_above": 256
               }
             }
+          },
+          "id": {
+            "type": "text"
           },
           "itemId": {
             "type": "long"
@@ -142,70 +207,13 @@ PUT eleme
             "type": "float"
           }
         }
-      },
-      "restaurant": {
-        "properties": {
-          "address": {
-            "type": "text",
-            "fields": {
-              "keyword": {
-                "type": "keyword",
-                "ignore_above": 256
-              }
-            }
-          },
-          "id": {
-            "type": "long"
-          },
-          "identification": {
-            "properties": {
-              "companyName": {
-                "type": "text",
-                "fields": {
-                  "keyword": {
-                    "type": "keyword",
-                    "ignore_above": 256
-                  }
-                }
-              },
-              "licensesNumber": {
-                "type": "text",
-                "fields": {
-                  "keyword": {
-                    "type": "keyword",
-                    "ignore_above": 256
-                  }
-                }
-              }
-            }
-          },
-          "location": {
-            "type": "geo_point"
-          },
-          "name": {
-            "type": "text",
-            "fields": {
-              "keyword": {
-                "type": "keyword",
-                "ignore_above": 256
-              }
-            }
-          }
-        }
       }
     },
     "settings": {
       "index": {
-        "creation_date": "1493883793324",
         "number_of_shards": "3",
-        "number_of_replicas": "1",
-        "uuid": "whOgEqEfQhq7RtNxupT2tg",
-        "version": {
-          "created": "5030199"
-        },
-        "provided_name": "eleme"
+        "number_of_replicas": "1"
       }
     }
-  }
 }
 ```
