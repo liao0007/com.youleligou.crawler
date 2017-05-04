@@ -1,6 +1,7 @@
 package com.youleligou.core.reps
 
 import com.datastax.spark.connector._
+import com.datastax.spark.connector.rdd.{CassandraRDD, CassandraTableScanRDD}
 import org.apache.spark.SparkContext
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -29,6 +30,15 @@ abstract class CassandraRepo[T <: Serializable](implicit classTag: ClassTag[T], 
     } recover {
       case NonFatal(x) =>
         logger.warn("{} {}", this.getClass, x.getMessage)
+    }
+
+  def allRdd(): Future[CassandraRDD[T]] =
+    Future {
+      sparkContext.cassandraTable[T](keyspace, table)
+    } recover {
+      case NonFatal(x) =>
+        logger.warn("{} {}", this.getClass, x.getMessage)
+        sparkContext.emptyCassandraTable[T](keyspace, table)
     }
 
   def all(): Future[Seq[T]] =

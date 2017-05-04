@@ -2,8 +2,9 @@ package com.youleligou.eleme.repos.elasticsearch
 
 import com.google.inject.Inject
 import com.youleligou.core.reps.ElasticSearchRepo
-import com.youleligou.eleme.daos.FoodSnapshotSearch
+import com.youleligou.eleme.daos.{FoodSnapshotSearch, RestaurantSearch}
 import org.apache.spark.SparkContext
+import org.apache.spark.rdd.RDD
 import org.elasticsearch.spark.rdd.EsSpark
 
 import scala.concurrent.ExecutionContext.Implicits._
@@ -17,9 +18,8 @@ class FoodSnapshotRepo @Inject()(val sparkContext: SparkContext) extends Elastic
   override val index: String = "eleme-food"
   override val typ: String   = "snapshot"
 
-  override def save(records: Seq[FoodSnapshotSearch]): Future[Any] =
+  override def save(rdd: RDD[FoodSnapshotSearch]): Future[Any] =
     Future {
-      val rdd = sparkContext.makeRDD(records)
       EsSpark.saveToEs(rdd, s"$index/$typ", Map("es.mapping.id" -> "id"))
     } recover {
       case NonFatal(x) =>

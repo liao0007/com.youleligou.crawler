@@ -1,6 +1,7 @@
 package com.youleligou.core.reps
 
 import org.apache.spark.SparkContext
+import org.apache.spark.rdd.RDD
 import org.elasticsearch.spark.rdd.EsSpark
 
 import scala.concurrent.ExecutionContext.Implicits._
@@ -20,18 +21,20 @@ abstract class ElasticSearchRepo[T](implicit classTag: ClassTag[T], typeTag: Typ
   override val schema: String = index
   override val table: String  = typ
 
-  def save(record: T): Future[Any] = Future {
-    save(Seq(record))
-  }
-
-  def save(records: Seq[T]): Future[Any] =
+  def save(rdd: RDD[T]): Future[Any] =
     Future {
-      val rdd = sparkContext.makeRDD(records)
       EsSpark.saveToEs(rdd, s"$index/$typ")
     } recover {
       case NonFatal(x) =>
         logger.warn("{} {}", this.getClass, x.getMessage)
     }
+
+  def save(records: Seq[T]): Future[Any] = {
+    val rdd = sparkContext.makeRDD(records)
+    save(rdd)
+  }
+
+  def save(record: T): Future[Any] = save(Seq(record))
 
   def all(): Future[Seq[T]] = ???
 

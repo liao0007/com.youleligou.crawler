@@ -3,7 +3,7 @@ package com.youleligou.eleme.daos
 import java.sql.Timestamp
 import java.time.{LocalDate, LocalDateTime}
 
-import com.youleligou.eleme.models.Food
+import com.youleligou.eleme.models.{Food, Identification, Restaurant}
 
 case class FoodSnapshotDao(
     itemId: Long,
@@ -35,7 +35,23 @@ object FoodSnapshotDao {
     satisfyRate = model.satisfyRate
   )
 
+  implicit def toModel(dao: FoodSnapshotDao): Food = Food(
+    itemId = dao.itemId,
+    restaurantId = dao.restaurantId,
+    categoryId = dao.categoryId,
+    name = dao.name,
+    description = dao.description,
+    monthSales = dao.monthSales,
+    rating = dao.rating,
+    ratingCount = dao.ratingCount,
+    satisfyCount = dao.satisfyCount,
+    satisfyRate = dao.satisfyRate
+  )
+
   implicit def convertSeq(source: Seq[Food])(implicit converter: Food => FoodSnapshotDao): Seq[FoodSnapshotDao] =
+    source map converter
+
+  implicit def convertToModelSeq(source: Seq[FoodSnapshotDao])(implicit converter: FoodSnapshotDao => Food): Seq[Food] =
     source map converter
 
 }

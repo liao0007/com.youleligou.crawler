@@ -3,7 +3,7 @@ package com.youleligou.eleme.services.menu
 import com.google.inject.Inject
 import com.youleligou.core.reps.{CassandraRepo, ElasticSearchRepo}
 import com.youleligou.crawler.models.{FetchResponse, ParseResult, UrlInfo}
-import com.youleligou.eleme.daos.{FoodSnapshotDao, FoodSnapshotSearch}
+import com.youleligou.eleme.daos.{CategoryDao, FoodSnapshotDao, FoodSnapshotSearch}
 import com.youleligou.eleme.models.{Category, Restaurant}
 import com.youleligou.eleme.repos.cassandra.RestaurantRepo
 import play.api.libs.json._
@@ -11,11 +11,13 @@ import play.api.libs.json._
 import scala.util.control.NonFatal
 
 class ParseService @Inject()(restaurantRepo: RestaurantRepo,
+                             categoryRepo: CassandraRepo[CategoryDao],
                              foodSnapshotRepo: CassandraRepo[FoodSnapshotDao],
                              foodSnapshotSearchRepo: ElasticSearchRepo[FoodSnapshotSearch])
     extends com.youleligou.crawler.services.ParseService {
 
   private def persist(categories: Seq[Category], fetchResponse: FetchResponse) = {
+    categoryRepo.save(categories)
     foodSnapshotRepo.save(categories.flatMap(_.foods))
 
     try {
