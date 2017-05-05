@@ -14,5 +14,6 @@ class CategoryRepo @Inject()(val sparkContext: SparkContext) extends CassandraRe
   val keyspace: String = "eleme"
   val table: String    = "categories"
 
+  def findById(id: Long): Option[CategoryDao] = sparkContext.cassandraTable[CategoryDao](keyspace, table).filter(_.id == id).collect().headOption
   def rddFindById(id: Long): RDD[CategoryDao] = sparkContext.cassandraTable[CategoryDao](keyspace, table).filter(_.id == id)
 }

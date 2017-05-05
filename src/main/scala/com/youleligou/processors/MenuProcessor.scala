@@ -1,12 +1,10 @@
 package com.youleligou.processors
 
 import com.datastax.spark.connector._
-import com.datastax.spark.connector.rdd.CassandraRDD
 import com.google.inject.Inject
 import com.youleligou.eleme.daos.{CategoryDao, FoodSnapshotDao, FoodSnapshotSearch, RestaurantDao}
 import com.youleligou.eleme.models.{Category, Food, Restaurant}
 import org.apache.spark.SparkContext
-import org.apache.spark.rdd.RDD
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -20,23 +18,25 @@ class MenuProcessor @Inject()(sparkContext: SparkContext,
                               categoryRepo: com.youleligou.eleme.repos.cassandra.CategoryRepo,
                               foodSnapshotSearchRepo: com.youleligou.eleme.repos.elasticsearch.FoodSnapshotRepo) {
 
-  def reindex(): Future[Unit] = {
-    restaurantRepo.rddAll() map { (restaurantDaoRdd: CassandraRDD[RestaurantDao]) =>
-      restaurantDaoRdd map { (restaurantDao: RestaurantDao) =>
+  def reindex(): Future[Seq[Option[Future[Any]]]] = {
+    restaurantRepo.all() map { (restaurantDao: Seq[RestaurantDao]) =>
+      restaurantDao flatMap { (restaurantDao: RestaurantDao) =>
         implicit val restaurant: Restaurant = restaurantDao
-        foodSnapshotRepo.rddFindByRestaurantId(restaurantDao.id) groupBy (_.categoryId) map {
+        foodSnapshotRepo.findByRestaurantId(restaurantDao.id) groupBy (_.categoryId) map {
           case (categoryId, foodSnapshotDaos) =>
-            val foodSnapshotSearchRdd: RDD[FoodSnapshotSearch] = categoryRepo.rddFindById(categoryId) flatMap { (categoryDao: CategoryDao) =>
+            categoryRepo.findById(categoryId) map { (categoryDao: CategoryDao) =>
               implicit val category: Category = categoryDao
               foodSnapshotDaos map { (foodSnapshotDao: FoodSnapshotDao) =>
                 val food: Food                             = foodSnapshotDao
                 val foodSnapshotSearch: FoodSnapshotSearch = food
                 foodSnapshotSearch
               }
+            } map {
+              foodSnapshotSearchRepo.save(_)
             }
-            foodSnapshotSearchRepo.save(foodSnapshotSearchRdd)
         }
       }
+
     }
   }
 
