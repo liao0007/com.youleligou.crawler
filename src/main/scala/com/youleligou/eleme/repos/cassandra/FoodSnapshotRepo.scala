@@ -15,8 +15,8 @@ class FoodSnapshotRepo @Inject()(val sparkContext: SparkContext) extends Cassand
   val table: String    = "food_snapshots"
 
   def findByRestaurantId(id: Long): Array[FoodSnapshotDao] =
-    sparkContext.cassandraTable[FoodSnapshotDao](keyspace, table).filter(_.restaurantId == id).collect()
+    sparkContext.cassandraTable[FoodSnapshotDao](keyspace, table).where("restaurantId = ?", id).collect()
 
   def rddFindByRestaurantId(id: Long): RDD[FoodSnapshotDao] =
-    sparkContext.cassandraTable[FoodSnapshotDao](keyspace, table).filter(_.restaurantId == id)
+    sparkContext.cassandraTable[FoodSnapshotDao](keyspace, table).where("restaurantId = ?", id)
 }
