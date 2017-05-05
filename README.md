@@ -47,8 +47,9 @@ firewall-cmd --reload
 
 # config elastic search
 ```
+echo '
+vm.max_map_count=262144' >> /etc/sysctl.conf
 sysctl -w vm.max_map_count=262144
-
 docker run --restart=always -p 9200:9200 -p 9300:9300 --name elas -e network.publish_host=192.168.1.34 -e discovery.zen.ping.unicast.hosts=192.168.1.32,192.168.1.33,192.168.1.34 -e cluster.name=yolo-es-cluster -d docker.elastic.co/elasticsearch/elasticsearch:5.3.1
 docker run --restart=always -p 5601:5601 --name kibana -e ELASTICSEARCH_URL=http://192.168.1.32:9200 -d docker.elastic.co/kibana/kibana:5.3.1
 firewall-cmd --zone=public --add-port=9200/tcp --permanent

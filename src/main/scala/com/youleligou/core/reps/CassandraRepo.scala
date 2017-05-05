@@ -32,7 +32,7 @@ abstract class CassandraRepo[T <: Serializable](implicit classTag: ClassTag[T], 
         logger.warn("{} {}", this.getClass, x.getMessage)
     }
 
-  def allRdd(): Future[CassandraRDD[T]] =
+  def rddAll(): Future[CassandraRDD[T]] =
     Future {
       sparkContext.cassandraTable[T](keyspace, table)
     } recover {

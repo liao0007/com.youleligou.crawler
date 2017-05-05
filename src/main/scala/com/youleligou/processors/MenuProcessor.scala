@@ -3,9 +3,10 @@ package com.youleligou.processors
 import com.datastax.spark.connector._
 import com.datastax.spark.connector.rdd.CassandraRDD
 import com.google.inject.Inject
-import com.youleligou.eleme.daos.{FoodSnapshotDao, FoodSnapshotSearch}
+import com.youleligou.eleme.daos.{CategoryDao, FoodSnapshotDao, FoodSnapshotSearch, RestaurantDao}
 import com.youleligou.eleme.models.{Category, Food, Restaurant}
 import org.apache.spark.SparkContext
+import org.apache.spark.rdd.RDD
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -19,21 +20,25 @@ class MenuProcessor @Inject()(sparkContext: SparkContext,
                               categoryRepo: com.youleligou.eleme.repos.cassandra.CategoryRepo,
                               foodSnapshotSearchRepo: com.youleligou.eleme.repos.elasticsearch.FoodSnapshotRepo) {
 
-  def reindex(): Future[Unit] =
-    foodSnapshotRepo.allRdd().map { (foodSnapshotDaoRdd: CassandraRDD[FoodSnapshotDao]) =>
-      val foodSnapshotSearchRdd = foodSnapshotDaoRdd.flatMap { (foodSnapshotDao: FoodSnapshotDao) =>
-        val food: Food = foodSnapshotDao
-        restaurantRepo.findById(food.restaurantId) flatMap { restaurantDao =>
-          implicit val restaurant: Restaurant = restaurantDao
-          categoryRepo.findById(food.categoryId) map { categoryDao =>
-            implicit val category: Category            = categoryDao
-            val foodSnapshotSearch: FoodSnapshotSearch = food
-            foodSnapshotSearch
-          }
+  def reindex(): Future[Unit] = {
+    restaurantRepo.rddAll() map { (restaurantDaoRdd: CassandraRDD[RestaurantDao]) =>
+      restaurantDaoRdd map { (restaurantDao: RestaurantDao) =>
+        implicit val restaurant: Restaurant = restaurantDao
+        foodSnapshotRepo.rddFindByRestaurantId(restaurantDao.id) groupBy (_.categoryId) map {
+          case (categoryId, foodSnapshotDaos) =>
+            val foodSnapshotSearchRdd: RDD[FoodSnapshotSearch] = categoryRepo.rddFindById(categoryId) flatMap { (categoryDao: CategoryDao) =>
+              implicit val category: Category = categoryDao
+              foodSnapshotDaos map { (foodSnapshotDao: FoodSnapshotDao) =>
+                val food: Food                             = foodSnapshotDao
+                val foodSnapshotSearch: FoodSnapshotSearch = food
+                foodSnapshotSearch
+              }
+            }
+            foodSnapshotSearchRepo.save(foodSnapshotSearchRdd)
         }
       }
-      foodSnapshotSearchRepo.save(foodSnapshotSearchRdd)
     }
+  }
 
   def run(): Unit = {
 

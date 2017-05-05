@@ -18,7 +18,7 @@ class RestaurantProcessor @Inject()(sparkContext: SparkContext,
                                     restaurantSearchRepo: com.youleligou.eleme.repos.elasticsearch.RestaurantRepo) {
 
   def reindex(): Future[Any] = {
-    restaurantRepo.allRdd().flatMap { (restaurantDaoRdd: CassandraRDD[RestaurantDao]) =>
+    restaurantRepo.rddAll().flatMap { (restaurantDaoRdd: CassandraRDD[RestaurantDao]) =>
       val restaurantSearchRdd = restaurantDaoRdd.map { (restaurantDao: RestaurantDao) =>
         val restaurant: Restaurant             = restaurantDao
         val restaurantSearch: RestaurantSearch = restaurant
