@@ -4,7 +4,7 @@ import com.google.inject.Guice
 import com.youleligou.crawler.CrawlerModule
 import com.youleligou.crawler.modules.{ActorModule, AkkaModule, ConfigModule, ServiceModule}
 import com.youleligou.eleme.ElemeModule
-import com.youleligou.processors.{FoodProcessor, RestaurantProcessor}
+import com.youleligou.processors.{MenuProcessor, RestaurantProcessor}
 import com.youleligou.proxyHunters.xicidaili.XiCiDaiLiModule
 import com.youleligou.proxyHunters.youdaili.YouDaiLiModule
 
@@ -45,6 +45,9 @@ object Main extends App {
 
   if (args.contains("eleme/menu/clean"))
     injector.instance[ElemeCrawlerBootstrap].cleanMenu()
+
+  if (args.contains("eleme/menu/reindex"))
+    injector.instance[MenuProcessor].reindex()
 
   /*
   proxy

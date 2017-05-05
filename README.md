@@ -36,7 +36,7 @@ chcon -Rt svirt_sandbox_file_t /var/data/cassandra
 docker run --restart=always -p 9042:9042 -p 9160:9160 -p 7000:7000 --name cassandra -v /var/data/cassandra:/var/lib/cassandra -d -e CASSANDRA_BROADCAST_ADDRESS=192.168.1.32 -e CASSANDRA_CLUSTER_NAME="YOLO CASSANDRA CLUSTER" cassandra
 
 //subsequent nodes
-docker run --restart=always -p 9042:9042 -p 9160:9160 -p 7000:7000 --name cassandra -v /var/data/cassandra:/var/lib/cassandra -d -e CASSANDRA_SEEDS=192.168.1.32 -e CASSANDRA_BROADCAST_ADDRESS=192.168.1.34 -e CASSANDRA_CLUSTER_NAME="YOLO CASSANDRA CLUSTER" cassandra
+docker run --restart=always -p 9042:9042 -p 9160:9160 -p 7000:7000 --name cassandra -v /var/data/cassandra:/var/lib/cassandra -d -e CASSANDRA_SEEDS=192.168.1.32 -e CASSANDRA_BROADCAST_ADDRESS=192.168.1.33 -e CASSANDRA_CLUSTER_NAME="YOLO CASSANDRA CLUSTER" cassandra
 
 //open ports for each node
 firewall-cmd --zone=public --add-port=9042/tcp --permanent
