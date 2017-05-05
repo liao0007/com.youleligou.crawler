@@ -19,6 +19,10 @@ case class RestaurantDao(
 )
 
 object RestaurantDao {
+
+  /*
+  model <-> dao
+   */
   implicit def fromModel(model: Restaurant): RestaurantDao = RestaurantDao(
     id = model.id,
     name = model.name,
@@ -29,6 +33,9 @@ object RestaurantDao {
     licensesNumber = model.identification.flatMap(_.licensesNumber),
     companyName = model.identification.flatMap(_.companyName)
   )
+
+  implicit def fromModel(source: Seq[Restaurant])(implicit converter: Restaurant => RestaurantDao): Seq[RestaurantDao] =
+    source map converter
 
   implicit def toModel(dao: RestaurantDao): Restaurant = Restaurant(
     id = dao.id,
@@ -52,9 +59,37 @@ object RestaurantDao {
     status = 0
   )
 
-  implicit def convertDaoSeq(source: Seq[Restaurant])(implicit converter: Restaurant => RestaurantDao): Seq[RestaurantDao] =
+  implicit def toModel(source: Seq[RestaurantDao])(implicit converter: RestaurantDao => Restaurant): Seq[Restaurant] =
     source map converter
 
-  implicit def convertToModelSeq(source: Seq[RestaurantDao])(implicit converter: RestaurantDao => Restaurant): Seq[Restaurant] =
+  /*
+  search <-> dao
+   */
+  implicit def fromSearch(search: RestaurantSearch): RestaurantDao = RestaurantDao(
+    id = search.id,
+    name = search.name,
+    address = search.address,
+    imagePath = search.imagePath,
+    latitude = search.latitude,
+    longitude = search.longitude,
+    licensesNumber = search.identification.flatMap(_.licensesNumber),
+    companyName = search.identification.flatMap(_.companyName)
+  )
+
+  implicit def fromSearch(source: Seq[RestaurantSearch])(implicit converter: RestaurantSearch => RestaurantDao): Seq[RestaurantDao] =
+    source map converter
+
+  implicit def toSearch(dao: RestaurantDao): RestaurantSearch = RestaurantSearch(
+    id = dao.id,
+    name = dao.name,
+    address = dao.address,
+    location = Map(
+      "lat" -> dao.latitude,
+      "lon" -> dao.longitude
+    ),
+    identification = Some(Identification(dao.licensesNumber, dao.companyName))
+  )
+
+  implicit def toSearch(source: Seq[RestaurantDao])(implicit converter: RestaurantDao => RestaurantSearch): Seq[RestaurantSearch] =
     source map converter
 }

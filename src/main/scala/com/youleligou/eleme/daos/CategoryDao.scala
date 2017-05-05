@@ -28,6 +28,9 @@ object CategoryDao {
     name = model.name
   )
 
+  implicit def fromModel(source: Seq[Category])(implicit converter: Category => CategoryDao): Seq[CategoryDao] =
+    source map converter
+
   implicit def toModel(dao: CategoryDao): Category = Category(
     id = dao.id,
     typ = dao.typ,
@@ -39,9 +42,6 @@ object CategoryDao {
     foods = Seq.empty[Food]
   )
 
-  implicit def convertDaoSeq(source: Seq[Category])(implicit converter: Category => CategoryDao): Seq[CategoryDao] =
-    source map converter
-
-  implicit def convertToModelSeq(source: Seq[CategoryDao])(implicit converter: CategoryDao => Category): Seq[Category] =
+  implicit def toModel(source: Seq[CategoryDao])(implicit converter: CategoryDao => Category): Seq[Category] =
     source map converter
 }

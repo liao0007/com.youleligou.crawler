@@ -22,6 +22,9 @@ object RestaurantSearch {
     identification = model.identification
   )
 
+  implicit def fromModel(source: Seq[Restaurant])(implicit converter: Restaurant => RestaurantSearch): Seq[RestaurantSearch] =
+    source map converter
+
   implicit def toModel(dao: RestaurantSearch): Restaurant = Restaurant(
     id = dao.id,
     address = dao.address,
@@ -44,9 +47,6 @@ object RestaurantSearch {
     status = 0
   )
 
-  implicit def convertDaoSeq(source: Seq[Restaurant])(implicit converter: Restaurant => RestaurantSearch): Seq[RestaurantSearch] =
-    source map converter
-
-  implicit def convertModelSeq(source: Seq[RestaurantSearch])(implicit converter: RestaurantSearch => Restaurant): Seq[Restaurant] =
+  implicit def toModel(source: Seq[RestaurantSearch])(implicit converter: RestaurantSearch => Restaurant): Seq[Restaurant] =
     source map converter
 }

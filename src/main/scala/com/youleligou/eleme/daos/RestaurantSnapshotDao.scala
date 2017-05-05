@@ -54,6 +54,6 @@ object RestaurantSnapshotDao {
     status = model.status
   )
 
-  implicit def convertSeq(source: Seq[Restaurant])(implicit converter: Restaurant => RestaurantSnapshotDao): Seq[RestaurantSnapshotDao] =
+  implicit def fromModel(source: Seq[Restaurant])(implicit converter: Restaurant => RestaurantSnapshotDao): Seq[RestaurantSnapshotDao] =
     source map converter
 }

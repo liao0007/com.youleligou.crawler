@@ -25,12 +25,9 @@ class MenuProcessor @Inject()(sparkContext: SparkContext,
         foodSnapshotRepo.findByRestaurantId(restaurantDao.id) groupBy (_.categoryId) map {
           case (categoryId, foodSnapshotDaos) =>
             categoryRepo.findById(categoryId) map { (categoryDao: CategoryDao) =>
-              implicit val category: Category = categoryDao
-              foodSnapshotDaos map { (foodSnapshotDao: FoodSnapshotDao) =>
-                val food: Food                             = foodSnapshotDao
-                val foodSnapshotSearch: FoodSnapshotSearch = food
-                foodSnapshotSearch
-              }
+              implicit val category: Category                 = categoryDao
+              val foodSnapshotSearch: Seq[FoodSnapshotSearch] = foodSnapshotDaos.toSeq
+              foodSnapshotSearch
             } map {
               foodSnapshotSearchRepo.save(_)
             }

@@ -24,7 +24,7 @@ class ParseService @Inject()(restaurantRepo: RestaurantRepo,
       val pattern               = """.*restaurant_id=(\d*)""".r
       val pattern(restaurantId) = fetchResponse.fetchRequest.urlInfo.path
 
-      restaurantRepo.rddFindById(restaurantId.toLong) map { restaurantDao =>
+      restaurantRepo.findById(restaurantId.toLong) foreach { restaurantDao =>
         implicit val restaurantModel: Restaurant = restaurantDao
         val foodSearches: Seq[FoodSnapshotSearch] = categories flatMap { implicit category =>
           val foods: Seq[FoodSnapshotSearch] = category.foods

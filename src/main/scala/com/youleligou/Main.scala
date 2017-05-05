@@ -45,7 +45,7 @@ object Main extends App {
 
   if (args.contains("eleme/menu/clean"))
     injector.instance[ElemeCrawlerBootstrap].cleanMenu()
-  injector.instance[MenuProcessor].reindex()
+
   if (args.contains("eleme/menu/reindex"))
     injector.instance[MenuProcessor].reindex()
 

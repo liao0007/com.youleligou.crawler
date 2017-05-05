@@ -38,5 +38,5 @@ object JobDao {
     completedAt = model.completedAt
   )
 
-  implicit def convertSeq(source: Seq[Job])(implicit converter: Job => JobDao): Seq[JobDao] = source map converter
+  implicit def fromModel(source: Seq[Job])(implicit converter: Job => JobDao): Seq[JobDao] = source map converter
 }

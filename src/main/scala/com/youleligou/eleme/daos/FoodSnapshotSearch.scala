@@ -63,6 +63,9 @@ case class FoodSnapshotSearch(
 object FoodSnapshotSearch {
   val createdDate: Date = java.sql.Date.valueOf(LocalDate.now())
 
+  /*
+  model <-> dao
+   */
   implicit def fromModel(model: Food)(implicit restaurantModel: Restaurant, categoryModel: Category): FoodSnapshotSearch = FoodSnapshotSearch(
     id = s"${model.itemId}-$createdDate",
     itemId = model.itemId,
@@ -77,6 +80,10 @@ object FoodSnapshotSearch {
     satisfyRate = model.satisfyRate,
     createdDate = createdDate
   )
+  implicit def fromModel(source: Seq[Food])(implicit converter: Food => FoodSnapshotSearch,
+                                            restaurantModel: Restaurant,
+                                            categoryModel: Category): Seq[FoodSnapshotSearch] =
+    source map converter
 
   implicit def toModel(dao: FoodSnapshotSearch): Food = Food(
     itemId = dao.itemId,
@@ -91,9 +98,7 @@ object FoodSnapshotSearch {
     satisfyRate = dao.satisfyRate
   )
 
-  implicit def convertDaoSeq(source: Seq[Food])(implicit converter: Food => FoodSnapshotSearch): Seq[FoodSnapshotSearch] =
+  implicit def toModel(source: Seq[FoodSnapshotSearch])(implicit converter: FoodSnapshotSearch => Food): Seq[Food] =
     source map converter
 
-  implicit def convertModelSeq(source: Seq[FoodSnapshotSearch])(implicit converter: FoodSnapshotSearch => Food): Seq[Food] =
-    source map converter
 }
