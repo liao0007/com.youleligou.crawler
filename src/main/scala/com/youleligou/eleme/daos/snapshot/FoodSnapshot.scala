@@ -1,11 +1,12 @@
-package com.youleligou.eleme.daos
+package com.youleligou.eleme.daos.snapshot
 
 import java.sql.Timestamp
 import java.time.{LocalDate, LocalDateTime}
 
-import com.youleligou.eleme.models.{Category, Food, Identification, Restaurant}
+import com.youleligou.eleme.daos.snapshot.search.FoodSnapshotSearch
+import com.youleligou.eleme.models.{Category, Food, Restaurant}
 
-case class FoodSnapshotDao(
+case class FoodSnapshot(
     itemId: Long,
     restaurantId: Long,
     categoryId: Long,
@@ -20,12 +21,12 @@ case class FoodSnapshotDao(
     createdAt: java.util.Date = Timestamp.valueOf(LocalDateTime.now())
 )
 
-object FoodSnapshotDao {
+object FoodSnapshot {
 
   /*
   model <-> dao
    */
-  implicit def fromModel(model: Food): FoodSnapshotDao = FoodSnapshotDao(
+  implicit def fromModel(model: Food): FoodSnapshot = FoodSnapshot(
     itemId = model.itemId,
     restaurantId = model.restaurantId,
     categoryId = model.categoryId,
@@ -37,11 +38,10 @@ object FoodSnapshotDao {
     satisfyCount = model.satisfyCount,
     satisfyRate = model.satisfyRate
   )
-
-  implicit def fromModel(source: Seq[Food])(implicit converter: Food => FoodSnapshotDao): Seq[FoodSnapshotDao] =
+  implicit def fromModel(source: Seq[Food])(implicit converter: Food => FoodSnapshot): Seq[FoodSnapshot] =
     source map converter
 
-  implicit def toModel(dao: FoodSnapshotDao): Food = Food(
+  implicit def toModel(dao: FoodSnapshot): Food = Food(
     itemId = dao.itemId,
     restaurantId = dao.restaurantId,
     categoryId = dao.categoryId,
@@ -53,18 +53,17 @@ object FoodSnapshotDao {
     satisfyCount = dao.satisfyCount,
     satisfyRate = dao.satisfyRate
   )
-
-  implicit def toModel(source: Seq[FoodSnapshotDao])(implicit converter: FoodSnapshotDao => Food): Seq[Food] =
+  implicit def toModel(source: Seq[FoodSnapshot])(implicit converter: FoodSnapshot => Food): Seq[Food] =
     source map converter
 
   /*
   search <-> dao
    */
-  implicit def fromSearch(search: FoodSnapshotSearch)(implicit restaurantModel: Restaurant, categoryModel: Category): FoodSnapshotDao = {
-    FoodSnapshotDao(
+  implicit def fromSearch(search: FoodSnapshotSearch)(implicit restaurantModel: Restaurant, categoryModel: Category): FoodSnapshot = {
+    FoodSnapshot(
       itemId = search.itemId,
-      restaurantId = search.restaurantId,
-      categoryId = search.categoryId,
+      restaurantId = search.restaurant.id,
+      categoryId = search.category.id,
       name = search.name,
       description = search.description,
       monthSales = search.monthSales,
@@ -77,16 +76,16 @@ object FoodSnapshotDao {
     )
   }
 
-  implicit def fromSearch(source: Seq[FoodSnapshotSearch])(implicit converter: FoodSnapshotSearch => FoodSnapshotDao): Seq[FoodSnapshotDao] =
+  implicit def fromSearch(source: Seq[FoodSnapshotSearch])(implicit converter: FoodSnapshotSearch => FoodSnapshot): Seq[FoodSnapshot] =
     source map converter
 
-  implicit def toSearch(dao: FoodSnapshotDao)(implicit restaurantModel: Restaurant, categoryModel: Category): FoodSnapshotSearch =
+  implicit def toSearch(dao: FoodSnapshot)(implicit restaurantSnapshot: RestaurantSnapshot, categorySnapshot: CategorySnapshot): FoodSnapshotSearch =
     FoodSnapshotSearch(
       id = s"${dao.itemId}-${dao.createdDate}",
       itemId = dao.itemId,
       name = dao.name,
-      restaurant = restaurantModel,
-      category = categoryModel,
+      restaurant = restaurantSnapshot,
+      category = categorySnapshot,
       description = dao.description,
       monthSales = dao.monthSales,
       rating = dao.rating,
@@ -96,8 +95,7 @@ object FoodSnapshotDao {
       createdDate = dao.createdDate
     )
 
-  implicit def toSearch(source: Seq[FoodSnapshotDao])(implicit converter: FoodSnapshotDao => FoodSnapshotSearch): Seq[FoodSnapshotSearch] =
+  implicit def toSearch(source: Seq[FoodSnapshot])(implicit converter: FoodSnapshot => FoodSnapshotSearch): Seq[FoodSnapshotSearch] =
     source map converter
-
 
 }

@@ -1,17 +1,22 @@
-package com.youleligou.eleme.daos
+package com.youleligou.eleme.daos.accumulate.search
+
+import java.sql.Timestamp
+import java.time.LocalDateTime
+import java.util.Date
 
 import com.youleligou.eleme.models.{Identification, Restaurant}
 
-case class RestaurantSearch(
+case class RestaurantAccumulateSearch(
     id: Long,
     name: String,
     address: String,
     location: Map[String, Float],
-    identification: Option[Identification]
+    identification: Option[Identification],
+    createdAt: Date = Timestamp.valueOf(LocalDateTime.now())
 )
 
-object RestaurantSearch {
-  implicit def fromModel(model: Restaurant): RestaurantSearch = RestaurantSearch(
+object RestaurantAccumulateSearch {
+  implicit def fromModel(model: Restaurant): RestaurantAccumulateSearch = RestaurantAccumulateSearch(
     id = model.id,
     name = model.name,
     address = model.address,
@@ -22,10 +27,10 @@ object RestaurantSearch {
     identification = model.identification
   )
 
-  implicit def fromModel(source: Seq[Restaurant])(implicit converter: Restaurant => RestaurantSearch): Seq[RestaurantSearch] =
+  implicit def fromModel(source: Seq[Restaurant])(implicit converter: Restaurant => RestaurantAccumulateSearch): Seq[RestaurantAccumulateSearch] =
     source map converter
 
-  implicit def toModel(dao: RestaurantSearch): Restaurant = Restaurant(
+  implicit def toModel(dao: RestaurantAccumulateSearch): Restaurant = Restaurant(
     id = dao.id,
     address = dao.address,
     averageCost = None,
@@ -47,6 +52,6 @@ object RestaurantSearch {
     status = 0
   )
 
-  implicit def toModel(source: Seq[RestaurantSearch])(implicit converter: RestaurantSearch => Restaurant): Seq[Restaurant] =
+  implicit def toModel(source: Seq[RestaurantAccumulateSearch])(implicit converter: RestaurantAccumulateSearch => Restaurant): Seq[Restaurant] =
     source map converter
 }

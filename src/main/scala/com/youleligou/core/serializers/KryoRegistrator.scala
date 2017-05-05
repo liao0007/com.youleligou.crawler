@@ -1,7 +1,8 @@
 package com.youleligou.core.serializers
 
 import com.youleligou.crawler.daos.{JobDao, ProxyServerDao}
-import com.youleligou.eleme.daos.{FoodSnapshotDao, RestaurantDao, RestaurantSnapshotDao}
+import com.youleligou.eleme.daos.accumulate.RestaurantAccumulate
+import com.youleligou.eleme.daos.snapshot.{FoodSnapshot, RestaurantSnapshot}
 import de.javakaffee.kryoserializers.jodatime.{JodaDateTimeSerializer, JodaLocalDateSerializer, JodaLocalDateTimeSerializer}
 import org.joda.time.{DateTime, LocalDate, LocalDateTime}
 
@@ -10,9 +11,9 @@ import org.joda.time.{DateTime, LocalDate, LocalDateTime}
   */
 class KryoRegistrator extends org.apache.spark.serializer.KryoRegistrator {
   override def registerClasses(kryo: com.esotericsoftware.kryo.Kryo): Unit = {
-    kryo.register(classOf[RestaurantDao])
-    kryo.register(classOf[FoodSnapshotDao])
-    kryo.register(classOf[RestaurantSnapshotDao])
+    kryo.register(classOf[RestaurantAccumulate])
+    kryo.register(classOf[FoodSnapshot])
+    kryo.register(classOf[RestaurantAccumulate])
     kryo.register(classOf[JobDao])
     kryo.register(classOf[ProxyServerDao])
 

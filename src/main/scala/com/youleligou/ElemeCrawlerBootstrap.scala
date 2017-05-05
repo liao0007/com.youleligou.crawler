@@ -11,7 +11,7 @@ import com.youleligou.core.reps.ElasticSearchRepo
 import com.youleligou.crawler.actors.Injector
 import com.youleligou.crawler.actors.Injector.{CacheCleared, ClearCache, Tick}
 import com.youleligou.crawler.models.{FetchRequest, UrlInfo}
-import com.youleligou.eleme.daos.RestaurantSearch
+import com.youleligou.eleme.daos.accumulate.search.RestaurantAccumulateSearch
 import com.youleligou.eleme.models.Restaurant
 import com.youleligou.eleme.repos.cassandra.RestaurantRepo
 import org.apache.spark.SparkContext
@@ -27,7 +27,7 @@ class ElemeCrawlerBootstrap @Inject()(config: Config,
                                       system: ActorSystem,
                                       redisClient: RedisClient,
                                       restaurantRepo: RestaurantRepo,
-                                      restaurantEsRepo: ElasticSearchRepo[RestaurantSearch],
+                                      restaurantEsRepo: ElasticSearchRepo[RestaurantAccumulateSearch],
                                       sparkContext: SparkContext,
                                       @Named(Injector.PoolName) injectors: ActorRef)
     extends LazyLogging {
@@ -65,8 +65,8 @@ class ElemeCrawlerBootstrap @Inject()(config: Config,
 
   def indexRestaurants(): Unit = {
     restaurantRepo.all() flatMap { restaurantDaos =>
-      val restaurants: Seq[Restaurant]                = restaurantDaos
-      val restaurantSearchDaos: Seq[RestaurantSearch] = restaurants
+      val restaurants: Seq[RestaurantAccumulateSearch]                = restaurantDaos
+      val restaurantSearchDaos: Seq[RestaurantAccumulateSearch] = restaurants
       restaurantEsRepo.save(restaurantSearchDaos)
     }
   }

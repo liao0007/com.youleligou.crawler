@@ -1,12 +1,13 @@
-package com.youleligou.eleme.daos
+package com.youleligou.eleme.daos.accumulate
 
 import java.sql.Timestamp
 import java.time.LocalDateTime
 import java.util.Date
 
+import com.youleligou.eleme.daos.accumulate.search.RestaurantAccumulateSearch
 import com.youleligou.eleme.models.{Identification, Restaurant}
 
-case class RestaurantDao(
+case class RestaurantAccumulate(
     id: Long,
     name: String,
     address: String,
@@ -18,12 +19,12 @@ case class RestaurantDao(
     createdAt: Date = Timestamp.valueOf(LocalDateTime.now())
 )
 
-object RestaurantDao {
+object RestaurantAccumulate {
 
   /*
   model <-> dao
    */
-  implicit def fromModel(model: Restaurant): RestaurantDao = RestaurantDao(
+  implicit def fromModel(model: Restaurant): RestaurantAccumulate = RestaurantAccumulate(
     id = model.id,
     name = model.name,
     address = model.address,
@@ -33,11 +34,10 @@ object RestaurantDao {
     licensesNumber = model.identification.flatMap(_.licensesNumber),
     companyName = model.identification.flatMap(_.companyName)
   )
-
-  implicit def fromModel(source: Seq[Restaurant])(implicit converter: Restaurant => RestaurantDao): Seq[RestaurantDao] =
+  implicit def fromModel(source: Seq[Restaurant])(implicit converter: Restaurant => RestaurantAccumulate): Seq[RestaurantAccumulate] =
     source map converter
 
-  implicit def toModel(dao: RestaurantDao): Restaurant = Restaurant(
+  implicit def toModel(dao: RestaurantAccumulate): Restaurant = Restaurant(
     id = dao.id,
     address = dao.address,
     averageCost = None,
@@ -58,28 +58,29 @@ object RestaurantDao {
     identification = Some(Identification(dao.licensesNumber, dao.companyName)),
     status = 0
   )
-
-  implicit def toModel(source: Seq[RestaurantDao])(implicit converter: RestaurantDao => Restaurant): Seq[Restaurant] =
+  implicit def toModel(source: Seq[RestaurantAccumulate])(implicit converter: RestaurantAccumulate => Restaurant): Seq[Restaurant] =
     source map converter
 
   /*
   search <-> dao
    */
-  implicit def fromSearch(search: RestaurantSearch): RestaurantDao = RestaurantDao(
+  implicit def fromSearch(search: RestaurantAccumulateSearch): RestaurantAccumulate = RestaurantAccumulate(
     id = search.id,
     name = search.name,
     address = search.address,
-    imagePath = search.imagePath,
-    latitude = search.latitude,
-    longitude = search.longitude,
+    imagePath = "",
+    latitude = search.location("lat"),
+    longitude = search.location("lon"),
     licensesNumber = search.identification.flatMap(_.licensesNumber),
-    companyName = search.identification.flatMap(_.companyName)
+    companyName = search.identification.flatMap(_.companyName),
+    createdAt = search.createdAt
   )
 
-  implicit def fromSearch(source: Seq[RestaurantSearch])(implicit converter: RestaurantSearch => RestaurantDao): Seq[RestaurantDao] =
+  implicit def fromSearch(source: Seq[RestaurantAccumulateSearch])(
+      implicit converter: RestaurantAccumulateSearch => RestaurantAccumulate): Seq[RestaurantAccumulate] =
     source map converter
 
-  implicit def toSearch(dao: RestaurantDao): RestaurantSearch = RestaurantSearch(
+  implicit def toSearch(dao: RestaurantAccumulate): RestaurantAccumulateSearch = RestaurantAccumulateSearch(
     id = dao.id,
     name = dao.name,
     address = dao.address,
@@ -87,9 +88,11 @@ object RestaurantDao {
       "lat" -> dao.latitude,
       "lon" -> dao.longitude
     ),
-    identification = Some(Identification(dao.licensesNumber, dao.companyName))
+    identification = Some(Identification(dao.licensesNumber, dao.companyName)),
+    createdAt = dao.createdAt
   )
 
-  implicit def toSearch(source: Seq[RestaurantDao])(implicit converter: RestaurantDao => RestaurantSearch): Seq[RestaurantSearch] =
+  implicit def toSearch(source: Seq[RestaurantAccumulate])(
+      implicit converter: RestaurantAccumulate => RestaurantAccumulateSearch): Seq[RestaurantAccumulateSearch] =
     source map converter
 }

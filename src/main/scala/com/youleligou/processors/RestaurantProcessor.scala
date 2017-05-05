@@ -3,7 +3,9 @@ package com.youleligou.processors
 import com.datastax.spark.connector._
 import com.datastax.spark.connector.rdd.CassandraRDD
 import com.google.inject.Inject
-import com.youleligou.eleme.daos.{FoodSnapshotDao, RestaurantDao, RestaurantSearch}
+import com.youleligou.eleme.daos.accumulate.RestaurantAccumulate
+import com.youleligou.eleme.daos.accumulate.search.RestaurantAccumulateSearch
+import com.youleligou.eleme.daos.snapshot.FoodSnapshot
 import com.youleligou.eleme.models.Restaurant
 import org.apache.spark.SparkContext
 
@@ -18,9 +20,9 @@ class RestaurantProcessor @Inject()(sparkContext: SparkContext,
                                     restaurantSearchRepo: com.youleligou.eleme.repos.elasticsearch.RestaurantRepo) {
 
   def reindex(): Future[Any] = {
-    restaurantRepo.rddAll() flatMap { (restaurantDaoRdd: CassandraRDD[RestaurantDao]) =>
-      val restaurantSearchRdd = restaurantDaoRdd.map { (restaurantDao: RestaurantDao) =>
-        val restaurantSearch: RestaurantSearch = restaurantDao
+    restaurantRepo.rddAll() flatMap { (restaurantDaoRdd: CassandraRDD[RestaurantAccumulateSearch]) =>
+      val restaurantSearchRdd = restaurantDaoRdd.map { (restaurantDao: RestaurantAccumulateSearch) =>
+        val restaurantSearch: RestaurantAccumulateSearch = restaurantDao
         restaurantSearch
       }
       restaurantSearchRepo.save(restaurantSearchRdd)
@@ -29,7 +31,7 @@ class RestaurantProcessor @Inject()(sparkContext: SparkContext,
 
   def run(): Unit = {
     sparkContext
-      .cassandraTable[FoodSnapshotDao]("eleme", "food_snapshots")
+      .cassandraTable[FoodSnapshot]("eleme", "food_snapshots")
       .filter(_.monthSales > 0)
       .groupBy(_.name)
       .map { grouped =>

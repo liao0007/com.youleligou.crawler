@@ -2,7 +2,7 @@ package com.youleligou.eleme.repos.elasticsearch
 
 import com.google.inject.Inject
 import com.youleligou.core.reps.ElasticSearchRepo
-import com.youleligou.eleme.daos.{FoodSnapshotSearch, RestaurantSearch}
+import com.youleligou.eleme.daos.snapshot.search.FoodSnapshotSearch
 import org.apache.spark.SparkContext
 import org.apache.spark.rdd.RDD
 import org.elasticsearch.spark.rdd.EsSpark
