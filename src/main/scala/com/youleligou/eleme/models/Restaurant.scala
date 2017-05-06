@@ -10,7 +10,7 @@ import play.api.libs.json.{JsPath, Reads}
 case class Restaurant(
     id: Long,
     address: String,
-    averageCost: Option[Float],
+    averageCost: Option[String], //"88元 / 人"
     description: String,
     deliveryFee: Float,
     minimumOrderAmount: Float,
@@ -33,7 +33,7 @@ object Restaurant {
   implicit val restaurantReads: Reads[Restaurant] = (
     (JsPath \ "id").read[Long] and
       (JsPath \ "address").read[String] and
-      (JsPath \ "average_cost").readNullable[Float] and
+      (JsPath \ "average_cost").readNullable[String] and
       (JsPath \ "description").read[String] and
       (JsPath \ "float_delivery_fee").read[Float] and
       (JsPath \ "float_minimum_order_amount").read[Float] and

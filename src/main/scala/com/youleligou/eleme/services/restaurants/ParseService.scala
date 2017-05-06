@@ -3,17 +3,15 @@ package com.youleligou.eleme.services.restaurants
 import com.google.inject.Inject
 import com.youleligou.core.reps.{CassandraRepo, ElasticSearchRepo}
 import com.youleligou.crawler.models.{FetchResponse, ParseResult, UrlInfo}
-import com.youleligou.eleme.daos.accumulate.RestaurantAccumulate
-import com.youleligou.eleme.daos.accumulate.search.RestaurantAccumulateSearch
-import com.youleligou.eleme.daos.snapshot.RestaurantSnapshot
+import com.youleligou.eleme.daos.{RestaurantDao, RestaurantSnapshotDao, RestaurantSnapshotDaoSearch}
 import com.youleligou.eleme.models.Restaurant
 import play.api.libs.json._
 
 import scala.concurrent.Future
 
-class ParseService @Inject()(restaurantSnapshotRepo: CassandraRepo[RestaurantAccumulateSearch],
-                             restaurantRepo: CassandraRepo[RestaurantAccumulateSearch],
-                             restaurantSearchRepo: ElasticSearchRepo[RestaurantAccumulateSearch])
+class ParseService @Inject()(restaurantSnapshotRepo: CassandraRepo[RestaurantSnapshotDao],
+                             restaurantRepo: CassandraRepo[RestaurantDao],
+                             restaurantSnapshotSearchRepo: ElasticSearchRepo[RestaurantSnapshotDaoSearch])
     extends com.youleligou.crawler.services.ParseService {
 
   final val Step: Int        = 1
@@ -48,24 +46,29 @@ class ParseService @Inject()(restaurantSnapshotRepo: CassandraRepo[RestaurantAcc
     Seq(urlInfo.copy(queryParameters = urlInfo.queryParameters + (OffsetKey -> (offset + limit).toString)))
   }
 
-  private def persist(restaurants: Seq[RestaurantAccumulateSearch]): Future[Any] = {
-    //persist into cassandra
-    restaurantSnapshotRepo.save(restaurants)
-    restaurantRepo.save(restaurants)
+  private def persist(restaurants: Seq[Restaurant]): Future[Any] = {
+//    implicit converts
+    val restaurantDaos: Seq[RestaurantDao]                              = restaurants
+    val restaurantSnapshotDaos: Seq[RestaurantSnapshotDao]              = restaurants
+    val restaurantSnapshotDaoSearches: Seq[RestaurantSnapshotDaoSearch] = restaurantSnapshotDaos
 
-    //search
-    restaurantSearchRepo.save(restaurants)
+    //cassandra
+    restaurantRepo.save(restaurantDaos)
+    restaurantSnapshotRepo.save(restaurantSnapshotDaos)
+
+    //es
+    restaurantSnapshotSearchRepo.save(restaurantSnapshotDaoSearches)
   }
 
   /**
     * 解析具体实现
     */
   override def parse(fetchResponse: FetchResponse): ParseResult = {
-    val restaurants: Seq[RestaurantAccumulateSearch] = Json.parse(fetchResponse.content) match {
+    val restaurants: Seq[Restaurant] = Json.parse(fetchResponse.content) match {
       case JsArray(restaurantsJsValue) =>
         restaurantsJsValue.flatMap { restaurant =>
-          restaurant.validate[RestaurantAccumulateSearch] match {
-            case restaurant: JsSuccess[RestaurantAccumulateSearch] =>
+          restaurant.validate[Restaurant] match {
+            case restaurant: JsSuccess[Restaurant] =>
               Some(restaurant.value)
             case error: JsError =>
               logger.warn("parse restaurant failed, {}", error.errors.toString())
@@ -74,7 +77,7 @@ class ParseService @Inject()(restaurantSnapshotRepo: CassandraRepo[RestaurantAcc
         }
       case _ =>
         logger.warn("parse restaurant failed, url {}", fetchResponse.fetchRequest.urlInfo.url)
-        Seq.empty[RestaurantAccumulateSearch]
+        Seq.empty[Restaurant]
     }
 
     persist(restaurants)

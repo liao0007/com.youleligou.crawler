@@ -1,8 +1,10 @@
 package com.youleligou.core.reps
 
 import com.datastax.spark.connector._
-import com.datastax.spark.connector.rdd.{CassandraRDD, CassandraTableScanRDD}
+import com.datastax.spark.connector.rdd.CassandraRDD
+import com.youleligou.core.daos.Dao
 import org.apache.spark.SparkContext
+import org.apache.spark.rdd.RDD
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -13,7 +15,7 @@ import scala.util.control.NonFatal
 /**
   * Created by liangliao on 25/4/17.
   */
-abstract class CassandraRepo[T <: Serializable](implicit classTag: ClassTag[T], typeTag: TypeTag[T]) extends Repo[T] {
+abstract class CassandraRepo[T <: Dao](implicit classTag: ClassTag[T], typeTag: TypeTag[T]) extends Repo[T] {
   def keyspace: String
   def sparkContext: SparkContext
 
@@ -23,10 +25,14 @@ abstract class CassandraRepo[T <: Serializable](implicit classTag: ClassTag[T], 
     save(Seq(record))
   }
 
-  def save(records: Seq[T]): Future[Any] =
+  def save(records: Seq[T]): Future[Any] = {
+    val collection: RDD[T] = sparkContext.parallelize(records)
+    save(collection)
+  }
+
+  def save(records: RDD[T]): Future[Unit] =
     Future {
-      val collection = sparkContext.parallelize(records)
-      collection.saveToCassandra(keyspace, table)
+      records.saveToCassandra(keyspace, table)
     } recover {
       case NonFatal(x) =>
         logger.warn("{} {}", this.getClass, x.getMessage)
@@ -41,13 +47,8 @@ abstract class CassandraRepo[T <: Serializable](implicit classTag: ClassTag[T], 
         sparkContext.emptyCassandraTable[T](keyspace, table)
     }
 
-  def all(): Future[Seq[T]] =
-    Future {
-      sparkContext.cassandraTable[T](keyspace, table).collect().toSeq
-    } recover {
-      case NonFatal(x) =>
-        logger.warn("{} {}", this.getClass, x.getMessage)
-        Seq.empty[T]
-    }
+  def all(): Future[Seq[T]] = rddAll() map {
+    _.collect().toSeq
+  }
 
 }

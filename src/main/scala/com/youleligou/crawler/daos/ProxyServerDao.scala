@@ -4,6 +4,7 @@ import java.sql.Timestamp
 import java.time.LocalDateTime
 import java.util.Date
 
+import com.youleligou.core.daos.Dao
 import com.youleligou.crawler.models.ProxyServer
 
 case class ProxyServerDao(
@@ -19,7 +20,7 @@ case class ProxyServerDao(
     checkCount: Int,
     lastVerifiedAt: Option[Date],
     createdAt: Date = Timestamp.valueOf(LocalDateTime.now())
-)
+) extends Dao
 
 object ProxyServerDao {
   object JobType extends Enumeration {

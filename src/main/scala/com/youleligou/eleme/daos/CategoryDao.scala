@@ -1,12 +1,12 @@
-package com.youleligou.eleme.daos.accumulate.search
+package com.youleligou.eleme.daos
 
 import java.sql.Timestamp
 import java.time.LocalDateTime
-import java.util.Date
 
+import com.youleligou.core.daos.Dao
 import com.youleligou.eleme.models.{Category, Food}
 
-case class CategoryAccumulateSearch(
+case class CategoryDao(
     id: Long,
     typ: Int,
     isActivity: Option[Boolean] = None,
@@ -14,12 +14,11 @@ case class CategoryAccumulateSearch(
     description: String,
     iconUrl: String,
     name: String,
-    createdAt: Date = Timestamp.valueOf(LocalDateTime.now())
-)
+    createdAt: java.util.Date = Timestamp.valueOf(LocalDateTime.now())
+) extends Dao
 
-object CategoryAccumulateSearch {
-
-  implicit def fromModel(model: Category): CategoryAccumulateSearch = CategoryAccumulateSearch(
+object CategoryDao {
+  implicit def fromModel(model: Category): CategoryDao = CategoryDao(
     id = model.id,
     typ = model.typ,
     isActivity = model.isActivity,
@@ -28,10 +27,10 @@ object CategoryAccumulateSearch {
     iconUrl = model.iconUrl,
     name = model.name
   )
-  implicit def fromModel(source: Seq[Category])(implicit converter: Category => CategoryAccumulateSearch): Seq[CategoryAccumulateSearch] =
+  implicit def fromModel(source: Seq[Category])(implicit converter: Category => CategoryDao): Seq[CategoryDao] =
     source map converter
 
-  implicit def toModel(dao: CategoryAccumulateSearch): Category = Category(
+  implicit def toModel(dao: CategoryDao): Category = Category(
     id = dao.id,
     typ = dao.typ,
     isActivity = dao.isActivity,
@@ -41,7 +40,6 @@ object CategoryAccumulateSearch {
     name = dao.name,
     foods = Seq.empty[Food]
   )
-
-  implicit def toModel(source: Seq[CategoryAccumulateSearch])(implicit converter: CategoryAccumulateSearch => Category): Seq[Category] =
+  implicit def toModel(source: Seq[CategoryDao])(implicit converter: CategoryDao => Category): Seq[Category] =
     source map converter
 }

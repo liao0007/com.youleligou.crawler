@@ -4,6 +4,7 @@ import java.sql.Timestamp
 import java.time.LocalDateTime
 import java.util.{Date, UUID}
 
+import com.youleligou.core.daos.Dao
 import com.youleligou.crawler.models.Job
 
 /**
@@ -20,7 +21,7 @@ case class JobDao(
     completedAt: Option[Date] = None,
     //spark cassandra connector not support java.sql.Timestamp, use java.util.Date instead
     createdAt: Date = Timestamp.valueOf(LocalDateTime.now())
-)
+) extends Dao
 
 object JobDao {
   object JobType extends Enumeration {

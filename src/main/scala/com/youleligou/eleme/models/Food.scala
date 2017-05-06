@@ -17,7 +17,8 @@ case class Food(
     rating: Float,
     ratingCount: Int,
     satisfyCount: Int,
-    satisfyRate: Float
+    satisfyRate: Float,
+    specFoods: Seq[FoodSku]
 )
 
 object Food {
@@ -31,6 +32,7 @@ object Food {
       (JsPath \ "rating").read[Float] and
       (JsPath \ "rating_count").read[Int] and
       (JsPath \ "satisfy_count").read[Int] and
-      (JsPath \ "satisfy_rate").read[Float]
+      (JsPath \ "satisfy_rate").read[Float] and
+      (JsPath \ "specfoods").read[Seq[FoodSku]]
   )(Food.apply _)
 }

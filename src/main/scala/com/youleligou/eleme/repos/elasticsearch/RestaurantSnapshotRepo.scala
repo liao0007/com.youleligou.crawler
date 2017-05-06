@@ -2,7 +2,7 @@ package com.youleligou.eleme.repos.elasticsearch
 
 import com.google.inject.Inject
 import com.youleligou.core.reps.ElasticSearchRepo
-import com.youleligou.eleme.daos.accumulate.search.RestaurantAccumulateSearch
+import com.youleligou.eleme.daos.RestaurantSnapshotDaoSearch
 import org.apache.spark.SparkContext
 import org.apache.spark.rdd.RDD
 import org.elasticsearch.spark.rdd.EsSpark
@@ -14,11 +14,11 @@ import scala.util.control.NonFatal
 /**
   * Created by liangliao on 25/4/17.
   */
-class RestaurantRepo @Inject()(val sparkContext: SparkContext) extends ElasticSearchRepo[RestaurantAccumulateSearch] {
+class RestaurantSnapshotRepo @Inject()(val sparkContext: SparkContext) extends ElasticSearchRepo[RestaurantSnapshotDaoSearch] {
   override val index: String = "eleme-restaurant"
-  override val typ: String   = "latest"
+  override val typ: String   = "snapshot"
 
-  override def save(rdd: RDD[RestaurantAccumulateSearch]): Future[Any] =
+  override def save(rdd: RDD[RestaurantSnapshotDaoSearch]): Future[Any] =
     Future {
       EsSpark.saveToEs(rdd, s"$index/$typ", Map("es.mapping.id" -> "id"))
     } recover {

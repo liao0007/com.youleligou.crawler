@@ -3,10 +3,7 @@ package com.youleligou.processors
 import com.datastax.spark.connector._
 import com.datastax.spark.connector.rdd.CassandraRDD
 import com.google.inject.Inject
-import com.youleligou.eleme.daos.accumulate.RestaurantAccumulate
-import com.youleligou.eleme.daos.accumulate.search.RestaurantAccumulateSearch
-import com.youleligou.eleme.daos.snapshot.FoodSnapshot
-import com.youleligou.eleme.models.Restaurant
+import com.youleligou.eleme.daos.{RestaurantSnapshotDaoSearch, _}
 import org.apache.spark.SparkContext
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -16,22 +13,22 @@ import scala.concurrent.Future
   * Created by liangliao on 4/5/17.
   */
 class RestaurantProcessor @Inject()(sparkContext: SparkContext,
-                                    restaurantRepo: com.youleligou.eleme.repos.cassandra.RestaurantRepo,
-                                    restaurantSearchRepo: com.youleligou.eleme.repos.elasticsearch.RestaurantRepo) {
+                                    restaurantSnapshotRepo: com.youleligou.eleme.repos.cassandra.RestaurantSnapshotRepo,
+                                    restaurantSnapshotSearchRepo: com.youleligou.eleme.repos.elasticsearch.RestaurantSnapshotRepo) {
 
   def reindex(): Future[Any] = {
-    restaurantRepo.rddAll() flatMap { (restaurantDaoRdd: CassandraRDD[RestaurantAccumulateSearch]) =>
-      val restaurantSearchRdd = restaurantDaoRdd.map { (restaurantDao: RestaurantAccumulateSearch) =>
-        val restaurantSearch: RestaurantAccumulateSearch = restaurantDao
-        restaurantSearch
+    restaurantSnapshotRepo.rddAll() flatMap { (restaurantSnapshotDaoRdd: CassandraRDD[RestaurantSnapshotDao]) =>
+      val restaurantSearchRdd = restaurantSnapshotDaoRdd.map { (restaurantSnapshotDao: RestaurantSnapshotDao) =>
+        val restaurantSnapshotDaoSearch: RestaurantSnapshotDaoSearch = restaurantSnapshotDao
+        restaurantSnapshotDaoSearch
       }
-      restaurantSearchRepo.save(restaurantSearchRdd)
+      restaurantSnapshotSearchRepo.save(restaurantSearchRdd)
     }
   }
 
   def run(): Unit = {
     sparkContext
-      .cassandraTable[FoodSnapshot]("eleme", "food_snapshots")
+      .cassandraTable[FoodSnapshotDao]("eleme", "food_snapshots")
       .filter(_.monthSales > 0)
       .groupBy(_.name)
       .map { grouped =>

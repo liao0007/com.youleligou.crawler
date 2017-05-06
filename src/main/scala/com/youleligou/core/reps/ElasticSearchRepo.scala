@@ -1,5 +1,6 @@
 package com.youleligou.core.reps
 
+import com.youleligou.core.daos.Dao
 import org.apache.spark.SparkContext
 import org.apache.spark.rdd.RDD
 import org.elasticsearch.spark.rdd.EsSpark
@@ -13,7 +14,7 @@ import scala.util.control.NonFatal
 /**
   * Created by liangliao on 2/5/17.
   */
-abstract class ElasticSearchRepo[T](implicit classTag: ClassTag[T], typeTag: TypeTag[T]) extends Repo[T] {
+abstract class ElasticSearchRepo[T <: Dao](implicit classTag: ClassTag[T], typeTag: TypeTag[T]) extends Repo[T] {
   def index: String
   def typ: String
   def sparkContext: SparkContext

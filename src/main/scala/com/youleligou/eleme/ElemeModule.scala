@@ -4,11 +4,7 @@ import com.google.inject._
 import com.youleligou.core.reps.{CassandraRepo, ElasticSearchRepo}
 import com.youleligou.crawler.modules._
 import com.youleligou.crawler.services.ParseService
-import com.youleligou.eleme.daos._
-import com.youleligou.eleme.daos.accumulate.search.RestaurantAccumulateSearch
-import com.youleligou.eleme.daos.accumulate.{CategoryAccumulate, RestaurantAccumulate}
-import com.youleligou.eleme.daos.snapshot.search.FoodSnapshotSearch
-import com.youleligou.eleme.daos.snapshot.{FoodSnapshot, RestaurantSnapshot}
+import com.youleligou.eleme.daos.{FoodSnapshotDaoSearch, _}
 import com.youleligou.eleme.services.{menu, restaurants}
 import net.codingwell.scalaguice.ScalaModule
 
@@ -17,14 +13,25 @@ import net.codingwell.scalaguice.ScalaModule
   */
 class ElemeModule extends AbstractModule with ScalaModule with GuiceAkkaActorRefProvider {
   override def configure() {
-    bind[CassandraRepo[FoodSnapshot]].to[repos.cassandra.FoodSnapshotRepo]
-    bind[CassandraRepo[RestaurantAccumulateSearch]].to[repos.cassandra.RestaurantSnapshotRepo]
-    bind[CassandraRepo[RestaurantAccumulateSearch]].to[repos.cassandra.RestaurantRepo]
-    bind[CassandraRepo[CategoryAccumulate]].to[repos.cassandra.CategoryRepo]
+    /*
+    cassandra
+     */
+    bind[CassandraRepo[RestaurantDao]].to[repos.cassandra.RestaurantRepo]
+    bind[CassandraRepo[CategoryDao]].to[repos.cassandra.CategoryRepo]
 
-    bind[ElasticSearchRepo[RestaurantAccumulateSearch]].to[repos.elasticsearch.RestaurantRepo]
-    bind[ElasticSearchRepo[FoodSnapshot]].to[repos.elasticsearch.FoodSnapshotRepo]
+    bind[CassandraRepo[RestaurantSnapshotDao]].to[repos.cassandra.RestaurantSnapshotRepo]
+    bind[CassandraRepo[FoodSnapshotDao]].to[repos.cassandra.FoodSnapshotRepo]
+    bind[CassandraRepo[FoodSkuSnapshotDao]].to[repos.cassandra.FoodSkuSnapshotRepo]
 
+    /*
+    es
+     */
+    bind[ElasticSearchRepo[RestaurantSnapshotDaoSearch]].to[repos.elasticsearch.RestaurantSnapshotRepo]
+    bind[ElasticSearchRepo[FoodSnapshotDaoSearch]].to[repos.elasticsearch.FoodSnapshotRepo]
+
+    /*
+    services
+     */
     bind[ParseService].annotatedWithName(classOf[menu.ParseService].getName).to[menu.ParseService]
     bind[ParseService].annotatedWithName(classOf[restaurants.ParseService].getName).to[restaurants.ParseService]
   }
