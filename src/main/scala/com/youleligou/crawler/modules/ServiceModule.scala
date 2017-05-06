@@ -63,7 +63,6 @@ class ServiceModule extends AbstractModule with ScalaModule {
 //      .set("spark.cassandra.auth.password", "cassandra")
 
       // elastic search
-      .set("es.index.auto.create", "false")
       .set("es.nodes", config.getString("es.nodes.contactPoints"))
       .set("es.net.http.auth.user", config.getString("es.net.http.auth.user"))
       .set("es.net.http.auth.pass", config.getString("es.net.http.auth.pass"))

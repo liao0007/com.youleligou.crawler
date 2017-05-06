@@ -3,8 +3,8 @@ package com.youleligou.eleme.services.menu
 import com.google.inject.Inject
 import com.youleligou.core.reps.{CassandraRepo, ElasticSearchRepo}
 import com.youleligou.crawler.models.{FetchResponse, ParseResult, UrlInfo}
-import com.youleligou.eleme.daos.{CategoryDao, FoodSkuSnapshotDao, FoodSnapshotDao, FoodSnapshotDaoSearch}
-import com.youleligou.eleme.models.{Category, Restaurant}
+import com.youleligou.eleme.daos.{RestaurantDaoSearch, _}
+import com.youleligou.eleme.models.Category
 import com.youleligou.eleme.repos.cassandra.RestaurantRepo
 import play.api.libs.json._
 
@@ -33,9 +33,12 @@ class ParseService @Inject()(restaurantRepo: RestaurantRepo,
       val pattern(restaurantId) = fetchResponse.fetchRequest.urlInfo.path
 
       restaurantRepo.findById(restaurantId.toLong) foreach { restaurantDao =>
-        implicit val restaurantModel: Restaurant = restaurantDao
+        implicit val restaurantDaoSearch: RestaurantDaoSearch = restaurantDao
 
-        val foodSnapshotDaoSearches: Seq[FoodSnapshotDaoSearch] = categories flatMap { implicit category =>
+        val foodSnapshotDaoSearches: Seq[FoodSnapshotDaoSearch] = categories flatMap { category =>
+          val categoryDao: CategoryDao                      = category
+          implicit val categoryDaoSearch: CategoryDaoSearch = categoryDao
+
           category.foods map { food =>
             implicit val foodSkus                            = food.specFoods
             val foodSnapshotDao: FoodSnapshotDao             = food

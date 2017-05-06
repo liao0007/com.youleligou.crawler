@@ -1,10 +1,10 @@
 package com.youleligou.eleme.daos
 
-import java.sql.{Date, Timestamp}
+import java.sql.Timestamp
 import java.time.{LocalDate, LocalDateTime}
 
 import com.youleligou.core.daos.SnapshotDao
-import com.youleligou.eleme.models.{Category, Food, FoodSku, Restaurant}
+import com.youleligou.eleme.models.FoodSku
 
 case class FoodSnapshotDaoSearch(
     id: String,
@@ -17,17 +17,16 @@ case class FoodSnapshotDaoSearch(
     ratingCount: Int,
     satisfyCount: Int,
     satisfyRate: Float,
-    restaurant: Restaurant,
-    category: Category,
+    restaurant: RestaurantDaoSearch,
+    category: CategoryDaoSearch,
     foodSkus: Seq[FoodSku],
     createdDate: java.util.Date = java.sql.Date.valueOf(LocalDate.now()),
     createdAt: java.util.Date = Timestamp.valueOf(LocalDateTime.now())
 ) extends SnapshotDao
 
 object FoodSnapshotDaoSearch {
-  val createdDate: Date = java.sql.Date.valueOf(LocalDate.now())
-
-  implicit def fromDao(dao: FoodSnapshotDao)(implicit restaurant: Restaurant, category: Category, foodSkus: Seq[FoodSku]): FoodSnapshotDaoSearch =
+  implicit def fromDao(
+      dao: FoodSnapshotDao)(implicit restaurant: RestaurantDaoSearch, category: CategoryDaoSearch, foodSkus: Seq[FoodSku]): FoodSnapshotDaoSearch =
     FoodSnapshotDaoSearch(
       id = s"${dao.itemId}-${dao.createdDate}",
       itemId = dao.itemId,
@@ -60,7 +59,7 @@ object FoodSnapshotDaoSearch {
     createdDate = search.createdDate,
     createdAt = search.createdAt
   )
-  implicit def toModel(source: Seq[FoodSnapshotDaoSearch])(implicit converter: FoodSnapshotDaoSearch => FoodSnapshotDao): Seq[FoodSnapshotDao] =
+  implicit def toDao(source: Seq[FoodSnapshotDaoSearch])(implicit converter: FoodSnapshotDaoSearch => FoodSnapshotDao): Seq[FoodSnapshotDao] =
     source map converter
 
 }
