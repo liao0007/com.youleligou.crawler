@@ -53,7 +53,7 @@ class ServiceModule extends AbstractModule with ScalaModule {
   @Singleton
   def provideCrawlerSparkContext(config: Config, system: ActorSystem): SparkContext = {
     val conf = new SparkConf(true)
-      // spark
+    // spark
       .set("spark.serializer", classOf[KryoSerializer].getName)
       .set("spark.kryo.registrator", "com.youleligou.core.serializers.KryoRegistrator")
       .set("spark.kryo.unsafe", "true")
@@ -63,8 +63,8 @@ class ServiceModule extends AbstractModule with ScalaModule {
 //      .set("spark.cassandra.auth.password", "cassandra")
 
       // elastic search
+      .set("es.index.auto.create", "false")
       .set("es.nodes", config.getString("es.nodes.contactPoints"))
-      .set("es.index.auto.create", config.getBoolean("es.index.auto.create").toString)
       .set("es.net.http.auth.user", config.getString("es.net.http.auth.user"))
       .set("es.net.http.auth.pass", config.getString("es.net.http.auth.pass"))
 

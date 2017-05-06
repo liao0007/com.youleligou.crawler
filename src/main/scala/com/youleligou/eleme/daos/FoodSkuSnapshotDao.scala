@@ -22,7 +22,7 @@ case class FoodSkuSnapshotDao(
     itemId: Long,
     checkoutMode: Int,
     stock: Int,
-    createdDate: java.sql.Date = java.sql.Date.valueOf(LocalDate.now()),
+    createdDate: java.util.Date = java.sql.Date.valueOf(LocalDate.now()),
     createdAt: java.util.Date = Timestamp.valueOf(LocalDateTime.now())
 ) extends Dao
 

@@ -28,7 +28,7 @@ case class FoodSku(
 object FoodSku {
   implicit val restaurantReads: Reads[FoodSku] = (
     (JsPath \ "original_price").readNullable[Float] and
-      (JsPath \ "sku_id").read[Long] and
+      (JsPath \ "sku_id").read[String].map(_.toLong) and
       (JsPath \ "name").read[String] and
       (JsPath \ "restaurant_id").read[Long] and
       (JsPath \ "food_id").read[Long] and
@@ -39,7 +39,7 @@ object FoodSku {
       (JsPath \ "sold_out").read[Boolean] and
       (JsPath \ "recent_popularity").read[Int] and
       (JsPath \ "is_essential").read[Boolean] and
-      (JsPath \ "item_id").read[Long] and
+      (JsPath \ "item_id").read[String].map(_.toLong) and
       (JsPath \ "checkout_mode").read[Int] and
       (JsPath \ "stock").read[Int]
   )(FoodSku.apply _)

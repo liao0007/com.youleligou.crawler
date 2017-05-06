@@ -4,7 +4,7 @@ import java.sql.{Date, Timestamp}
 import java.time.{LocalDate, LocalDateTime}
 
 import com.youleligou.core.daos.SnapshotDao
-import com.youleligou.eleme.models.{Category, FoodSku, Restaurant}
+import com.youleligou.eleme.models.{Category, Food, FoodSku, Restaurant}
 
 case class FoodSnapshotDaoSearch(
     id: String,
@@ -12,6 +12,7 @@ case class FoodSnapshotDaoSearch(
     name: String,
     description: String,
     monthSales: Int,
+    balancedPrice: Float,
     rating: Float,
     ratingCount: Int,
     satisfyCount: Int,
@@ -19,7 +20,7 @@ case class FoodSnapshotDaoSearch(
     restaurant: Restaurant,
     category: Category,
     foodSkus: Seq[FoodSku],
-    createdDate: java.sql.Date = java.sql.Date.valueOf(LocalDate.now()),
+    createdDate: java.util.Date = java.sql.Date.valueOf(LocalDate.now()),
     createdAt: java.util.Date = Timestamp.valueOf(LocalDateTime.now())
 ) extends SnapshotDao
 
@@ -33,6 +34,7 @@ object FoodSnapshotDaoSearch {
       name = dao.name,
       description = dao.description,
       monthSales = dao.monthSales,
+      balancedPrice = foodSkus.map(foodSku => foodSku.price * foodSku.recentPopularity).sum / foodSkus.map(_.recentPopularity).sum,
       rating = dao.rating,
       ratingCount = dao.ratingCount,
       satisfyCount = dao.satisfyCount,

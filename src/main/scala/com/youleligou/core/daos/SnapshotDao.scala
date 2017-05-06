@@ -1,6 +1,6 @@
 package com.youleligou.core.daos
 
-import java.sql.Date
+import java.util.Date
 
 /**
   * Created by liangliao on 6/5/17.

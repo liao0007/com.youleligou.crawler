@@ -4,9 +4,11 @@ import com.google.inject.Inject
 import com.youleligou.core.reps.{CassandraRepo, ElasticSearchRepo}
 import com.youleligou.crawler.models.{FetchResponse, ParseResult, UrlInfo}
 import com.youleligou.eleme.daos.{CategoryDao, FoodSkuSnapshotDao, FoodSnapshotDao, FoodSnapshotDaoSearch}
-import com.youleligou.eleme.models.Category
+import com.youleligou.eleme.models.{Category, Restaurant}
 import com.youleligou.eleme.repos.cassandra.RestaurantRepo
 import play.api.libs.json._
+
+import scala.util.control.NonFatal
 
 class ParseService @Inject()(restaurantRepo: RestaurantRepo,
                              categoryRepo: CassandraRepo[CategoryDao],
@@ -25,7 +27,7 @@ class ParseService @Inject()(restaurantRepo: RestaurantRepo,
 
     /*
     es
-
+     */
     try {
       val pattern               = """.*restaurant_id=(\d*)""".r
       val pattern(restaurantId) = fetchResponse.fetchRequest.urlInfo.path
@@ -47,7 +49,7 @@ class ParseService @Inject()(restaurantRepo: RestaurantRepo,
       case NonFatal(x) =>
         logger.warn("{} {}", this.getClass, x.getMessage)
     }
-*/
+
   }
 
   /**
@@ -57,7 +59,14 @@ class ParseService @Inject()(restaurantRepo: RestaurantRepo,
     val categories: Seq[Category] = Json.parse(fetchResponse.content) match {
       case JsArray(value) =>
         value flatMap { item =>
-          item.validate[Category].asOpt
+          item
+            .validate[Category]
+            .fold({ reason =>
+              logger.warn("parse menu failed, {}", reason.toString)
+              None
+            }, { category =>
+              Some(category)
+            })
         }
       case _ => Seq.empty[Category]
     }
