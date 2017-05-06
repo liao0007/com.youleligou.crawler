@@ -12,27 +12,23 @@ import scala.util.control.NonFatal
 
 class ParseService @Inject()(restaurantRepo: RestaurantRepo,
                              categoryRepo: CassandraRepo[CategoryDao],
+                             categorySnapshotRepo: CassandraRepo[CategorySnapshotDao],
                              foodSnapshotRepo: CassandraRepo[FoodSnapshotDao],
                              foodSkuSnapshotRepo: CassandraRepo[FoodSkuSnapshotDao],
                              foodSnapshotSearchRepo: ElasticSearchRepo[FoodSnapshotDaoSearch])
     extends com.youleligou.crawler.services.ParseService {
 
-  private def persist(categories: Seq[Category], fetchResponse: FetchResponse) = {
-    /*
-    cassandra
-     */
-    categoryRepo.save(categories)
-    foodSnapshotRepo.save(categories.flatMap(_.foods))
-    foodSkuSnapshotRepo.save(categories.flatMap(_.foods).flatMap(_.specFoods))
-
-    /*
-    es
-     */
+  private def persist(categories: Seq[Category], fetchResponse: FetchResponse) =
     try {
       val pattern               = """.*restaurant_id=(\d*)""".r
       val pattern(restaurantId) = fetchResponse.fetchRequest.urlInfo.path
 
-      restaurantRepo.findById(restaurantId.toLong) foreach { restaurantDao =>
+      restaurantRepo.findById(restaurantId.toLong) foreach { implicit restaurantDao =>
+        categoryRepo.save(categories)
+        categorySnapshotRepo.save(categories)
+        foodSnapshotRepo.save(categories.flatMap(_.foods))
+        foodSkuSnapshotRepo.save(categories.flatMap(_.foods).flatMap(_.specFoods))
+
         implicit val restaurantDaoSearch: RestaurantDaoSearch = restaurantDao
 
         val foodSnapshotDaoSearches: Seq[FoodSnapshotDaoSearch] = categories flatMap { category =>
@@ -52,8 +48,6 @@ class ParseService @Inject()(restaurantRepo: RestaurantRepo,
       case NonFatal(x) =>
         logger.warn("{} {}", this.getClass, x.getMessage)
     }
-
-  }
 
   /**
     * 解析具体实现

@@ -4,12 +4,6 @@ PUT eleme-restaurant
     "mappings": {
         "snapshot": {
             "properties": {
-                "id": {
-                    "type": "text"
-                },
-                "restaurantId": {
-                    "type": "long"
-                },
                 "address": {
                     "type": "text",
                     "fields": {
@@ -22,6 +16,15 @@ PUT eleme-restaurant
                 "averageCost": {
                     "type": "text"
                 },
+                "createdAt": {
+                    "type": "date"
+                },
+                "createdDate": {
+                    "type": "date"
+                },
+                "deliveryFee": {
+                    "type": "float"
+                },
                 "description": {
                     "type": "text",
                     "fields": {
@@ -31,11 +34,30 @@ PUT eleme-restaurant
                         }
                     }
                 },
-                "deliveryFee": {
-                    "type": "float"
+                "id": {
+                    "type": "text"
                 },
-                "minimumOrderAmount": {
-                    "type": "float"
+                "identification": {
+                    "properties": {
+                        "companyName": {
+                            "type": "text",
+                            "fields": {
+                                "keyword": {
+                                    "type": "keyword",
+                                    "ignore_above": 256
+                                }
+                            }
+                        },
+                        "licensesNumber": {
+                            "type": "text",
+                            "fields": {
+                                "keyword": {
+                                    "type": "keyword",
+                                    "ignore_above": 256
+                                }
+                            }
+                        }
+                    }
                 },
                 "imagePath": {
                     "type": "text"
@@ -45,6 +67,12 @@ PUT eleme-restaurant
                 },
                 "isPremium": {
                     "type": "boolean"
+                },
+                "location": {
+                    "type": "geo_point"
+                },
+                "minimumOrderAmount": {
+                    "type": "float"
                 },
                 "name": {
                     "type": "text",
@@ -76,39 +104,11 @@ PUT eleme-restaurant
                 "recentOrderNum": {
                     "type": "integer"
                 },
+                "restaurantId": {
+                    "type": "long"
+                },
                 "status": {
                     "type": "integer"
-                },
-                "location": {
-                    "type": "geo_point"
-                },
-                "identification": {
-                    "properties": {
-                        "companyName": {
-                            "type": "text",
-                            "fields": {
-                                "keyword": {
-                                    "type": "keyword",
-                                    "ignore_above": 256
-                                }
-                            }
-                        },
-                        "licensesNumber": {
-                            "type": "text",
-                            "fields": {
-                                "keyword": {
-                                    "type": "keyword",
-                                    "ignore_above": 256
-                                }
-                            }
-                        }
-                    }
-                },
-                "createdAt": {
-                    "type": "date"
-                },
-                "createdDate": {
-                    "type": "date"
                 }
             }
         }
@@ -120,14 +120,15 @@ PUT eleme-restaurant
         }
     }
 }
-```
 
-```
 PUT eleme-food
 {
     "mappings": {
         "snapshot": {
             "properties": {
+                "balancedPrice": {
+                    "type": "float"
+                },
                 "category": {
                     "properties": {
                         "activity": {
@@ -138,6 +139,9 @@ PUT eleme-food
                                     "ignore_above": 256
                                 }
                             }
+                        },
+                        "createdAt": {
+                            "type": "date"
                         },
                         "description": {
                             "type": "text",
@@ -152,6 +156,9 @@ PUT eleme-food
                             "type": "text"
                         },
                         "id": {
+                            "type": "long"
+                        },
+                         "restaurantId": {
                             "type": "long"
                         },
                         "isActivity": {
@@ -183,6 +190,62 @@ PUT eleme-food
                         "keyword": {
                             "type": "keyword",
                             "ignore_above": 256
+                        }
+                    }
+                },
+                "foodSkus": {
+                    "type": "nested",
+                    "properties": {
+                        "checkoutMode": {
+                            "type": "long"
+                        },
+                        "foodId": {
+                            "type": "long"
+                        },
+                        "isEssential": {
+                            "type": "boolean"
+                        },
+                        "itemId": {
+                            "type": "long"
+                        },
+                        "name": {
+                            "type": "text",
+                            "fields": {
+                                "keyword": {
+                                    "type": "keyword",
+                                    "ignore_above": 256
+                                }
+                            }
+                        },
+                        "originalPrice": {
+                            "type": "float"
+                        },
+                        "packingFee": {
+                            "type": "float"
+                        },
+                        "price": {
+                            "type": "float"
+                        },
+                        "promotionStock": {
+                            "type": "long"
+                        },
+                        "recentPopularity": {
+                            "type": "long"
+                        },
+                        "recentRating": {
+                            "type": "float"
+                        },
+                        "restaurantId": {
+                            "type": "long"
+                        },
+                        "skuId": {
+                            "type": "long"
+                        },
+                        "soldOut": {
+                            "type": "boolean"
+                        },
+                        "stock": {
+                            "type": "long"
                         }
                     }
                 },
@@ -221,6 +284,9 @@ PUT eleme-food
                                 }
                             }
                         },
+                        "createdAt": {
+                            "type": "date"
+                        },
                         "id": {
                             "type": "long"
                         },
@@ -246,6 +312,15 @@ PUT eleme-food
                                 }
                             }
                         },
+                        "imagePath": {
+                            "type": "text",
+                            "fields": {
+                                "keyword": {
+                                    "type": "keyword",
+                                    "ignore_above": 256
+                                }
+                            }
+                        },
                         "location": {
                             "type": "geo_point"
                         },
@@ -265,9 +340,6 @@ PUT eleme-food
                 },
                 "satisfyRate": {
                     "type": "float"
-                },
-                "foodSkus": {
-                    "type": "nested"
                 }
             }
         }

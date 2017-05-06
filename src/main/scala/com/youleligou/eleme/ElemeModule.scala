@@ -20,6 +20,7 @@ class ElemeModule extends AbstractModule with ScalaModule with GuiceAkkaActorRef
     bind[CassandraRepo[CategoryDao]].to[repos.cassandra.CategoryRepo]
 
     bind[CassandraRepo[RestaurantSnapshotDao]].to[repos.cassandra.RestaurantSnapshotRepo]
+    bind[CassandraRepo[CategorySnapshotDao]].to[repos.cassandra.CategorySnapshotRepo]
     bind[CassandraRepo[FoodSnapshotDao]].to[repos.cassandra.FoodSnapshotRepo]
     bind[CassandraRepo[FoodSkuSnapshotDao]].to[repos.cassandra.FoodSkuSnapshotRepo]
 

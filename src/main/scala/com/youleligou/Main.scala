@@ -25,9 +25,6 @@ object Main extends App {
 
   import net.codingwell.scalaguice.InjectorExtensions._
 
-  injector.instance[ElemeCrawlerBootstrap].cleanMenu()
-  injector.instance[ElemeCrawlerBootstrap].startMenu()
-
   /*
   restaurant
    */

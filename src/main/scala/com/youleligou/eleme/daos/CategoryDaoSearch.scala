@@ -7,6 +7,7 @@ import com.youleligou.core.daos.Dao
 
 case class CategoryDaoSearch(
     id: Long,
+    restaurantId: Long,
     typ: Int,
     isActivity: Option[Boolean] = None,
     activity: Option[String] = None,
@@ -20,6 +21,7 @@ object CategoryDaoSearch {
   implicit def fromDao(dao: CategoryDao): CategoryDaoSearch =
     CategoryDaoSearch(
       id = dao.id,
+      restaurantId = dao.restaurantId,
       typ = dao.typ,
       isActivity = dao.isActivity,
       activity = dao.activity,
@@ -33,6 +35,7 @@ object CategoryDaoSearch {
 
   implicit def toDao(search: CategoryDaoSearch): CategoryDao = CategoryDao(
     id = search.id,
+    restaurantId = search.restaurantId,
     typ = search.typ,
     isActivity = search.isActivity,
     activity = search.activity,

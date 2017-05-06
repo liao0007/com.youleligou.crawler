@@ -1,12 +1,12 @@
 package com.youleligou.eleme.daos
 
 import java.sql.Timestamp
-import java.time.LocalDateTime
+import java.time.{LocalDate, LocalDateTime}
 
-import com.youleligou.core.daos.Dao
+import com.youleligou.core.daos.SnapshotDao
 import com.youleligou.eleme.models.{Category, Food, Restaurant}
 
-case class CategoryDao(
+case class CategorySnapshotDao(
     id: Long,
     restaurantId: Long,
     typ: Int,
@@ -15,11 +15,12 @@ case class CategoryDao(
     description: String,
     iconUrl: String,
     name: String,
+    createdDate: java.util.Date = java.sql.Date.valueOf(LocalDate.now()),
     createdAt: java.util.Date = Timestamp.valueOf(LocalDateTime.now())
-) extends Dao
+) extends SnapshotDao
 
-object CategoryDao {
-  implicit def fromModel(model: Category)(implicit restaurantDao: RestaurantDao): CategoryDao = CategoryDao(
+object CategorySnapshotDao {
+  implicit def fromModel(model: Category)(implicit restaurantDao: RestaurantDao): CategorySnapshotDao = CategorySnapshotDao(
     id = model.id,
     restaurantId = restaurantDao.id,
     typ = model.typ,
@@ -29,10 +30,10 @@ object CategoryDao {
     iconUrl = model.iconUrl,
     name = model.name
   )
-  implicit def fromModel(source: Seq[Category])(implicit converter: Category => CategoryDao): Seq[CategoryDao] =
+  implicit def fromModel(source: Seq[Category])(implicit converter: Category => CategorySnapshotDao): Seq[CategorySnapshotDao] =
     source map converter
 
-  implicit def toModel(dao: CategoryDao): Category = Category(
+  implicit def toModel(dao: CategorySnapshotDao): Category = Category(
     id = dao.id,
     typ = dao.typ,
     isActivity = dao.isActivity,
@@ -42,6 +43,6 @@ object CategoryDao {
     name = dao.name,
     foods = Seq.empty[Food]
   )
-  implicit def toModel(source: Seq[CategoryDao])(implicit converter: CategoryDao => Category): Seq[Category] =
+  implicit def toModel(source: Seq[CategorySnapshotDao])(implicit converter: CategorySnapshotDao => Category): Seq[Category] =
     source map converter
 }
