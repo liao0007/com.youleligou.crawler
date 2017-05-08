@@ -1,4 +1,4 @@
-package com.youleligou.meituan.reps.elasticsearch
+package com.youleligou.meituan.repos.elasticsearch
 
 import com.google.inject.Inject
 import com.youleligou.core.reps.ElasticSearchRepo

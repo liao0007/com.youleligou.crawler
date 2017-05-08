@@ -1,4 +1,4 @@
-package com.youleligou.meituan.reps.cassandra
+package com.youleligou.meituan.repos.cassandra
 
 import com.google.inject.Inject
 import com.youleligou.core.reps.CassandraRepo

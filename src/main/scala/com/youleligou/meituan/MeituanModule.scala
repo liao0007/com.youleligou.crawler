@@ -4,8 +4,8 @@ import com.google.inject._
 import com.youleligou.core.reps.{CassandraRepo, ElasticSearchRepo}
 import com.youleligou.crawler.modules._
 import com.youleligou.crawler.services.ParseService
-import com.youleligou.eleme.daos.{FoodSnapshotDaoSearch, _}
-import com.youleligou.eleme.services.{menu, restaurants}
+import com.youleligou.meituan.services._
+import com.youleligou.meituan.daos._
 import net.codingwell.scalaguice.ScalaModule
 
 /**
@@ -16,24 +16,24 @@ class MeituanModule extends AbstractModule with ScalaModule with GuiceAkkaActorR
     /*
     cassandra
      */
-    bind[CassandraRepo[RestaurantDao]].to[repos.cassandra.RestaurantRepo]
-    bind[CassandraRepo[CategoryDao]].to[repos.cassandra.CategoryRepo]
+    bind[CassandraRepo[PoiDao]].to[repos.cassandra.PoiRepo]
+    bind[CassandraRepo[FoodTagDao]].to[repos.cassandra.FoodTagRepo]
 
-    bind[CassandraRepo[RestaurantSnapshotDao]].to[repos.cassandra.RestaurantSnapshotRepo]
-    bind[CassandraRepo[CategorySnapshotDao]].to[repos.cassandra.CategorySnapshotRepo]
-    bind[CassandraRepo[FoodSnapshotDao]].to[repos.cassandra.FoodSnapshotRepo]
-    bind[CassandraRepo[FoodSkuSnapshotDao]].to[repos.cassandra.FoodSkuSnapshotRepo]
+    bind[CassandraRepo[PoiSnapshotDao]].to[repos.cassandra.PoiSnapshotRepo]
+    bind[CassandraRepo[FoodTagSnapshotDao]].to[repos.cassandra.FoodTagSnapshotRepo]
+    bind[CassandraRepo[SpuSnapshotDao]].to[repos.cassandra.SpuSnapshotRepo]
+    bind[CassandraRepo[SkuSnapshotDao]].to[repos.cassandra.SkuSnapshotRepo]
 
     /*
     es
      */
-    bind[ElasticSearchRepo[RestaurantSnapshotDaoSearch]].to[repos.elasticsearch.RestaurantSnapshotRepo]
-    bind[ElasticSearchRepo[FoodSnapshotDaoSearch]].to[repos.elasticsearch.FoodSnapshotRepo]
+    bind[ElasticSearchRepo[PoiSnapshotDaoSearch]].to[repos.elasticsearch.PoiSnapshotRepo]
+    bind[ElasticSearchRepo[SpuSnapshotDaoSearch]].to[repos.elasticsearch.SpuSnapshotRepo]
 
     /*
     services
      */
-    bind[ParseService].annotatedWithName(classOf[menu.ParseService].getName).to[menu.ParseService]
-    bind[ParseService].annotatedWithName(classOf[restaurants.ParseService].getName).to[restaurants.ParseService]
+    bind[ParseService].annotatedWithName(classOf[poiFilter.ParseService].getName).to[poiFilter.ParseService]
+    bind[ParseService].annotatedWithName(classOf[poiFood.ParseService].getName).to[poiFood.ParseService]
   }
 }
