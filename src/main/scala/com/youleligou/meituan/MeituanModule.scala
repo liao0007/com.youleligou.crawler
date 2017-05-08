@@ -35,6 +35,6 @@ class MeituanModule extends AbstractModule with ScalaModule with GuiceAkkaActorR
      */
     bind[ParseService].annotatedWithName(classOf[parse.PoiFilterParseService].getName).to[parse.PoiFilterParseService]
     bind[ParseService].annotatedWithName(classOf[parse.PoiFoodParseService].getName).to[parse.PoiFoodParseService]
-    bind[FetchService].annotatedWithName(classOf[fetch.MeituanHttpClientFetchService].getName).to[fetch.MeituanHttpClientFetchService]
+    bind[FetchService].annotatedWithName(classOf[fetch.PoiFilterHttpClientFetchService].getName).to[fetch.PoiFilterHttpClientFetchService]
   }
 }

@@ -7,10 +7,10 @@ import com.google.inject.Inject
 import com.typesafe.config.Config
 import com.youleligou.core.reps.Repo
 import com.youleligou.crawler.daos.JobDao
-import com.youleligou.crawler.models.{FetchRequest, FetchResponse, Job}
+import com.youleligou.crawler.models.{FetchRequest, FetchResponse, Job, UrlInfo}
 import com.youleligou.crawler.services.FetchService
 import play.api.libs.ws.ahc.StandaloneAhcWSClient
-import play.api.libs.ws.{DefaultWSProxyServer, StandaloneWSRequest}
+import play.api.libs.ws.{DefaultWSProxyServer, StandaloneWSRequest, StandaloneWSResponse}
 
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
@@ -21,8 +21,8 @@ import scala.util.control.NonFatal
   * Created by young.yang on 2016/8/28.
   * 采用HttpClient实现的爬取器
   */
-class HttpClientFetchService @Inject()(config: Config, jobRepo: Repo[JobDao], standaloneAhcWSClient: StandaloneAhcWSClient)
-    extends FetchService {
+class HttpClientFetchService @Inject()(config: Config, jobRepo: Repo[JobDao], standaloneAhcWSClient: StandaloneAhcWSClient) extends FetchService {
+  val rand = new Random(System.currentTimeMillis())
 
   import com.github.andr83.scalaconfig._
   val useProxy: Boolean                = config.getBoolean("crawler.fetch.useProxy")
@@ -32,19 +32,20 @@ class HttpClientFetchService @Inject()(config: Config, jobRepo: Repo[JobDao], st
   val timeout: Duration                = Duration(config.getInt("crawler.fetch.timeout"), MILLISECONDS)
 
   def fetch(fetchRequest: FetchRequest)(implicit executor: ExecutionContext): Future[FetchResponse] = {
-    val FetchRequest(urlInfo, _) = fetchRequest
-    val rand                     = new Random(System.currentTimeMillis())
+    val request: StandaloneWSRequest = buildRequest(fetchRequest.urlInfo.url)
+    val response: Future[StandaloneWSResponse] = makeRequest(request) { r =>
+      r.get()
+    }
+    processResponse(fetchRequest, response)
+  }
 
-    val crawlerJob = Job(
-      url = urlInfo.url,
-      jobName = urlInfo.jobType,
-      useProxy = useProxy
-    )
+  def buildRequest(url: String, headers: Seq[(String, String)] = Seq.empty[(String, String)]): StandaloneWSRequest = {
+    val cascadedHeader = headers :+ ("User-Agent", userAgents(rand.nextInt(userAgentsSize)))
 
     val clientWithUrl =
       standaloneAhcWSClient
-        .url(urlInfo.url)
-        .withHeaders("User-Agent" -> userAgents(rand.nextInt(userAgentsSize)))
+        .url(url)
+        .withHeaders(cascadedHeader: _*)
         .withRequestTimeout(timeout)
 
     val withForwardedFor = addXForwardedFor(clientWithUrl)
@@ -61,29 +62,45 @@ class HttpClientFetchService @Inject()(config: Config, jobRepo: Repo[JobDao], st
       } else
         withForwardedFor
 
+    clientWithProxy
+  }
+
+  def makeRequest(request: StandaloneWSRequest)(function: StandaloneWSRequest => Future[StandaloneWSResponse]): Future[StandaloneWSResponse] =
     try {
-      clientWithProxy
-        .get()
-        .map { response =>
-          jobRepo.save(crawlerJob.copy(statusCode = Some(response.status), statusMessage = Some(response.statusText), completedAt = Some(Timestamp.valueOf(LocalDateTime.now()))))
-          FetchResponse(response.status, response.body, response.statusText, fetchRequest)
-        } recover {
-        case NonFatal(x) =>
-          logger.warn(x.getMessage)
-          jobRepo.save(crawlerJob.copy(statusCode = Some(999), statusMessage = Some(x.getMessage)))
-          x.getMessage match {
-            case "Remotely closed" =>
-              FetchResponse(FetchService.RemoteClosed, "", x.getMessage, fetchRequest)
-            case _ =>
-              FetchResponse(FetchService.Timeout, "", x.getMessage, fetchRequest)
-          }
-      }
+      function(request)
     } catch {
       case NonFatal(x) =>
         logger.warn(x.getMessage)
-        jobRepo.save(crawlerJob.copy(statusCode = Some(999), statusMessage = Some(x.getMessage)))
-        Future.successful(FetchResponse(FetchService.RemoteClosed, "", x.getMessage, fetchRequest))
+        Future.failed(x)
     }
+
+  def processResponse(fetchRequest: FetchRequest, futureResponse: Future[StandaloneWSResponse]) = {
+    val FetchRequest(urlInfo, _) = fetchRequest
+    val crawlerJob = Job(
+      url = urlInfo.toString,
+      jobName = urlInfo.jobType,
+      useProxy = useProxy
+    )
+
+    futureResponse
+      .map { response =>
+        jobRepo.save(
+          crawlerJob.copy(statusCode = Some(response.status),
+                          statusMessage = Some(response.statusText),
+                          completedAt = Some(Timestamp.valueOf(LocalDateTime.now()))))
+        FetchResponse(response.status, response.body, response.statusText, fetchRequest)
+      } recover {
+      case NonFatal(x) =>
+        logger.warn(x.getMessage)
+        jobRepo.save(crawlerJob.copy(statusCode = Some(999), statusMessage = Some(x.getMessage)))
+        x.getMessage match {
+          case "Remotely closed" =>
+            FetchResponse(FetchService.RemoteClosed, "", x.getMessage, fetchRequest)
+          case _ =>
+            FetchResponse(FetchService.Timeout, "", x.getMessage, fetchRequest)
+        }
+    }
+
   }
 
   def addXForwardedFor(standaloneWSRequest: StandaloneWSRequest): StandaloneWSRequest = {

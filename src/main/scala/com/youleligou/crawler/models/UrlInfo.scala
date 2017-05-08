@@ -11,6 +11,7 @@ import play.api.libs.json.Json
 case class UrlInfo(domain: String,
                    path: String,
                    queryParameters: Map[String, String] = Map.empty[String, String],
+                   bodyParameters: Map[String, String] = Map.empty[String, String],
                    urlType: String = UrlInfoType.Generated,
                    jobType: String,
                    deep: Int = 0,
@@ -19,13 +20,16 @@ case class UrlInfo(domain: String,
     val parameterString =
       if (queryParameters.nonEmpty)
         queryParameters
-          .map(queryParameter => queryParameter._1 + "=" + queryParameter._2)
+          .map(parameter => parameter._1 + "=" + parameter._2)
           .mkString(if (path.contains("?")) "&" else "?", "&", "")
       else ""
     domain + path + parameterString
   }
 
-  override def toString: String = url
+  override def toString: String =
+    url + "/" + bodyParameters
+      .map(parameter => parameter._1 + "=" + parameter._2)
+      .mkString("&")
 
   def withPath(newPath: String): UrlInfo = {
     val trimmedPath = newPath.trim
