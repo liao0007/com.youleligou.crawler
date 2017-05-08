@@ -1,8 +1,5 @@
 import java.util.regex.Pattern
 
-classOf[Pattern].getName
-
-
-val pattern = """.*restaurant_id=(\d*)""".r
-val pattern(nu) = "/shopping/v2/menu?restaurant_id=150880085"
-nu.toLong
+import scala.util.Random
+val rand = new Random(System.currentTimeMillis())
+(Math.abs(Math.sin(rand.nextDouble())) * 1000).toInt

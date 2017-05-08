@@ -13,6 +13,7 @@ import com.youleligou.crawler.modules.GuiceAkkaActorRefProvider
 import com.youleligou.crawler.services.FetchService
 
 import scala.concurrent.Future
+import scala.util.Random
 
 /**
   * Created by young.yang on 2016/8/28.
@@ -32,8 +33,8 @@ class Fetcher @Inject()(config: Config, injector: com.google.inject.Injector, @N
   override def receive: Receive = {
     case Fetcher.Fetch(fetchRequest) =>
       fetchRequest.urlInfo.services.get(Fetcher.ServiceNameKey).foreach { serviceName =>
-        val fetchService                         = injector.getInstance(Key.get(classOf[FetchService], Names.named(serviceName)))
-        val fetchResult: Future[Fetcher.Fetched] = fetchService.fetch(fetchRequest).map(Fetcher.Fetched) pipeTo self
+        val fetchService = injector.getInstance(Key.get(classOf[FetchService], Names.named(serviceName)))
+        fetchService.fetch(fetchRequest).map(Fetcher.Fetched) pipeTo self
         context become fetching(sender)
       }
   }

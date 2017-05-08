@@ -56,8 +56,6 @@ object Main extends App {
  restaurant
   */
 
-  injector.instance[MeituanCrawlerBootstrap].cleanRestaurants()
-  injector.instance[MeituanCrawlerBootstrap].startRestaurants()
   if (args.contains("meituan/restaurants/start"))
     injector.instance[MeituanCrawlerBootstrap].startRestaurants()
 

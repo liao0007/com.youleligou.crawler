@@ -35,6 +35,7 @@ class ElemeModule extends AbstractModule with ScalaModule with GuiceAkkaActorRef
      */
     bind[ParseService].annotatedWithName(classOf[parse.MenuParseService].getName).to[parse.MenuParseService]
     bind[ParseService].annotatedWithName(classOf[parse.RestaurantsParseService].getName).to[parse.RestaurantsParseService]
-    bind[FetchService].annotatedWithName(classOf[fetch.HttpClientFetchService].getName).to[fetch.HttpClientFetchService]
+    bind[FetchService].annotatedWithName(classOf[fetch.MenuHttpClientFetchService].getName).to[fetch.MenuHttpClientFetchService]
+    bind[FetchService].annotatedWithName(classOf[fetch.RestaurantsHttpClientFetchService].getName).to[fetch.RestaurantsHttpClientFetchService]
   }
 }

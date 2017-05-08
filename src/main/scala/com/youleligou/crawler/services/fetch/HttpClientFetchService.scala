@@ -67,6 +67,7 @@ class HttpClientFetchService @Inject()(config: Config, jobRepo: Repo[JobDao], st
 
   def makeRequest(request: StandaloneWSRequest)(function: StandaloneWSRequest => Future[StandaloneWSResponse]): Future[StandaloneWSResponse] =
     try {
+      Thread.sleep((Math.abs(Math.sin(rand.nextDouble())) * 1000).toInt)
       function(request)
     } catch {
       case NonFatal(x) =>
@@ -106,9 +107,9 @@ class HttpClientFetchService @Inject()(config: Config, jobRepo: Repo[JobDao], st
 
   def addXForwardedFor(standaloneWSRequest: StandaloneWSRequest): StandaloneWSRequest = {
     val roll = Random.nextInt(100)
-    if (roll < 60) {
+    if (roll < 70) {
       standaloneWSRequest.withHeaders("X-Forwarded-For" -> randomIp)
-    } else if (roll < 80) {
+    } else if (roll < 90) {
       standaloneWSRequest.withHeaders("X-Forwarded-For" -> Seq.fill(2)(randomIp).mkString(", "))
     } else {
       standaloneWSRequest
