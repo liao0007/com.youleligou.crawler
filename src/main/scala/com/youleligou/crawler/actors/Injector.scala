@@ -34,7 +34,7 @@ class Injector @Inject()(config: Config, redisClient: RedisClient, hashService: 
 
     case Injector.Inject(fetchRequest, force) =>
       log.debug("{} hash check {}", self.path, fetchRequest)
-      val md5   = hashService.hash(fetchRequest.urlInfo.url)
+      val md5   = hashService.hash(fetchRequest.urlInfo.toString)
       val queue = fetchRequest.urlInfo.jobType
 
       redisClient.hsetnx(injectedUrlHashKey(queue), md5, "1") map { result =>
@@ -53,7 +53,6 @@ class Injector @Inject()(config: Config, redisClient: RedisClient, hashService: 
       } map Injector.Injected pipeTo self
 
     case Injector.Injected(count) =>
-
     case Injector.Tick(queue) =>
       log.debug("{} tick {}", self.path, queue)
       redisClient.rpop[String](pendingInjectingUrlQueueKey(queue)).map(Injector.Ticked) recover {

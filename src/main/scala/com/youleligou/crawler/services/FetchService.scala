@@ -20,4 +20,5 @@ object FetchService {
   val ServiceUnavailable = 503
   val Timeout            = 504
   val RemoteClosed       = 999
+  val Misc               = 1000
 }

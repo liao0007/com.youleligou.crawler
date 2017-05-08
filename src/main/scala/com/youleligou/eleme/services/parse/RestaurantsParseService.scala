@@ -76,7 +76,7 @@ class RestaurantsParseService @Inject()(restaurantSnapshotRepo: CassandraRepo[Re
           }
         }
       case _ =>
-        logger.warn("parse restaurant failed, url {}", fetchResponse.fetchRequest.urlInfo.url)
+        logger.warn("parse restaurant failed, url {}", fetchResponse.fetchRequest.urlInfo)
         Seq.empty[Restaurant]
     }
 

@@ -41,9 +41,9 @@ class PoiFilterParseService @Inject()(poiSnapshotRepo: CassandraRepo[PoiSnapshot
 
   private def getChildLinksByOffset(fetchResponse: FetchResponse): Seq[UrlInfo] = {
     val urlInfo = fetchResponse.fetchRequest.urlInfo
-    val offset  = urlInfo.queryParameters.getOrElse(OffsetKey, "0").toInt
-    val limit   = urlInfo.queryParameters.getOrElse(LimitKey, "1").toInt
-    Seq(urlInfo.copy(queryParameters = urlInfo.queryParameters + (OffsetKey -> (offset + limit).toString)))
+    val offset  = urlInfo.bodyParameters.getOrElse(OffsetKey, "0").toInt
+    val limit   = urlInfo.bodyParameters.getOrElse(LimitKey, "1").toInt
+    Seq(urlInfo.copy(bodyParameters = urlInfo.bodyParameters + (OffsetKey -> (offset + limit).toString)))
   }
 
   private def persist(pois: Seq[Poi]): Future[Any] = {
@@ -53,11 +53,12 @@ class PoiFilterParseService @Inject()(poiSnapshotRepo: CassandraRepo[PoiSnapshot
     val poiSnapshotDaoSearches: Seq[PoiSnapshotDaoSearch] = poiSnapshotDaos
 
     //cassandra
-    poiRepo.save(poiDaos)
-    poiSnapshotRepo.save(poiSnapshotDaos)
+//    poiRepo.save(poiDaos)
+//    poiSnapshotRepo.save(poiSnapshotDaos)
 
     //es
-    poiSnapshotSearchRepo.save(poiSnapshotDaoSearches)
+//    poiSnapshotSearchRepo.save(poiSnapshotDaoSearches)
+    Future.successful(true)
   }
 
   /**
@@ -80,7 +81,7 @@ class PoiFilterParseService @Inject()(poiSnapshotRepo: CassandraRepo[PoiSnapshot
               }
             }
           case _ =>
-            logger.warn("parse poi failed, url {}", fetchResponse.fetchRequest.urlInfo.url)
+            logger.warn("parse poi failed, url {}", fetchResponse.fetchRequest.urlInfo)
             Seq.empty[Poi]
         }
 
@@ -88,7 +89,6 @@ class PoiFilterParseService @Inject()(poiSnapshotRepo: CassandraRepo[PoiSnapshot
           persist(pois)
 
         val hasNextPage: Boolean = (result \ "data" \ "poi_has_next_page" toOption).contains(JsBoolean(true))
-
         ParseResult(
           fetchResponse = fetchResponse,
           childLink = if (!hasNextPage) getChildLinksByLocation(fetchResponse) else getChildLinksByOffset(fetchResponse)

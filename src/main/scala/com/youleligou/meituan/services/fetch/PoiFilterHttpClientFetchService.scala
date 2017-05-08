@@ -5,8 +5,10 @@ import com.typesafe.config.Config
 import com.youleligou.core.reps.Repo
 import com.youleligou.crawler.daos.JobDao
 import com.youleligou.crawler.models.{FetchRequest, FetchResponse, UrlInfo}
+import com.youleligou.crawler.services.FetchService
 import com.youleligou.crawler.services.fetch.HttpClientFetchService
 import org.joda.time.DateTime
+import play.api.libs.json.{JsString, Json}
 import play.api.libs.ws.ahc.StandaloneAhcWSClient
 import play.api.libs.ws.{StandaloneWSRequest, StandaloneWSResponse}
 
@@ -60,7 +62,13 @@ class PoiFilterHttpClientFetchService @Inject()(config: Config, jobRepo: Repo[Jo
     val response: Future[StandaloneWSResponse] = makeRequest(request) { r =>
       r.post(body)
     }
-    processResponse(fetchRequest, response)
+    processResponse(fetchRequest, response) map { fetchResponse =>
+      if ((Json.parse(fetchResponse.content) \ "msg" toOption).contains(JsString("成功")))
+        fetchResponse
+      else {
+        fetchResponse.copy(status = FetchService.Misc)
+      }
+    }
 
   }
 
