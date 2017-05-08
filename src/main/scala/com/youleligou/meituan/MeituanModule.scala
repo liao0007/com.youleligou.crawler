@@ -4,8 +4,8 @@ import com.google.inject._
 import com.youleligou.core.reps.{CassandraRepo, ElasticSearchRepo}
 import com.youleligou.crawler.modules._
 import com.youleligou.crawler.services.{FetchService, ParseService}
-import com.youleligou.meituan.services._
 import com.youleligou.meituan.daos._
+import com.youleligou.meituan.services._
 import net.codingwell.scalaguice.ScalaModule
 
 /**
@@ -36,5 +36,6 @@ class MeituanModule extends AbstractModule with ScalaModule with GuiceAkkaActorR
     bind[ParseService].annotatedWithName(classOf[parse.PoiFilterParseService].getName).to[parse.PoiFilterParseService]
     bind[ParseService].annotatedWithName(classOf[parse.PoiFoodParseService].getName).to[parse.PoiFoodParseService]
     bind[FetchService].annotatedWithName(classOf[fetch.PoiFilterHttpClientFetchService].getName).to[fetch.PoiFilterHttpClientFetchService]
+    bind[FetchService].annotatedWithName(classOf[fetch.PoiFoodHttpClientFetchService].getName).to[fetch.PoiFoodHttpClientFetchService]
   }
 }

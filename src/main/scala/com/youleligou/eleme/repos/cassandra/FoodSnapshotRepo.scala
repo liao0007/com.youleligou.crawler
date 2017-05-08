@@ -1,6 +1,5 @@
 package com.youleligou.eleme.repos.cassandra
 
-import com.datastax.spark.connector._
 import com.google.inject.Inject
 import com.youleligou.core.reps.CassandraRepo
 import com.youleligou.eleme.daos.FoodSnapshotDao

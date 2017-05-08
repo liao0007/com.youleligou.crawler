@@ -4,7 +4,7 @@ import java.sql.Timestamp
 import java.time.{LocalDate, LocalDateTime}
 
 import com.youleligou.core.daos.SnapshotDao
-import com.youleligou.eleme.models.{Category, Food, Restaurant}
+import com.youleligou.eleme.models.{Category, Food}
 
 case class CategorySnapshotDao(
     id: Long,

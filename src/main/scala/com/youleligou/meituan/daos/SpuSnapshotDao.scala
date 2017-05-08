@@ -3,9 +3,7 @@ package com.youleligou.meituan.daos
 import java.sql.Timestamp
 import java.time.{LocalDate, LocalDateTime}
 
-import com.youleligou.core.daos.{Dao, SnapshotDao}
-import com.youleligou.eleme.daos.SpuSnapshotDao
-import com.youleligou.eleme.models.{Spu, SpuSku}
+import com.youleligou.core.daos.SnapshotDao
 import com.youleligou.meituan.modals.{Sku, Spu}
 
 /**

@@ -4,7 +4,7 @@ import java.sql.Timestamp
 import java.time.LocalDateTime
 
 import com.youleligou.core.daos.Dao
-import com.youleligou.meituan.modals.{Spu, FoodTag}
+import com.youleligou.meituan.modals.{FoodTag, Spu}
 
 /**
   * Created by liangliao on 8/5/17.

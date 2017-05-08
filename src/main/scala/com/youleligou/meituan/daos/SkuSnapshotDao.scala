@@ -4,8 +4,6 @@ import java.sql.Timestamp
 import java.time.{LocalDate, LocalDateTime}
 
 import com.youleligou.core.daos.SnapshotDao
-import com.youleligou.eleme.daos.SkuSnapshotDao
-import com.youleligou.eleme.models.Sku
 import com.youleligou.meituan.modals.Sku
 
 /**

@@ -3,7 +3,7 @@ package com.youleligou.proxyHunters.youdaili
 import com.google.inject._
 import com.youleligou.crawler.modules._
 import com.youleligou.crawler.services.ParseService
-import com.youleligou.proxyHunters.youdaili.services.{parse, proxyList, proxyPage}
+import com.youleligou.proxyHunters.youdaili.services.parse
 import net.codingwell.scalaguice.ScalaModule
 
 /**

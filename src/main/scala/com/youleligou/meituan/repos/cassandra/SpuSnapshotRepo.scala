@@ -1,6 +1,5 @@
 package com.youleligou.meituan.repos.cassandra
 
-import com.datastax.spark.connector._
 import com.google.inject.Inject
 import com.youleligou.core.reps.CassandraRepo
 import com.youleligou.meituan.daos.SpuSnapshotDao

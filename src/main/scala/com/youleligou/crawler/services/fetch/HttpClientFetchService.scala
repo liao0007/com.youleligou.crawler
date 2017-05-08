@@ -7,7 +7,7 @@ import com.google.inject.Inject
 import com.typesafe.config.Config
 import com.youleligou.core.reps.Repo
 import com.youleligou.crawler.daos.JobDao
-import com.youleligou.crawler.models.{FetchRequest, FetchResponse, Job, UrlInfo}
+import com.youleligou.crawler.models.{FetchRequest, FetchResponse, Job}
 import com.youleligou.crawler.services.FetchService
 import play.api.libs.ws.ahc.StandaloneAhcWSClient
 import play.api.libs.ws.{DefaultWSProxyServer, StandaloneWSRequest, StandaloneWSResponse}

@@ -4,8 +4,6 @@ import java.sql.Timestamp
 import java.time.LocalDateTime
 
 import com.youleligou.core.daos.Dao
-import com.youleligou.eleme.daos.PoiDao
-import com.youleligou.eleme.models.{Identification, Poi}
 import com.youleligou.meituan.modals.Poi
 
 /**
