@@ -1,4 +1,4 @@
-package com.youleligou.proxyHunters.xicidaili.services.proxyList
+package com.youleligou.proxyHunters.xicidaili.services.parse
 
 import java.sql.Timestamp
 
@@ -16,7 +16,7 @@ import scala.util.control.NonFatal
   * Created by young.yang on 2016/8/31.
   * Jsoup解析器
   */
-class ParseService @Inject()(proxyServerRepo: Repo[ProxyServerDao]) extends com.youleligou.crawler.services.ParseService {
+class ProxyListParseService @Inject()(proxyServerRepo: Repo[ProxyServerDao]) extends com.youleligou.crawler.services.ParseService {
 
   val format = new java.text.SimpleDateFormat("yy-MM-dd hh:mm")
 

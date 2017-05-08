@@ -4,18 +4,21 @@ import javax.inject.Named
 
 import akka.actor.{Actor, ActorLogging, ActorRef}
 import akka.pattern.pipe
-import com.google.inject.Inject
+import com.google.inject.name.Names
+import com.google.inject.{Inject, Key}
 import com.typesafe.config.Config
 import com.youleligou.crawler.actors.Parser.Parse
 import com.youleligou.crawler.models.{FetchRequest, FetchResponse}
 import com.youleligou.crawler.modules.GuiceAkkaActorRefProvider
 import com.youleligou.crawler.services.FetchService
 
+import scala.concurrent.Future
+
 /**
   * Created by young.yang on 2016/8/28.
   * 网页抓取任务,采用Actor实现
   */
-class Fetcher @Inject()(config: Config, fetchService: FetchService, @Named(Injector.PoolName) injectors: ActorRef)
+class Fetcher @Inject()(config: Config, injector: com.google.inject.Injector, @Named(Injector.PoolName) injectors: ActorRef)
     extends Actor
     with ActorLogging
     with GuiceAkkaActorRefProvider {
@@ -28,8 +31,11 @@ class Fetcher @Inject()(config: Config, fetchService: FetchService, @Named(Injec
 
   override def receive: Receive = {
     case Fetcher.Fetch(fetchRequest) =>
-      fetchService.fetch(fetchRequest).map(Fetcher.Fetched) pipeTo self
-      context become fetching(sender)
+      fetchRequest.urlInfo.services.get(Fetcher.ServiceNameKey).foreach { serviceName =>
+        val fetchService                         = injector.getInstance(Key.get(classOf[FetchService], Names.named(serviceName)))
+        val fetchResult: Future[Fetcher.Fetched] = fetchService.fetch(fetchRequest).map(Fetcher.Fetched) pipeTo self
+        context become fetching(sender)
+      }
   }
 
   def fetching(injector: ActorRef): Receive = {
@@ -65,8 +71,9 @@ class Fetcher @Inject()(config: Config, fetchService: FetchService, @Named(Injec
 }
 
 object Fetcher extends NamedActor {
-  final val Name     = "FetchActor"
-  final val PoolName = "FetchActorPool"
+  final val Name           = "FetchActor"
+  final val PoolName       = "FetchActorPool"
+  final val ServiceNameKey = "FetchService"
 
   sealed trait Command
   sealed trait Event

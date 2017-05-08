@@ -1,4 +1,4 @@
-package com.youleligou.eleme.services.restaurants
+package com.youleligou.meituan.services.parse
 
 import com.google.inject.Inject
 import com.youleligou.core.reps.{CassandraRepo, ElasticSearchRepo}
@@ -9,9 +9,9 @@ import play.api.libs.json._
 
 import scala.concurrent.Future
 
-class ParseService @Inject()(restaurantSnapshotRepo: CassandraRepo[RestaurantSnapshotDao],
-                             restaurantRepo: CassandraRepo[RestaurantDao],
-                             restaurantSnapshotSearchRepo: ElasticSearchRepo[RestaurantSnapshotDaoSearch])
+class PoiFilterParseService @Inject()(restaurantSnapshotRepo: CassandraRepo[RestaurantSnapshotDao],
+                                      restaurantRepo: CassandraRepo[RestaurantDao],
+                                      restaurantSnapshotSearchRepo: ElasticSearchRepo[RestaurantSnapshotDaoSearch])
     extends com.youleligou.crawler.services.ParseService {
 
   final val Step: Int        = 1

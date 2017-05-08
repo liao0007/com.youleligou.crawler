@@ -11,6 +11,8 @@ import com.youleligou.crawler.actors.Injector
 import com.youleligou.crawler.actors.Injector.{CacheCleared, ClearCache, Tick}
 import com.youleligou.crawler.models.{FetchRequest, UrlInfo}
 import com.youleligou.eleme.repos.cassandra.RestaurantRepo
+import com.youleligou.eleme.services.fetch.ElemeHttpClientFetchService
+import com.youleligou.eleme.services.parse.MenuParseService
 import org.apache.spark.SparkContext
 import redis.RedisClient
 
@@ -79,7 +81,8 @@ class ElemeCrawlerBootstrap @Inject()(config: Config,
             path = s"/shopping/v2/menu?restaurant_id=$id",
             jobType = menuJobType,
             services = Map(
-              "ParseService" -> "com.youleligou.eleme.services.menu.ParseService"
+              "ParseService" -> classOf[MenuParseService].getName,
+              "FetchService" -> classOf[ElemeHttpClientFetchService].getName
             )
           )
         ),

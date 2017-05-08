@@ -3,9 +3,9 @@ package com.youleligou.eleme
 import com.google.inject._
 import com.youleligou.core.reps.{CassandraRepo, ElasticSearchRepo}
 import com.youleligou.crawler.modules._
-import com.youleligou.crawler.services.ParseService
+import com.youleligou.crawler.services.{FetchService, ParseService}
 import com.youleligou.eleme.daos.{FoodSnapshotDaoSearch, _}
-import com.youleligou.eleme.services.{menu, restaurants}
+import com.youleligou.eleme.services._
 import net.codingwell.scalaguice.ScalaModule
 
 /**
@@ -33,7 +33,8 @@ class ElemeModule extends AbstractModule with ScalaModule with GuiceAkkaActorRef
     /*
     services
      */
-    bind[ParseService].annotatedWithName(classOf[menu.ParseService].getName).to[menu.ParseService]
-    bind[ParseService].annotatedWithName(classOf[restaurants.ParseService].getName).to[restaurants.ParseService]
+    bind[ParseService].annotatedWithName(classOf[parse.MenuParseService].getName).to[parse.MenuParseService]
+    bind[ParseService].annotatedWithName(classOf[parse.RestaurantsParseService].getName).to[parse.RestaurantsParseService]
+    bind[FetchService].annotatedWithName(classOf[fetch.ElemeHttpClientFetchService].getName).to[fetch.ElemeHttpClientFetchService]
   }
 }

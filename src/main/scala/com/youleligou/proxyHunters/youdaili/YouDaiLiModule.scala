@@ -3,7 +3,7 @@ package com.youleligou.proxyHunters.youdaili
 import com.google.inject._
 import com.youleligou.crawler.modules._
 import com.youleligou.crawler.services.ParseService
-import com.youleligou.proxyHunters.youdaili.services.{proxyList, proxyPage}
+import com.youleligou.proxyHunters.youdaili.services.{parse, proxyList, proxyPage}
 import net.codingwell.scalaguice.ScalaModule
 
 /**
@@ -12,7 +12,7 @@ import net.codingwell.scalaguice.ScalaModule
 class YouDaiLiModule extends AbstractModule with ScalaModule with GuiceAkkaActorRefProvider {
 
   override def configure() {
-    bind[ParseService].annotatedWithName(classOf[proxyList.ParseService].getName).to[proxyList.ParseService]
-    bind[ParseService].annotatedWithName(classOf[proxyPage.ParseService].getName).to[proxyPage.ParseService]
+    bind[ParseService].annotatedWithName(classOf[parse.ProxyListParseService].getName).to[parse.ProxyListParseService]
+    bind[ParseService].annotatedWithName(classOf[parse.ProxyPageParseService].getName).to[parse.ProxyPageParseService]
   }
 }

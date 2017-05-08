@@ -1,4 +1,4 @@
-package com.youleligou.proxyHunters.youdaili.services.proxyList
+package com.youleligou.proxyHunters.youdaili.services.parse
 
 import com.google.inject.Inject
 import com.youleligou.core.reps.Repo
@@ -14,7 +14,7 @@ import scala.util.control.NonFatal
   * Created by young.yang on 2016/8/31.
   * Jsoup解析器
   */
-class ParseService @Inject()(proxyServerRepo: Repo[ProxyServerDao])
+class ProxyListParseService @Inject()(proxyServerRepo: Repo[ProxyServerDao])
     extends com.youleligou.crawler.services.ParseService {
 
   private def getChildLinks(content: Document, fetchResponse: FetchResponse) = {

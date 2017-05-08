@@ -1,4 +1,4 @@
-package com.youleligou.eleme.services.menu
+package com.youleligou.eleme.services.parse
 
 import com.google.inject.Inject
 import com.youleligou.core.reps.{CassandraRepo, ElasticSearchRepo}
@@ -10,12 +10,12 @@ import play.api.libs.json._
 
 import scala.util.control.NonFatal
 
-class ParseService @Inject()(restaurantRepo: RestaurantRepo,
-                             categoryRepo: CassandraRepo[CategoryDao],
-                             categorySnapshotRepo: CassandraRepo[CategorySnapshotDao],
-                             foodSnapshotRepo: CassandraRepo[FoodSnapshotDao],
-                             foodSkuSnapshotRepo: CassandraRepo[FoodSkuSnapshotDao],
-                             foodSnapshotSearchRepo: ElasticSearchRepo[FoodSnapshotDaoSearch])
+class MenuParseService @Inject()(restaurantRepo: RestaurantRepo,
+                                 categoryRepo: CassandraRepo[CategoryDao],
+                                 categorySnapshotRepo: CassandraRepo[CategorySnapshotDao],
+                                 foodSnapshotRepo: CassandraRepo[FoodSnapshotDao],
+                                 foodSkuSnapshotRepo: CassandraRepo[FoodSkuSnapshotDao],
+                                 foodSnapshotSearchRepo: ElasticSearchRepo[FoodSnapshotDaoSearch])
     extends com.youleligou.crawler.services.ParseService {
 
   private def persist(categories: Seq[Category], fetchResponse: FetchResponse) =

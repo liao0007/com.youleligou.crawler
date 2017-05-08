@@ -1,4 +1,4 @@
-package com.youleligou.proxyHunters.youdaili.services.proxyPage
+package com.youleligou.proxyHunters.youdaili.services.parse
 
 import akka.actor.ActorRef
 import com.google.inject.Inject
@@ -6,6 +6,7 @@ import com.google.inject.name.Named
 import com.typesafe.config.Config
 import com.youleligou.crawler.actors.Injector
 import com.youleligou.crawler.models.{FetchRequest, FetchResponse, ParseResult, UrlInfo}
+import com.youleligou.crawler.services.fetch.HttpClientFetchService
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 
@@ -16,7 +17,8 @@ import scala.util.control.NonFatal
   * Created by young.yang on 2016/8/31.
   * Jsoup解析器
   */
-class ParseService @Inject()(config: Config, @Named(Injector.PoolName) injectors: ActorRef) extends com.youleligou.crawler.services.ParseService {
+class ProxyPageParseService @Inject()(config: Config, @Named(Injector.PoolName) injectors: ActorRef)
+    extends com.youleligou.crawler.services.ParseService {
 
   private def getChildLinks(document: Document, fetchResponse: FetchResponse) = {
     document.select(".pagelist li").not(".thisclass").asScala.flatMap { li =>
@@ -41,7 +43,8 @@ class ParseService @Inject()(config: Config, @Named(Injector.PoolName) injectors
               path = url.replace(fetchResponse.fetchRequest.urlInfo.domain, ""),
               jobType = config.getString("crawler.youdaili.job.proxyList.jobType"),
               services = Map(
-                "ParseService" -> "com.youleligou.proxyHunters.youdaili.services.proxyList.ParseService"
+                "ParseService" -> classOf[ProxyListParseService].getName,
+                "FetchService" -> classOf[HttpClientFetchService].getName
               )
             )
           )

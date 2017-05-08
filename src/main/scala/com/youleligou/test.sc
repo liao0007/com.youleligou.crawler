@@ -1,5 +1,6 @@
+import java.util.regex.Pattern
 
-
+classOf[Pattern].getName
 
 
 val pattern = """.*restaurant_id=(\d*)""".r
