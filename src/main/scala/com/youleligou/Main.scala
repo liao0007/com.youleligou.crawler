@@ -33,6 +33,8 @@ object Main extends App {
   /*
   restaurant
    */
+  injector.instance[ElemeCrawlerBootstrap].cleanRestaurants()
+  injector.instance[ElemeCrawlerBootstrap].startRestaurants()
   if (args.contains("eleme/restaurants/start"))
     injector.instance[ElemeCrawlerBootstrap].startRestaurants()
 

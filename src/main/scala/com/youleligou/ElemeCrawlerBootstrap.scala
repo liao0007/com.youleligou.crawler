@@ -58,7 +58,7 @@ class ElemeCrawlerBootstrap @Inject()(config: Config,
                                   force = true)
     }
 
-    system.scheduler.schedule(60.seconds, FiniteDuration(restaurantsJobConfig.getInt("interval"), MILLISECONDS), injectors, Tick(restaurantsJobType))
+    system.scheduler.schedule(10.seconds, FiniteDuration(restaurantsJobConfig.getInt("interval"), MILLISECONDS), injectors, Tick(restaurantsJobType))
   }
 
   def cleanMenu(): Unit = {
@@ -90,7 +90,7 @@ class ElemeCrawlerBootstrap @Inject()(config: Config,
       )
 
     }
-    system.scheduler.schedule(60.seconds, FiniteDuration(menuJobConfig.getInt("interval"), MILLISECONDS), injectors, Tick(menuJobType))
+    system.scheduler.schedule(10.seconds, FiniteDuration(menuJobConfig.getInt("interval"), MILLISECONDS), injectors, Tick(menuJobType))
   }
 
 }

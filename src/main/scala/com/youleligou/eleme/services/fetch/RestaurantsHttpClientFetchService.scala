@@ -18,23 +18,15 @@ class RestaurantsHttpClientFetchService @Inject()(config: Config, jobRepo: Repo[
     extends com.youleligou.crawler.services.fetch.HttpClientFetchService(config, jobRepo, standaloneAhcWSClient) {
 
   override def fetch(fetchRequest: FetchRequest)(implicit executor: ExecutionContext): Future[FetchResponse] = {
-    val urlInfo: UrlInfo = fetchRequest.urlInfo
-
-    val pattern               = """.*restaurant_id=(\d*)""".r
-    val pattern(restaurantId) = urlInfo.path
-    val latitude              = urlInfo.queryParameters("latitude")
-    val longitude             = urlInfo.queryParameters("longitude")
-
     val request: StandaloneWSRequest = buildRequest(
       fetchRequest.urlInfo.url,
       Seq(
-        "Host"            -> "www.ele.me",
-        "Connection"      -> "keep-alive",
-        "Accept"          -> "application/json, text/plain, */*",
-        "x-shard"         -> s"shopid=$restaurantId;loc=$longitude,$latitude",
-        "Accept-Language" -> "zh-CN",
-        "Referer"         -> s"https://www.ele.me/shop/$restaurantId",
-        "Accept-Encoding" -> "gzip, deflate"
+        "Host"                      -> "mainsite-restapi.ele.me",
+        "Accept"                    -> "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "Upgrade-Insecure-Requests" -> "1",
+        "Accept-Language"           -> "zh-CN",
+        "Accept-Encoding"           -> "gzip, deflate",
+        "Connection"                -> "keep-alive"
       )
     )
 
