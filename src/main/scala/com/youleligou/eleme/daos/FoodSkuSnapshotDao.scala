@@ -3,7 +3,7 @@ package com.youleligou.eleme.daos
 import java.sql.Timestamp
 import java.time.{LocalDate, LocalDateTime}
 
-import com.youleligou.core.daos.Dao
+import com.youleligou.core.daos.{Dao, SnapshotDao}
 import com.youleligou.eleme.models.FoodSku
 
 case class FoodSkuSnapshotDao(
@@ -24,7 +24,7 @@ case class FoodSkuSnapshotDao(
     stock: Int,
     createdDate: java.util.Date = java.sql.Date.valueOf(LocalDate.now()),
     createdAt: java.util.Date = Timestamp.valueOf(LocalDateTime.now())
-) extends Dao
+) extends SnapshotDao
 
 object FoodSkuSnapshotDao {
 

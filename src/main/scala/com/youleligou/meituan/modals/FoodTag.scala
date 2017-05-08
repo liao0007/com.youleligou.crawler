@@ -7,19 +7,19 @@ import play.api.libs.json.{JsPath, Reads}
 /**
   * Created by liangliao on 8/5/17.
   */
-case class Tag( // category
-               tag: Long,
-               name: String,
-               icon: String,
-               typ: Int,
-               spus: Seq[Spu])
+case class FoodTag( // category
+                    tag: Long,
+                    name: String,
+                    icon: String,
+                    typ: Int,
+                    spus: Seq[Spu])
 
-object Tag {
-  implicit val poiReads: Reads[Tag] = (
+object FoodTag {
+  implicit val poiReads: Reads[FoodTag] = (
     (JsPath \ "tag").read[String].map(_.toLong) and
       (JsPath \ "name").read[String] and
       (JsPath \ "icon").read[String] and
       (JsPath \ "typ").read[Int] and
       (JsPath \ "spus").read[Seq[Spu]]
-  )(Tag.apply _)
+  )(FoodTag.apply _)
 }

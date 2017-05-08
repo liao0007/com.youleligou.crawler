@@ -12,7 +12,4 @@ import org.apache.spark.SparkContext
 class FoodSnapshotRepo @Inject()(val sparkContext: SparkContext) extends CassandraRepo[FoodSnapshotDao] {
   val keyspace: String = "eleme"
   val table: String    = "food_snapshots"
-
-  def findByRestaurantId(id: Long): Array[FoodSnapshotDao] =
-    sparkContext.cassandraTable[FoodSnapshotDao](keyspace, table).where("restaurant_id = ?", id).collect()
 }
