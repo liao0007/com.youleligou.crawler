@@ -80,7 +80,8 @@ class RestaurantsParseService @Inject()(restaurantSnapshotRepo: CassandraRepo[Re
         Seq.empty[Restaurant]
     }
 
-    persist(restaurants)
+    if (restaurants.nonEmpty)
+      persist(restaurants)
 
     ParseResult(
       fetchResponse = fetchResponse,

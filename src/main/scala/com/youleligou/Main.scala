@@ -4,6 +4,7 @@ import com.google.inject.Guice
 import com.youleligou.crawler.CrawlerModule
 import com.youleligou.crawler.modules.{ActorModule, AkkaModule, ConfigModule, ServiceModule}
 import com.youleligou.eleme.ElemeModule
+import com.youleligou.meituan.MeituanModule
 import com.youleligou.processors.{MenuProcessor, RestaurantProcessor}
 import com.youleligou.proxyHunters.xicidaili.XiCiDaiLiModule
 import com.youleligou.proxyHunters.youdaili.YouDaiLiModule
@@ -19,12 +20,16 @@ object Main extends App {
     new ActorModule,
     new CrawlerModule,
     new ElemeModule,
+    new MeituanModule,
     new XiCiDaiLiModule,
     new YouDaiLiModule
   )
 
   import net.codingwell.scalaguice.InjectorExtensions._
 
+  /*
+  eleme
+   */
   /*
   restaurant
    */
@@ -33,9 +38,6 @@ object Main extends App {
 
   if (args.contains("eleme/restaurants/clean"))
     injector.instance[ElemeCrawlerBootstrap].cleanRestaurants()
-
-  if (args.contains("eleme/restaurants/reindex"))
-    injector.instance[RestaurantProcessor].reindex()
 
   /*
   menu
@@ -46,8 +48,32 @@ object Main extends App {
   if (args.contains("eleme/menu/clean"))
     injector.instance[ElemeCrawlerBootstrap].cleanMenu()
 
-  if (args.contains("eleme/menu/reindex"))
-    injector.instance[MenuProcessor].reindex()
+
+  /*
+  meituan
+   */
+  /*
+ restaurant
+  */
+
+  injector.instance[MeituanCrawlerBootstrap].cleanRestaurants()
+  injector.instance[MeituanCrawlerBootstrap].startRestaurants()
+  if (args.contains("meituan/restaurants/start"))
+    injector.instance[MeituanCrawlerBootstrap].startRestaurants()
+
+  if (args.contains("meituan/restaurants/clean"))
+    injector.instance[MeituanCrawlerBootstrap].cleanRestaurants()
+
+  /*
+  menu
+   */
+  if (args.contains("meituan/menu/start"))
+    injector.instance[MeituanCrawlerBootstrap].startMenu()
+
+  if (args.contains("meituan/menu/clean"))
+    injector.instance[MeituanCrawlerBootstrap].cleanMenu()
+
+
 
   /*
   proxy

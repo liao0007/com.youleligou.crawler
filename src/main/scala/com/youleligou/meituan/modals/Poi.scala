@@ -8,24 +8,23 @@ import play.api.libs.json.{JsPath, Reads}
   * Created by liangliao on 8/5/17.
   */
 case class Poi( // restaurant
-    id: Long,
-    mtPoiId: Long,
-    name: String,
-    status: Int,
-    picUrl: String,
-    avgDeliveryTime: Int,
-    shippingFee: Float,
-    minPrice: Float,
-    monthSaleNum: Int,
-    brandType: Int,
-    sales: Int,
-    wmPoiOpeningDays: Int,
-    latitude: Long,
-    longitude: Long,
-    shippingFeeTip: String,
-    minPriceTip: String,
-    wmPoiViewId: Long
-)
+               id: Long,
+               mtPoiId: Long,
+               name: String,
+               status: Int,
+               picUrl: String,
+               avgDeliveryTime: Int,
+               shippingFee: Float,
+               minPrice: Float,
+               monthSaleNum: Int,
+               brandType: Int,
+               sales: Int,
+               wmPoiOpeningDays: Int,
+               latitude: Long,
+               longitude: Long,
+               shippingFeeTip: String,
+               minPriceTip: String,
+               wmPoiViewId: Long)
 
 object Poi {
   implicit val poiReads: Reads[Poi] = (
@@ -45,6 +44,6 @@ object Poi {
       (JsPath \ "longitude").read[Long] and
       (JsPath \ "shipping_fee_tip").read[String] and
       (JsPath \ "min_price_tip").read[String] and
-      (JsPath \ "wm_poi_view_id").read[Long]
+      (JsPath \ "wm_poi_view_id").read[String].map(_.toLong)
   )(Poi.apply _)
 }

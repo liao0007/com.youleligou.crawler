@@ -25,15 +25,15 @@ import scala.concurrent.duration._
 class MeituanCrawlerBootstrap @Inject()(config: Config,
                                         system: ActorSystem,
                                         redisClient: RedisClient,
-                                        restaurantRepo: PoiRepo,
+                                        poiRepo: PoiRepo,
                                         sparkContext: SparkContext,
                                         @Named(Injector.PoolName) injectors: ActorRef)
     extends LazyLogging {
 
   import system.dispatcher
 
-  val restaurantsFilterJobConfig = config.getConfig("crawler.metuan.job.poiFilter")
-  val menuJobConfig              = config.getConfig("crawler.metuan.job.poiFood")
+  val restaurantsFilterJobConfig = config.getConfig("crawler.meituan.job.poiFilter")
+  val menuJobConfig              = config.getConfig("crawler.meituan.job.poiFood")
 
   /**
     * 爬虫启动函数
@@ -58,7 +58,7 @@ class MeituanCrawlerBootstrap @Inject()(config: Config,
                                   force = true)
     }
 
-    system.scheduler.schedule(60.seconds,
+    system.scheduler.schedule(10.seconds,
                               FiniteDuration(restaurantsFilterJobConfig.getInt("interval"), MILLISECONDS),
                               injectors,
                               Tick(restaurantsJobType))
@@ -76,7 +76,7 @@ class MeituanCrawlerBootstrap @Inject()(config: Config,
 
   def startMenu(): Unit = {
     val menuJobType = menuJobConfig.getString("jobType")
-    restaurantRepo.allWmPoiViewIds() foreach { id =>
+    poiRepo.allWmPoiViewIds() foreach { id =>
       injectors ! Injector.Inject(
         FetchRequest(
           urlInfo = UrlInfo(

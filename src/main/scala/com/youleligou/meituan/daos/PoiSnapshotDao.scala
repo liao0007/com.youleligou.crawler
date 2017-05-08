@@ -32,7 +32,7 @@ case class PoiSnapshotDao( // restaurant
     extends SnapshotDao
 
 object PoiSnapshotDao {
-  implicit def fromModel(model: Poi)(implicit poiDao: PoiDao): PoiSnapshotDao = PoiSnapshotDao(
+  implicit def fromModel(model: Poi): PoiSnapshotDao = PoiSnapshotDao(
     id = model.id,
     mtPoiId = model.mtPoiId,
     name = model.name,

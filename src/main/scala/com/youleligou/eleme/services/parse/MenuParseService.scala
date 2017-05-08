@@ -68,7 +68,8 @@ class MenuParseService @Inject()(restaurantRepo: RestaurantRepo,
       case _ => Seq.empty[Category]
     }
 
-    persist(categories, fetchResponse)
+    if (categories.nonEmpty)
+      persist(categories, fetchResponse)
 
     ParseResult(
       fetchResponse = fetchResponse,

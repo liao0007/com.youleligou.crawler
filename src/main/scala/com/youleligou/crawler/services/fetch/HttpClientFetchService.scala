@@ -74,7 +74,8 @@ class HttpClientFetchService @Inject()(config: Config, jobRepo: Repo[JobDao], st
         Future.failed(x)
     }
 
-  def processResponse(fetchRequest: FetchRequest, futureResponse: Future[StandaloneWSResponse]) = {
+  def processResponse(fetchRequest: FetchRequest, futureResponse: Future[StandaloneWSResponse])(
+      implicit executor: ExecutionContext): Future[FetchResponse] = {
     val FetchRequest(urlInfo, _) = fetchRequest
     val crawlerJob = Job(
       url = urlInfo.toString,
