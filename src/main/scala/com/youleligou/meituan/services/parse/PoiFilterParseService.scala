@@ -25,6 +25,7 @@ class PoiFilterParseService @Inject()(poiSnapshotRepo: CassandraRepo[PoiSnapshot
 
   private def getChildLinksByLocation(fetchResponse: FetchResponse): Seq[UrlInfo] = {
     val queryParameters   = fetchResponse.fetchRequest.urlInfo.queryParameters
+    val bodyParameters    = fetchResponse.fetchRequest.urlInfo.bodyParameters
     val deep              = fetchResponse.fetchRequest.urlInfo.deep
     val originalLatitude  = queryParameters.getOrElse(LatitudeKey, "39").toFloat
     val originalLongitude = queryParameters.getOrElse(LongitudeKey, "116").toFloat
@@ -34,8 +35,9 @@ class PoiFilterParseService @Inject()(poiSnapshotRepo: CassandraRepo[PoiSnapshot
       longitudeSteps <- -Step to Step if longitudeSteps != 0; longitudeDelta = longitudeSteps / Precision
     } yield {
       val updatedQueryParameters = queryParameters + (LatitudeKey -> rounding(originalLatitude + latitudeDelta)) + (LongitudeKey -> rounding(
-        originalLongitude + longitudeDelta)) + (OffsetKey -> "0")
-      fetchResponse.fetchRequest.urlInfo.copy(queryParameters = updatedQueryParameters, deep = deep + 1)
+        originalLongitude + longitudeDelta))
+      val updatedBodyParameters = bodyParameters + (OffsetKey -> "0")
+      fetchResponse.fetchRequest.urlInfo.copy(queryParameters = updatedQueryParameters, bodyParameters = updatedBodyParameters, deep = deep + 1)
     }
   }
 
