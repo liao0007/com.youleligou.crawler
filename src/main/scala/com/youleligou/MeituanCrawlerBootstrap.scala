@@ -58,7 +58,7 @@ class MeituanCrawlerBootstrap @Inject()(config: Config,
                                   force = true)
     }
 
-    system.scheduler.schedule(10.seconds,
+    system.scheduler.schedule(60.seconds,
                               FiniteDuration(restaurantsFilterJobConfig.getInt("interval"), MILLISECONDS),
                               injectors,
                               Tick(restaurantsJobType))
@@ -96,7 +96,7 @@ class MeituanCrawlerBootstrap @Inject()(config: Config,
       )
 
     }
-    system.scheduler.schedule(10.seconds, FiniteDuration(menuJobConfig.getInt("interval"), MILLISECONDS), injectors, Tick(menuJobType))
+    system.scheduler.schedule(60.seconds, FiniteDuration(menuJobConfig.getInt("interval"), MILLISECONDS), injectors, Tick(menuJobType))
   }
 
 }

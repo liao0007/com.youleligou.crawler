@@ -63,7 +63,20 @@ http_port 433
 coredump_dir /var/spool/squid
 cache deny all
 via off
-forwarded_for transparent
+forwarded_for off
+
+request_header_access From deny all
+request_header_access Server deny all
+request_header_access WWW-Authenticate deny all
+request_header_access Link deny all
+request_header_access Cache-Control deny all
+request_header_access Proxy-Connection deny all
+request_header_access X-Cache deny all
+request_header_access X-Cache-Lookup deny all
+request_header_access Via deny all
+request_header_access X-Forwarded-For deny all
+request_header_access Pragma deny all
+request_header_access Keep-Alive deny all
 ############ SQUID CONFIG ############
 " > /etc/squid/squid.conf && 
 htpasswd -c /etc/squid/passwords vps
@@ -97,7 +110,7 @@ firewall-cmd --reload
 ```
 * test and trigger
 ```
-curl -x 127.0.0.1:433 -U vps:PASSWORD www.baidu.com
+curl -x 127.0.0.1:433 -U vps:vps www.baidu.com
 ./change_ip.sh
 ```
 
