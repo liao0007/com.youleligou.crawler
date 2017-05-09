@@ -88,7 +88,7 @@ class HttpClientFetchService @Inject()(config: Config, jobRepo: Repo[JobDao], st
 
   def makeRequest(request: StandaloneWSRequest)(function: StandaloneWSRequest => Future[StandaloneWSResponse]): Future[StandaloneWSResponse] =
     try {
-      Thread.sleep((Math.abs(Math.sin(rand.nextDouble())) * 1000).toInt)
+//      Thread.sleep((Math.abs(Math.sin(rand.nextDouble())) * 1000).toInt)
       function(request)
     } catch {
       case NonFatal(x) =>

@@ -68,7 +68,7 @@ class PoiFilterHttpClientFetchService @Inject()(config: Config, jobRepo: Repo[Jo
       if (fetchResponse.status == FetchService.Ok) {
         if ((Json.parse(fetchResponse.content) \ "code" toOption).contains(JsNumber(200404))) {
           //too frequent {"data":{},"code":200404,"msg":"请稍后再试。"}
-          Thread.sleep(1000 + rand.nextInt(5000))
+//          Thread.sleep(1000 + rand.nextInt(5000))
           fetchResponse.copy(status = FetchService.ServiceUnavailable)
 
         } else if (!(Json.parse(fetchResponse.content) \ "msg" toOption).contains(JsString("成功"))) {
