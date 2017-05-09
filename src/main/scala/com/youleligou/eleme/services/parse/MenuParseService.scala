@@ -20,10 +20,8 @@ class MenuParseService @Inject()(restaurantRepo: RestaurantRepo,
 
   private def persist(categories: Seq[Category], fetchResponse: FetchResponse) =
     try {
-      val pattern               = """.*restaurant_id=(\d*)""".r
-      val pattern(restaurantId) = fetchResponse.fetchRequest.urlInfo.path
-
-      restaurantRepo.findById(restaurantId.toLong) foreach { implicit restaurantDao =>
+      val restaurantId = fetchResponse.fetchRequest.urlInfo.queryParameters("restaurant_id").toLong
+      restaurantRepo.findById(restaurantId) foreach { implicit restaurantDao =>
         categoryRepo.save(categories)
         categorySnapshotRepo.save(categories)
         foodSnapshotRepo.save(categories.flatMap(_.foods))
