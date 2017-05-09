@@ -15,6 +15,7 @@ trait FetchService extends LazyLogging {
 object FetchService {
   val Ok                 = 200
   val PaymentRequired    = 402
+  val Forbidden          = 403
   val NotFound           = 404
   val TooManyRequest     = 429
   val ServiceUnavailable = 503

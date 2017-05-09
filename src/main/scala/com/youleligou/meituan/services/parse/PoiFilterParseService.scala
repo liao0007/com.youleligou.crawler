@@ -90,19 +90,15 @@ class PoiFilterParseService @Inject()(poiSnapshotRepo: CassandraRepo[PoiSnapshot
         if (pois.nonEmpty)
           persist(pois)
 
-        val hasNextPage: Boolean = (result \ "data" \ "poi_has_next_page" toOption).contains(JsBoolean(true))
-        ParseResult(
-          fetchResponse = fetchResponse,
-          childLink = if (!hasNextPage) getChildLinksByLocation(fetchResponse) else getChildLinksByOffset(fetchResponse)
-        )
-
       case _ =>
         logger.warn("parse poi failed, {}", result.toString())
-        ParseResult(
-          fetchResponse = fetchResponse
-        )
-
     }
+
+    val hasNextPage: Boolean = (result \ "data" \ "poi_has_next_page" toOption).contains(JsBoolean(true))
+    ParseResult(
+      fetchResponse = fetchResponse,
+      childLink = if (!hasNextPage) getChildLinksByLocation(fetchResponse) else getChildLinksByOffset(fetchResponse)
+    )
 
   }
 }

@@ -67,7 +67,8 @@ class PoiFoodParseService @Inject()(restaurantRepo: PoiRepo,
       case _ => Seq.empty[FoodTag]
     }
 
-    persist(categories, fetchResponse)
+    if (categories.nonEmpty)
+      persist(categories, fetchResponse)
 
     ParseResult(
       fetchResponse = fetchResponse,

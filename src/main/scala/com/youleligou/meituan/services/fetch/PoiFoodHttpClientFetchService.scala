@@ -56,11 +56,16 @@ class PoiFoodHttpClientFetchService @Inject()(config: Config, jobRepo: Repo[JobD
       r.post(body)
     }
     processResponse(fetchRequest, response) map { fetchResponse =>
-      if ((Json.parse(fetchResponse.content) \ "msg" toOption).contains(JsString("成功")))
+      if (fetchResponse.status == FetchService.Ok) {
+        if ((Json.parse(fetchResponse.content) \ "msg" toOption).contains(JsString("成功")))
+          fetchResponse
+        else {
+          fetchResponse.copy(status = FetchService.Misc)
+        }
+      } else {
         fetchResponse
-      else {
-        fetchResponse.copy(status = FetchService.Misc)
       }
+
     }
   }
 

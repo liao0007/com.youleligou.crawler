@@ -14,6 +14,7 @@ import play.api.libs.ws.{DefaultWSProxyServer, StandaloneWSRequest, StandaloneWS
 
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
+import scala.io.Source
 import scala.util.Random
 import scala.util.control.NonFatal
 
@@ -26,7 +27,8 @@ class HttpClientFetchService @Inject()(config: Config, jobRepo: Repo[JobDao], st
 
   import com.github.andr83.scalaconfig._
   val useProxy: Boolean                = config.getBoolean("crawler.fetch.useProxy")
-  val proxyServer: Map[String, String] = config.as[Map[String, String]](config.getString("crawler.fetch.proxy"))
+  val proxyType                        = config.getString("crawler.fetch.proxy")
+  val proxyConfig: Map[String, String] = config.as[Map[String, String]](proxyType)
   val userAgents: Seq[String]          = config.as[Seq[String]]("crawler.fetch.userAgents")
   val userAgentsSize: Int              = userAgents.length
   val timeout: Duration                = Duration(config.getInt("crawler.fetch.timeout"), MILLISECONDS)
@@ -58,6 +60,19 @@ class HttpClientFetchService @Inject()(config: Config, jobRepo: Repo[JobDao], st
 
     val clientWithProxy =
       if (useProxy) {
+
+        val proxyServer = if (proxyType == "proxy.data5u") {
+          val proxyInfo = Source.fromURL(proxyConfig("url")).mkString.trim.split(":")
+          Map(
+            "host"     -> proxyInfo(0),
+            "port"     -> proxyInfo(1),
+            "username" -> "",
+            "password" -> ""
+          )
+        } else {
+          proxyConfig
+        }
+
         withForwardedFor
           .withProxyServer(
             DefaultWSProxyServer(host = proxyServer("host"),
