@@ -31,14 +31,10 @@ class RestaurantsHttpClientFetchService @Inject()(config: Config,
     val request: StandaloneWSRequest = buildRequest(
       urlInfo.copy(queryParameters = urlInfo.queryParameters ++ Map("geohash" -> geoHashCode)).url,
       Seq(
-        "Host"                      -> "www.ele.me",
-        "Accept"                    -> "application/json, text/plain, */*",
-        "x-shard"                   -> s"loc=$longitude,$latitude",
-        "Referer"                   -> s"https://www.ele.me/place/$geoHashCode?latitude=$latitude&longitude=$longitude",
-        "Upgrade-Insecure-Requests" -> "1",
-        "Accept-Language"           -> "zh-CN",
-        "Accept-Encoding"           -> "gzip, deflate",
-        "Connection"                -> "keep-alive"
+        "Host"    -> "www.ele.me",
+        "Accept"  -> "application/json, text/plain, */*",
+        "Referer" -> s"https://www.ele.me/place/$geoHashCode?latitude=$latitude&longitude=$longitude",
+        "x-shard" -> s"loc=$longitude,$latitude"
       )
     )
     val response: Future[StandaloneWSResponse] = makeRequest(request) { r =>

@@ -3,46 +3,45 @@ package com.youleligou.meituan.services.parse
 import com.google.inject.Inject
 import com.youleligou.core.reps.{CassandraRepo, ElasticSearchRepo}
 import com.youleligou.crawler.models.{FetchResponse, ParseResult, UrlInfo}
-import com.youleligou.eleme.daos.{RestaurantDaoSearch, _}
-import com.youleligou.eleme.models.Category
-import com.youleligou.eleme.repos.cassandra.RestaurantRepo
+import com.youleligou.meituan.daos._
+import com.youleligou.meituan.modals.FoodTag
+import com.youleligou.meituan.repos.cassandra.PoiRepo
 import play.api.libs.json._
 
 import scala.util.control.NonFatal
 
-class PoiFoodParseService @Inject()(restaurantRepo: RestaurantRepo,
-                                    categoryRepo: CassandraRepo[CategoryDao],
-                                    categorySnapshotRepo: CassandraRepo[CategorySnapshotDao],
-                                    foodSnapshotRepo: CassandraRepo[FoodSnapshotDao],
-                                    foodSkuSnapshotRepo: CassandraRepo[FoodSkuSnapshotDao],
-                                    foodSnapshotSearchRepo: ElasticSearchRepo[FoodSnapshotDaoSearch])
+class PoiFoodParseService @Inject()(restaurantRepo: PoiRepo,
+                                    categoryRepo: CassandraRepo[FoodTagDao],
+                                    categorySnapshotRepo: CassandraRepo[FoodTagSnapshotDao],
+                                    spuSnapshotRepo: CassandraRepo[SpuSnapshotDao],
+                                    skuSnapshotRepo: CassandraRepo[SkuSnapshotDao],
+                                    spuSnapshotSearchRepo: ElasticSearchRepo[SpuSnapshotDaoSearch])
     extends com.youleligou.crawler.services.ParseService {
 
-  private def persist(categories: Seq[Category], fetchResponse: FetchResponse) =
+  private def persist(categories: Seq[FoodTag], fetchResponse: FetchResponse) =
     try {
-      val pattern               = """.*restaurant_id=(\d*)""".r
-      val pattern(restaurantId) = fetchResponse.fetchRequest.urlInfo.path
+      val wmPoiId = fetchResponse.fetchRequest.urlInfo.bodyParameters("wm_poi_id").toLong
 
-      restaurantRepo.findById(restaurantId.toLong) foreach { implicit restaurantDao =>
+      restaurantRepo.findByWmPoiViewId(wmPoiId) foreach { implicit restaurantDao =>
         categoryRepo.save(categories)
         categorySnapshotRepo.save(categories)
-        foodSnapshotRepo.save(categories.flatMap(_.foods))
-        foodSkuSnapshotRepo.save(categories.flatMap(_.foods).flatMap(_.specFoods))
+        spuSnapshotRepo.save(categories.flatMap(_.spus))
+        skuSnapshotRepo.save(categories.flatMap(_.spus).flatMap(_.skus))
 
-        implicit val restaurantDaoSearch: RestaurantDaoSearch = restaurantDao
+        implicit val restaurantDaoSearch: PoiDaoSearch = restaurantDao
 
-        val foodSnapshotDaoSearches: Seq[FoodSnapshotDaoSearch] = categories flatMap { category =>
-          val categoryDao: CategoryDao                      = category
-          implicit val categoryDaoSearch: CategoryDaoSearch = categoryDao
+        val foodSnapshotDaoSearches: Seq[SpuSnapshotDaoSearch] = categories flatMap { category =>
+          val categoryDao: FoodTagDao                      = category
+          implicit val categoryDaoSearch: FoodTagDaoSearch = categoryDao
 
-          category.foods map { food =>
-            implicit val foodSkus                            = food.specFoods
-            val foodSnapshotDao: FoodSnapshotDao             = food
-            val foodSnapshotDaoSearch: FoodSnapshotDaoSearch = foodSnapshotDao
+          category.spus map { food =>
+            implicit val foodSkus                           = food.skus
+            val foodSnapshotDao: SpuSnapshotDao             = food
+            val foodSnapshotDaoSearch: SpuSnapshotDaoSearch = foodSnapshotDao
             foodSnapshotDaoSearch
           }
         }
-        foodSnapshotSearchRepo.save(foodSnapshotDaoSearches)
+        spuSnapshotSearchRepo.save(foodSnapshotDaoSearches)
       }
     } catch {
       case NonFatal(x) =>
@@ -53,11 +52,11 @@ class PoiFoodParseService @Inject()(restaurantRepo: RestaurantRepo,
     * 解析具体实现
     */
   override def parse(fetchResponse: FetchResponse): ParseResult = {
-    val categories: Seq[Category] = Json.parse(fetchResponse.content) match {
+    val categories: Seq[FoodTag] = Json.parse(fetchResponse.content) match {
       case JsArray(value) =>
         value flatMap { item =>
           item
-            .validate[Category]
+            .validate[FoodTag]
             .fold({ reason =>
               logger.warn("parse menu failed, {}", reason.toString)
               None
@@ -65,7 +64,7 @@ class PoiFoodParseService @Inject()(restaurantRepo: RestaurantRepo,
               Some(category)
             })
         }
-      case _ => Seq.empty[Category]
+      case _ => Seq.empty[FoodTag]
     }
 
     persist(categories, fetchResponse)

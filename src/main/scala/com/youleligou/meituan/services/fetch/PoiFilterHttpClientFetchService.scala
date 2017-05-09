@@ -52,14 +52,13 @@ class PoiFilterHttpClientFetchService @Inject()(config: Config, jobRepo: Repo[Jo
     val request: StandaloneWSRequest = buildRequest(
       url,
       Seq(
-        "Host"            -> "i.waimai.meituan.com",
-        "Accept"          -> "application/json",
-        "Content-Type"    -> "application/x-www-form-urlencoded",
-        "Origin"          -> "http://i.waimai.meituan.com",
-        "Connection"      -> "keep-alive",
-        "Accept-Language" -> "zh-CN",
-        "Accept-Encoding" -> "gzip, deflate",
-        "Cookie"          -> cookie
+        "Host"             -> "i.waimai.meituan.com",
+        "Accept"           -> "application/json",
+        "X-Requested-With" -> "XMLHttpRequest",
+        "Referer"          -> s"http://i.waimai.meituan.com/home?lat=$latitude&lng=$longitude",
+        "Content-Type"     -> "application/x-www-form-urlencoded",
+        "Origin"           -> "http://i.waimai.meituan.com",
+        "Cookie"           -> cookie
       )
     )
     val response: Future[StandaloneWSResponse] = makeRequest(request) { r =>

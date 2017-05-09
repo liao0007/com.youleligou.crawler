@@ -20,8 +20,8 @@ case class Poi( // restaurant
                brandType: Int,
                sales: Int,
                wmPoiOpeningDays: Int,
-               latitude: Long,
-               longitude: Long,
+               latitude: Float,
+               longitude: Float,
                shippingFeeTip: String,
                minPriceTip: String,
                wmPoiViewId: Long)
@@ -40,8 +40,8 @@ object Poi {
       (JsPath \ "brand_type").read[Int] and
       (JsPath \ "sales").read[Int] and
       (JsPath \ "wm_poi_opening_days").read[Int] and
-      (JsPath \ "latitude").read[Long] and
-      (JsPath \ "longitude").read[Long] and
+      (JsPath \ "latitude").read[Float].map(_ / 1000000f) and
+      (JsPath \ "longitude").read[Float].map(_ / 1000000f) and
       (JsPath \ "shipping_fee_tip").read[String] and
       (JsPath \ "min_price_tip").read[String] and
       (JsPath \ "wm_poi_view_id").read[String].map(_.toLong)

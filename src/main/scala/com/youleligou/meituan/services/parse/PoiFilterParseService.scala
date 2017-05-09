@@ -53,11 +53,11 @@ class PoiFilterParseService @Inject()(poiSnapshotRepo: CassandraRepo[PoiSnapshot
     val poiSnapshotDaoSearches: Seq[PoiSnapshotDaoSearch] = poiSnapshotDaos
 
     //cassandra
-//    poiRepo.save(poiDaos)
-//    poiSnapshotRepo.save(poiSnapshotDaos)
+    poiRepo.save(poiDaos)
+    poiSnapshotRepo.save(poiSnapshotDaos)
 
     //es
-//    poiSnapshotSearchRepo.save(poiSnapshotDaoSearches)
+    poiSnapshotSearchRepo.save(poiSnapshotDaoSearches)
     Future.successful(true)
   }
 

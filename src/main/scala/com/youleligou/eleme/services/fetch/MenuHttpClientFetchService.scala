@@ -25,13 +25,9 @@ class MenuHttpClientFetchService @Inject()(config: Config, jobRepo: Repo[JobDao]
     val request: StandaloneWSRequest = buildRequest(
       fetchRequest.urlInfo.url,
       Seq(
-        "Host"                      -> "www.ele.me",
-        "Accept"                    -> "application/json, text/plain, */*",
-        "Upgrade-Insecure-Requests" -> "1",
-        "Accept-Encoding"           -> "gzip, deflate",
-        "Connection"                -> "keep-alive",
-        "Accept-Language"           -> "zh-CN",
-        "Referer"                   -> s"https://www.ele.me/shop/$restaurantId"
+        "Host"    -> "www.ele.me",
+        "Accept"  -> "application/json, text/plain, */*",
+        "Referer" -> s"https://www.ele.me/shop/$restaurantId"
       )
     )
 

@@ -352,3 +352,82 @@ PUT eleme-food
     }
 }
 ```
+
+meituan
+```
+get meituan-poi
+{
+    "mappings": {
+        "snapshot": {
+            "properties": {
+                "id": {
+                    "type": "long"
+                },
+                "mtPoiId": {
+                    "type": "long"
+                },
+                "name": {
+                    "type": "text",
+                    "fields": {
+                        "keyword": {
+                            "type": "keyword",
+                            "ignore_above": 256
+                        }
+                    }
+                },
+                "status": {
+                    "type": "integer"
+                },
+                "picUrl": {
+                    "type": "text"
+                },
+                "avgDeliveryTime": {
+                    "type": "integer"
+                },
+                "shippingFee": {
+                    "type": "float"
+                },
+                "minPrice": {
+                    "type": "float"
+                },
+                "monthSaleNum": {
+                    "type": "integer"
+                },
+                "brandType": {
+                    "type": "integer"
+                },
+                "sales": {
+                    "type": "integer"
+                },
+                "wmPoiOpeningDays": {
+                    "type": "integer"
+                },
+                "location": {
+                    "type": "geo_point"
+                },
+                "shippingFeeTip": {
+                    "type": "text"
+                },
+                "minPriceTip": {
+                    "type": "text"
+                },
+                "wmPoiViewId": {
+                    "type": "long"
+                },
+                "createdDate": {
+                    "type": "date"
+                },
+                "createdAt": {
+                    "type": "date"
+                }
+            }
+        }
+    },
+    "settings": {
+        "index": {
+            "number_of_shards": "3",
+            "number_of_replicas": "1"
+        }
+    }
+}
+```

@@ -9,7 +9,8 @@ import com.youleligou.core.daos.SnapshotDao
   * Created by liangliao on 8/5/17.
   */
 case class PoiSnapshotDaoSearch( // restaurant
-                                id: Long,
+                                id: String,
+                                poiId: Long,
                                 mtPoiId: Long,
                                 name: String,
                                 status: Int,
@@ -21,8 +22,7 @@ case class PoiSnapshotDaoSearch( // restaurant
                                 brandType: Int,
                                 sales: Int,
                                 wmPoiOpeningDays: Int,
-                                latitude: Long,
-                                longitude: Long,
+                                location: Map[String, Float],
                                 shippingFeeTip: String,
                                 minPriceTip: String,
                                 wmPoiViewId: Long,
@@ -33,7 +33,8 @@ case class PoiSnapshotDaoSearch( // restaurant
 object PoiSnapshotDaoSearch {
   implicit def fromDao(dao: PoiSnapshotDao): PoiSnapshotDaoSearch =
     PoiSnapshotDaoSearch(
-      id = dao.id,
+      id = s"${dao.id}-${dao.createdDate}",
+      poiId = dao.id,
       mtPoiId = dao.mtPoiId,
       name = dao.name,
       status = dao.status,
@@ -45,8 +46,10 @@ object PoiSnapshotDaoSearch {
       brandType = dao.brandType,
       sales = dao.sales,
       wmPoiOpeningDays = dao.wmPoiOpeningDays,
-      latitude = dao.latitude,
-      longitude = dao.longitude,
+      location = Map(
+        "lat" -> dao.latitude,
+        "lon" -> dao.longitude
+      ),
       shippingFeeTip = dao.shippingFeeTip,
       minPriceTip = dao.minPriceTip,
       wmPoiViewId = dao.wmPoiViewId,
@@ -57,7 +60,7 @@ object PoiSnapshotDaoSearch {
     source map converter
 
   implicit def toDao(search: PoiSnapshotDaoSearch): PoiSnapshotDao = PoiSnapshotDao(
-    id = search.id,
+    id = search.poiId,
     mtPoiId = search.mtPoiId,
     name = search.name,
     status = search.status,
@@ -69,8 +72,8 @@ object PoiSnapshotDaoSearch {
     brandType = search.brandType,
     sales = search.sales,
     wmPoiOpeningDays = search.wmPoiOpeningDays,
-    latitude = search.latitude,
-    longitude = search.longitude,
+    latitude = search.location("lat"),
+    longitude = search.location("log"),
     shippingFeeTip = search.shippingFeeTip,
     minPriceTip = search.minPriceTip,
     wmPoiViewId = search.wmPoiViewId,

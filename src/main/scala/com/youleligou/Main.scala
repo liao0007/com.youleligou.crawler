@@ -28,6 +28,9 @@ object Main extends App {
 
   import net.codingwell.scalaguice.InjectorExtensions._
 
+//  injector.instance[MeituanCrawlerBootstrap].cleanRestaurants()
+//  injector.instance[MeituanCrawlerBootstrap].startRestaurants()
+
   /*
   eleme
    */

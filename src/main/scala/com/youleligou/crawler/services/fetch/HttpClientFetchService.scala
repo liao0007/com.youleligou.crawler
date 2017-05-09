@@ -40,7 +40,13 @@ class HttpClientFetchService @Inject()(config: Config, jobRepo: Repo[JobDao], st
   }
 
   def buildRequest(url: String, headers: Seq[(String, String)] = Seq.empty[(String, String)]): StandaloneWSRequest = {
-    val cascadedHeader = headers :+ ("User-Agent", userAgents(rand.nextInt(userAgentsSize)))
+    val cascadedHeader = headers ++ Seq(
+      "User-Agent"                -> userAgents(rand.nextInt(userAgentsSize)),
+      "Upgrade-Insecure-Requests" -> "1",
+      "Accept-Language"           -> "zh-CN",
+      "Accept-Encoding"           -> "gzip, deflate",
+      "Connection"                -> "keep-alive"
+    )
 
     val clientWithUrl =
       standaloneAhcWSClient

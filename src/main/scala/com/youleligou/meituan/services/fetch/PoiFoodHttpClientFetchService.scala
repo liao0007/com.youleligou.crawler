@@ -44,13 +44,12 @@ class PoiFoodHttpClientFetchService @Inject()(config: Config, jobRepo: Repo[JobD
     val request: StandaloneWSRequest = buildRequest(
       url,
       Seq(
-        "Host"            -> "i.waimai.meituan.com",
-        "Accept"          -> "application/json",
-        "Content-Type"    -> "application/x-www-form-urlencoded",
-        "Origin"          -> "http://i.waimai.meituan.com",
-        "Connection"      -> "keep-alive",
-        "Accept-Language" -> "zh-CN",
-        "Accept-Encoding" -> "gzip, deflate"
+        "Host"             -> "i.waimai.meituan.com",
+        "Accept"           -> "application/json",
+        "Referer"          -> s"http://i.waimai.meituan.com/restaurant/$wmPoiId",
+        "X-Requested-With" -> "XMLHttpRequest",
+        "Content-Type"     -> "application/x-www-form-urlencoded",
+        "Origin"           -> "http://i.waimai.meituan.com"
       )
     )
     val response: Future[StandaloneWSResponse] = makeRequest(request) { r =>
