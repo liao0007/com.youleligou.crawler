@@ -8,7 +8,7 @@ import com.youleligou.crawler.models.{FetchRequest, FetchResponse, UrlInfo}
 import com.youleligou.crawler.services.FetchService
 import com.youleligou.crawler.services.fetch.HttpClientFetchService
 import org.joda.time.DateTime
-import play.api.libs.json.{JsString, Json}
+import play.api.libs.json.{JsNumber, JsString, Json}
 import play.api.libs.ws.ahc.StandaloneAhcWSClient
 import play.api.libs.ws.{StandaloneWSRequest, StandaloneWSResponse}
 
@@ -66,13 +66,20 @@ class PoiFilterHttpClientFetchService @Inject()(config: Config, jobRepo: Repo[Jo
     }
     processResponse(fetchRequest, response) map { fetchResponse =>
       if (fetchResponse.status == FetchService.Ok) {
-        if ((Json.parse(fetchResponse.content) \ "msg" toOption).contains(JsString("成功")))
-          fetchResponse
-        else {
+        if ((Json.parse(fetchResponse.content) \ "code" toOption).contains(JsNumber(200404))) {
+          //too frequent {"data":{},"code":200404,"msg":"请稍后再试。"}
+          Thread.sleep(1000 + rand.nextInt(5000))
+          fetchResponse.copy(status = FetchService.ServiceUnavailable)
+
+        } else if (!(Json.parse(fetchResponse.content) \ "msg" toOption).contains(JsString("成功"))) {
           fetchResponse.copy(status = FetchService.Misc)
+
+        } else if (fetchResponse.status == FetchService.Forbidden) {
+          fetchResponse.copy(status = FetchService.Ok)
+
+        } else {
+          fetchResponse
         }
-      } else if (fetchResponse.status == FetchService.Forbidden) {
-        fetchResponse.copy(status = FetchService.Ok)
       } else {
         fetchResponse
       }
