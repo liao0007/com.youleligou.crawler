@@ -1,7 +1,8 @@
 package com.youleligou.proxyHunters.xicidaili
 
 import com.google.inject._
-import com.youleligou.crawler.modules._
+import com.youleligou.core.modules.GuiceAkkaActorRefProvider
+import com.youleligou.crawler.modules.{DaoModule, _}
 import com.youleligou.crawler.services.ParseService
 import com.youleligou.proxyHunters.xicidaili.services.parse
 import net.codingwell.scalaguice.ScalaModule
@@ -12,6 +13,7 @@ import net.codingwell.scalaguice.ScalaModule
 class XiCiDaiLiModule extends AbstractModule with ScalaModule with GuiceAkkaActorRefProvider {
 
   override def configure() {
+
     bind[ParseService].annotatedWithName(classOf[parse.ProxyListParseService].getName).to[parse.ProxyListParseService]
   }
 }

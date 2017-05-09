@@ -6,8 +6,8 @@ import akka.actor.{Actor, ActorLogging, ActorRef}
 import com.google.inject.name.Names
 import com.google.inject.{Inject, Key}
 import com.typesafe.config.Config
+import com.youleligou.core.modules.GuiceAkkaActorRefProvider
 import com.youleligou.crawler.models.{FetchResponse, ParseResult}
-import com.youleligou.crawler.modules.GuiceAkkaActorRefProvider
 import com.youleligou.crawler.services.{HasService, ParseService}
 
 /**

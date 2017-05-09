@@ -1,11 +1,10 @@
 package com.youleligou
 
 import com.google.inject.Guice
-import com.youleligou.crawler.CrawlerModule
-import com.youleligou.crawler.modules.{ActorModule, AkkaModule, ConfigModule, ServiceModule}
+import com.youleligou._
+import com.youleligou.crawler.modules.DaoModule
 import com.youleligou.eleme.ElemeModule
 import com.youleligou.meituan.MeituanModule
-import com.youleligou.processors.{MenuProcessor, RestaurantProcessor}
 import com.youleligou.proxyHunters.xicidaili.XiCiDaiLiModule
 import com.youleligou.proxyHunters.youdaili.YouDaiLiModule
 
@@ -14,11 +13,13 @@ import com.youleligou.proxyHunters.youdaili.YouDaiLiModule
   */
 object Main extends App {
   val injector = Guice.createInjector(
-    new ConfigModule,
-    new AkkaModule,
-    new ServiceModule,
-    new ActorModule,
-    new CrawlerModule,
+    new core.modules.ConfigModule,
+    new core.modules.AkkaModule,
+    new core.modules.ServiceModule,
+    new crawler.modules.ActorModule,
+    new crawler.modules.ServiceModule,
+    new crawler.modules.DaoModule,
+    new DaoModule,
     new ElemeModule,
     new MeituanModule,
     new XiCiDaiLiModule,
@@ -33,8 +34,6 @@ object Main extends App {
   /*
   restaurant
    */
-  injector.instance[ElemeCrawlerBootstrap].cleanRestaurants()
-  injector.instance[ElemeCrawlerBootstrap].startRestaurants()
   if (args.contains("eleme/restaurants/start"))
     injector.instance[ElemeCrawlerBootstrap].startRestaurants()
 

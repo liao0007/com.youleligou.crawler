@@ -7,9 +7,9 @@ import akka.pattern.pipe
 import com.google.inject.name.Names
 import com.google.inject.{Inject, Key}
 import com.typesafe.config.Config
+import com.youleligou.core.modules.GuiceAkkaActorRefProvider
 import com.youleligou.crawler.actors.Parser.Parse
 import com.youleligou.crawler.models.{FetchRequest, FetchResponse}
-import com.youleligou.crawler.modules.GuiceAkkaActorRefProvider
 import com.youleligou.crawler.services.FetchService
 
 import scala.concurrent.Future

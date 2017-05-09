@@ -1,4 +1,4 @@
-package com.youleligou.crawler.modules
+package com.youleligou.core.modules
 
 import akka.actor.{Actor, ActorContext, ActorRef, ActorSystem, ExtendedActorSystem, Extension, ExtensionId, ExtensionIdProvider, IndirectActorProducer, Props}
 import akka.routing.FromConfig

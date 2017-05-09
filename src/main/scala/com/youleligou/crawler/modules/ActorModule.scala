@@ -6,6 +6,7 @@ import akka.actor.{Actor, ActorRef, ActorSystem}
 import com.google.inject.name.{Named, Names}
 import com.google.inject.{AbstractModule, Provides}
 import com.typesafe.config.Config
+import com.youleligou.core.modules.GuiceAkkaActorRefProvider
 import com.youleligou.crawler.actors._
 import net.codingwell.scalaguice.ScalaModule
 

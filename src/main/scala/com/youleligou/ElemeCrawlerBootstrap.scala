@@ -77,8 +77,9 @@ class ElemeCrawlerBootstrap @Inject()(config: Config,
       injectors ! Injector.Inject(
         FetchRequest(
           urlInfo = UrlInfo(
-            domain = "http://mainsite-restapi.ele.me",
-            path = s"/shopping/v2/menu?restaurant_id=$id",
+            domain = "http://www.ele.me",
+            path = s"/restapi/shopping/v2/menu",
+            queryParameters = Map("restaurant_id" -> id.toString),
             jobType = menuJobType,
             services = Map(
               "ParseService" -> classOf[MenuParseService].getName,

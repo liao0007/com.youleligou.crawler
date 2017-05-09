@@ -4,9 +4,9 @@ import akka.actor.{Actor, ActorLogging, ActorRef, Stash}
 import akka.pattern.pipe
 import com.google.inject.Inject
 import com.typesafe.config.Config
+import com.youleligou.core.modules.GuiceAkkaActorRefProvider
 import com.youleligou.crawler.actors.Fetcher._
 import com.youleligou.crawler.models._
-import com.youleligou.crawler.modules.GuiceAkkaActorRefProvider
 import com.youleligou.crawler.services.HashService
 import play.api.libs.json.Json
 import redis.RedisClient
