@@ -7,8 +7,9 @@ import com.youleligou.core.daos.Dao
 import com.youleligou.eleme.models.{Category, Food}
 
 case class CategoryDao(
-    id: Long,
     restaurantId: Long,
+    categoryId: Long,
+    //PK
     typ: Int,
     isActivity: Option[Boolean] = None,
     activity: Option[String] = None,
@@ -20,8 +21,8 @@ case class CategoryDao(
 
 object CategoryDao {
   implicit def fromModel(model: Category)(implicit restaurantDao: RestaurantDao): CategoryDao = CategoryDao(
-    id = model.id,
-    restaurantId = restaurantDao.id,
+    restaurantId = restaurantDao.restaurantId,
+    categoryId = model.id,
     typ = model.typ,
     isActivity = model.isActivity,
     activity = model.activity,
@@ -33,7 +34,7 @@ object CategoryDao {
     source map converter
 
   implicit def toModel(dao: CategoryDao): Category = Category(
-    id = dao.id,
+    id = dao.categoryId,
     typ = dao.typ,
     isActivity = dao.isActivity,
     activity = dao.activity,
@@ -46,7 +47,7 @@ object CategoryDao {
     source map converter
 
   implicit def fromSnapshot(snapshot: CategorySnapshotDao): CategoryDao = CategoryDao(
-    id = snapshot.id,
+    categoryId = snapshot.categoryId,
     restaurantId = snapshot.restaurantId,
     typ = snapshot.typ,
     isActivity = snapshot.isActivity,

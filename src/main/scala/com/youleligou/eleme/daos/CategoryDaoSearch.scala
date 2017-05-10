@@ -6,8 +6,9 @@ import java.time.LocalDateTime
 import com.youleligou.core.daos.Dao
 
 case class CategoryDaoSearch(
-    id: Long,
     restaurantId: Long,
+    categoryId: Long,
+    //PK
     typ: Int,
     isActivity: Option[Boolean] = None,
     activity: Option[String] = None,
@@ -20,7 +21,7 @@ case class CategoryDaoSearch(
 object CategoryDaoSearch {
   implicit def fromDao(dao: CategoryDao): CategoryDaoSearch =
     CategoryDaoSearch(
-      id = dao.id,
+      categoryId = dao.categoryId,
       restaurantId = dao.restaurantId,
       typ = dao.typ,
       isActivity = dao.isActivity,
@@ -34,7 +35,7 @@ object CategoryDaoSearch {
     source map converter
 
   implicit def toDao(search: CategoryDaoSearch): CategoryDao = CategoryDao(
-    id = search.id,
+    categoryId = search.categoryId,
     restaurantId = search.restaurantId,
     typ = search.typ,
     isActivity = search.isActivity,
@@ -47,10 +48,9 @@ object CategoryDaoSearch {
   implicit def toDao(source: Seq[CategoryDaoSearch])(implicit converter: CategoryDaoSearch => CategoryDao): Seq[CategoryDao] =
     source map converter
 
-
   implicit def fromSnapshotDao(snapshot: CategorySnapshotDao): CategoryDaoSearch =
     CategoryDaoSearch(
-      id = snapshot.id,
+      categoryId = snapshot.categoryId,
       restaurantId = snapshot.restaurantId,
       typ = snapshot.typ,
       isActivity = snapshot.isActivity,

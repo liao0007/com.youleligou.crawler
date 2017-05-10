@@ -8,7 +8,8 @@ import com.youleligou.core.daos.Dao
 import com.youleligou.eleme.models.{Identification, Restaurant}
 
 case class RestaurantDao(
-    id: Long,
+    restaurantId: Long,
+    //PK
     name: String,
     address: String,
     imagePath: String,
@@ -25,7 +26,7 @@ object RestaurantDao {
   model <-> dao
    */
   implicit def fromModel(model: Restaurant): RestaurantDao = RestaurantDao(
-    id = model.id,
+    restaurantId = model.id,
     name = model.name,
     address = model.address,
     imagePath = model.imagePath,
@@ -38,7 +39,7 @@ object RestaurantDao {
     source map converter
 
   implicit def toModel(dao: RestaurantDao): Restaurant = Restaurant(
-    id = dao.id,
+    id = dao.restaurantId,
     address = dao.address,
     averageCost = None,
     description = "",
@@ -61,9 +62,8 @@ object RestaurantDao {
   implicit def toModel(source: Seq[RestaurantDao])(implicit converter: RestaurantDao => Restaurant): Seq[Restaurant] =
     source map converter
 
-
   implicit def fromSnapshot(snapshot: RestaurantSnapshotDao): RestaurantDao = RestaurantDao(
-    id = snapshot.id,
+    restaurantId = snapshot.restaurantId,
     name = snapshot.name,
     address = snapshot.address,
     imagePath = snapshot.imagePath,

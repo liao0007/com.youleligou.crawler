@@ -9,7 +9,10 @@ import com.youleligou.eleme.models.Identification
 
 case class RestaurantSnapshotDaoSearch(
     id: String,
+    //search PK
+    createdDate: java.util.Date = java.sql.Date.valueOf(LocalDate.now()),
     restaurantId: Long,
+    //PK
     address: String,
     averageCost: Option[String],
     description: String,
@@ -27,7 +30,6 @@ case class RestaurantSnapshotDaoSearch(
     status: Int,
     location: Map[String, Float],
     identification: Option[Identification],
-    createdDate: java.util.Date = java.sql.Date.valueOf(LocalDate.now()),
     createdAt: java.util.Date = Timestamp.valueOf(LocalDateTime.now())
 ) extends SnapshotDao
 
@@ -36,8 +38,8 @@ object RestaurantSnapshotDaoSearch {
   implicit def fromDao(dao: RestaurantSnapshotDao): RestaurantSnapshotDaoSearch = {
     val formatter = new SimpleDateFormat("yyyy-MM-dd")
     RestaurantSnapshotDaoSearch(
-      id = s"${dao.id}-${formatter.format(dao.createdDate)}",
-      restaurantId = dao.id,
+      id = s"${dao.restaurantId}-${formatter.format(dao.createdDate)}",
+      restaurantId = dao.restaurantId,
       address = dao.address,
       averageCost = dao.averageCost,
       description = dao.description,
@@ -67,7 +69,7 @@ object RestaurantSnapshotDaoSearch {
     source map converter
 
   implicit def toDao(search: RestaurantSnapshotDaoSearch): RestaurantSnapshotDao = RestaurantSnapshotDao(
-    id = search.restaurantId,
+    restaurantId = search.restaurantId,
     address = search.address,
     averageCost = search.averageCost,
     description = search.description,

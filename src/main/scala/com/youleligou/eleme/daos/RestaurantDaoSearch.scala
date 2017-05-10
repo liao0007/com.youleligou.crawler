@@ -8,7 +8,8 @@ import com.youleligou.core.daos.Dao
 import com.youleligou.eleme.models.Identification
 
 case class RestaurantDaoSearch(
-    id: Long,
+    restaurantId: Long,
+    //PK
     name: String,
     address: String,
     imagePath: String,
@@ -20,7 +21,7 @@ case class RestaurantDaoSearch(
 object RestaurantDaoSearch {
 
   implicit def fromDao(dao: RestaurantDao): RestaurantDaoSearch = RestaurantDaoSearch(
-    id = dao.id,
+    restaurantId = dao.restaurantId,
     address = dao.address,
     imagePath = dao.imagePath,
     name = dao.name,
@@ -35,7 +36,7 @@ object RestaurantDaoSearch {
     source map converter
 
   implicit def toDao(search: RestaurantDaoSearch): RestaurantDao = RestaurantDao(
-    id = search.id,
+    restaurantId = search.restaurantId,
     address = search.address,
     imagePath = search.imagePath,
     latitude = search.location("lat"),
@@ -48,9 +49,8 @@ object RestaurantDaoSearch {
   implicit def toDao(source: Seq[RestaurantDaoSearch])(implicit converter: RestaurantDaoSearch => RestaurantDao): Seq[RestaurantDao] =
     source map converter
 
-
   implicit def fromSnapshotDao(dao: RestaurantSnapshotDao): RestaurantDaoSearch = RestaurantDaoSearch(
-    id = dao.id,
+    restaurantId = dao.restaurantId,
     address = dao.address,
     imagePath = dao.imagePath,
     name = dao.name,

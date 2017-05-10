@@ -34,8 +34,8 @@ PUT eleme-restaurant
                         }
                     }
                 },
-                "id": {
-                    "type": "text"
+                "restaurantId": {
+                    "type": "long"
                 },
                 "identification": {
                     "properties": {
@@ -104,8 +104,8 @@ PUT eleme-restaurant
                 "recentOrderNum": {
                     "type": "integer"
                 },
-                "restaurantId": {
-                    "type": "long"
+                "id": {
+                    "type": "text"
                 },
                 "status": {
                     "type": "integer"
@@ -155,7 +155,7 @@ PUT eleme-food
                         "iconUrl": {
                             "type": "text"
                         },
-                        "id": {
+                        "categoryId": {
                             "type": "long"
                         },
                          "restaurantId": {
@@ -252,6 +252,9 @@ PUT eleme-food
                 "id": {
                     "type": "text"
                 },
+                "categoryId": {
+                    "type": "long"
+                },
                 "itemId": {
                     "type": "long"
                 },
@@ -290,7 +293,7 @@ PUT eleme-food
                         "createdAt": {
                             "type": "date"
                         },
-                        "id": {
+                        "restaurantId": {
                             "type": "long"
                         },
                         "identification": {

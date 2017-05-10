@@ -4,13 +4,17 @@ import java.sql.Timestamp
 import java.time.{LocalDate, LocalDateTime}
 
 import com.youleligou.core.daos.SnapshotDao
-import com.youleligou.eleme.models.FoodSku
+import com.youleligou.eleme.models.{Food, FoodSku}
 
 case class FoodSkuSnapshotDao(
-    originalPrice: Option[Float],
-    skuId: Long,
-    name: String,
+    createdDate: java.util.Date = java.sql.Date.valueOf(LocalDate.now()),
     restaurantId: Long,
+    categoryId: Long,
+    itemId: Long,
+    skuId: Long,
+    //PK
+    originalPrice: Option[Float],
+    name: String,
     foodId: Long,
     packingFee: Float,
     recentRating: Float,
@@ -19,20 +23,20 @@ case class FoodSkuSnapshotDao(
     soldOut: Boolean,
     recentPopularity: Int,
     isEssential: Boolean,
-    itemId: Long,
     checkoutMode: Int,
     stock: Int,
-    createdDate: java.util.Date = java.sql.Date.valueOf(LocalDate.now()),
     createdAt: java.util.Date = Timestamp.valueOf(LocalDateTime.now())
 ) extends SnapshotDao
 
 object FoodSkuSnapshotDao {
 
-  implicit def fromModel(model: FoodSku): FoodSkuSnapshotDao = FoodSkuSnapshotDao(
-    originalPrice = model.originalPrice,
+  implicit def fromModel(model: FoodSku)(implicit foodModel: Food): FoodSkuSnapshotDao = FoodSkuSnapshotDao(
+    restaurantId = foodModel.restaurantId,
+    categoryId = foodModel.categoryId,
+    itemId = model.itemId,
     skuId = model.skuId,
+    originalPrice = model.originalPrice,
     name = model.name,
-    restaurantId = model.restaurantId,
     foodId = model.foodId,
     packingFee = model.packingFee,
     recentRating = model.recentRating,
@@ -41,11 +45,10 @@ object FoodSkuSnapshotDao {
     soldOut = model.soldOut,
     recentPopularity = model.recentPopularity,
     isEssential = model.isEssential,
-    itemId = model.itemId,
     checkoutMode = model.checkoutMode,
     stock = model.stock
   )
-  implicit def fromModel(source: Seq[FoodSku])(implicit converter: FoodSku => FoodSkuSnapshotDao): Seq[FoodSkuSnapshotDao] =
+  implicit def fromModel(source: Seq[FoodSku])(implicit converter: FoodSku => FoodSkuSnapshotDao, foodModel: Food): Seq[FoodSkuSnapshotDao] =
     source map converter
 
   implicit def toModel(dao: FoodSkuSnapshotDao): FoodSku = FoodSku(

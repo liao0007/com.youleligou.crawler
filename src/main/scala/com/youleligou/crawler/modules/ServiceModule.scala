@@ -54,9 +54,11 @@ class ServiceModule extends AbstractModule with ScalaModule {
   def provideCrawlerSparkContext(config: Config, system: ActorSystem): SparkContext = {
     val conf = new SparkConf(true)
     // spark
-      .set("spark.serializer", classOf[KryoSerializer].getName)
-      .set("spark.kryo.registrator", "com.youleligou.core.serializers.KryoRegistrator")
-      .set("spark.kryo.unsafe", "true")
+      .setMaster(config.getString("spark.master"))
+      .setAppName(config.getString("spark.appName"))
+//      .set("spark.serializer", classOf[KryoSerializer].getName)
+//      .set("spark.kryo.registrator", "com.youleligou.core.serializers.KryoRegistrator")
+//      .set("spark.kryo.unsafe", "true")
       // cassandra
       .set("spark.cassandra.connection.host", config.getStringList("cassandra.contactPoints").asScala.mkString(","))
 //      .set("spark.cassandra.auth.username", "cassandra")
@@ -67,7 +69,7 @@ class ServiceModule extends AbstractModule with ScalaModule {
       .set("es.net.http.auth.user", config.getString("es.net.http.auth.user"))
       .set("es.net.http.auth.pass", config.getString("es.net.http.auth.pass"))
 
-    val sc = new SparkContext(config.getString("spark.master"), config.getString("spark.appName"), conf)
+    val sc = new SparkContext(conf)
     config.getStringList("spark.dependentJar").asScala foreach { jar =>
       sc.addJar(jar)
     }

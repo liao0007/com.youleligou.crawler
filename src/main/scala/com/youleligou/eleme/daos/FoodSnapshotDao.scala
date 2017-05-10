@@ -7,9 +7,11 @@ import com.youleligou.core.daos.SnapshotDao
 import com.youleligou.eleme.models.{Food, FoodSku}
 
 case class FoodSnapshotDao(
-    itemId: Long,
+    createdDate: java.util.Date = java.sql.Date.valueOf(LocalDate.now()),
     restaurantId: Long,
     categoryId: Long,
+    itemId: Long,
+    //PK
     name: String,
     description: String,
     monthSales: Int,
@@ -17,16 +19,15 @@ case class FoodSnapshotDao(
     ratingCount: Int,
     satisfyCount: Int,
     satisfyRate: Float,
-    createdDate: java.util.Date = java.sql.Date.valueOf(LocalDate.now()),
     createdAt: java.util.Date = Timestamp.valueOf(LocalDateTime.now())
 ) extends SnapshotDao
 
 object FoodSnapshotDao {
 
-  implicit def fromModel(model: Food): FoodSnapshotDao = FoodSnapshotDao(
+  implicit def fromModel(model: Food)(implicit categoryDao: CategoryDao): FoodSnapshotDao = FoodSnapshotDao(
+    restaurantId = categoryDao.restaurantId,
+    categoryId = categoryDao.categoryId,
     itemId = model.itemId,
-    restaurantId = model.restaurantId,
-    categoryId = model.categoryId,
     name = model.name,
     description = model.description,
     monthSales = model.monthSales,
@@ -35,7 +36,7 @@ object FoodSnapshotDao {
     satisfyCount = model.satisfyCount,
     satisfyRate = model.satisfyRate
   )
-  implicit def fromModel(source: Seq[Food])(implicit converter: Food => FoodSnapshotDao): Seq[FoodSnapshotDao] =
+  implicit def fromModel(source: Seq[Food])(implicit converter: Food => FoodSnapshotDao, categoryDao: CategoryDao): Seq[FoodSnapshotDao] =
     source map converter
 
   implicit def toModel(dao: FoodSnapshotDao): Food = Food(

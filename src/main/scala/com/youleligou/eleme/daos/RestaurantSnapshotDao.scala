@@ -7,7 +7,9 @@ import com.youleligou.core.daos.SnapshotDao
 import com.youleligou.eleme.models.{Identification, Restaurant}
 
 case class RestaurantSnapshotDao(
-    id: Long,
+    createdDate: java.util.Date = java.sql.Date.valueOf(LocalDate.now()),
+    restaurantId: Long,
+    //PK
     address: String,
     averageCost: Option[String],
     description: String,
@@ -27,13 +29,12 @@ case class RestaurantSnapshotDao(
     licensesNumber: Option[String],
     companyName: Option[String],
     status: Int,
-    createdDate: java.util.Date = java.sql.Date.valueOf(LocalDate.now()),
     createdAt: java.util.Date = Timestamp.valueOf(LocalDateTime.now())
 ) extends SnapshotDao
 
 object RestaurantSnapshotDao {
   implicit def fromModel(model: Restaurant): RestaurantSnapshotDao = RestaurantSnapshotDao(
-    id = model.id,
+    restaurantId = model.id,
     address = model.address,
     averageCost = model.averageCost,
     description = model.description,
@@ -58,7 +59,7 @@ object RestaurantSnapshotDao {
     source map converter
 
   implicit def toModel(dao: RestaurantSnapshotDao): Restaurant = Restaurant(
-    id = dao.id,
+    id = dao.restaurantId,
     address = dao.address,
     averageCost = dao.averageCost,
     description = dao.description,
