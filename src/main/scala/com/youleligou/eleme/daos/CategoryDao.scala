@@ -44,4 +44,19 @@ object CategoryDao {
   )
   implicit def toModel(source: Seq[CategoryDao])(implicit converter: CategoryDao => Category): Seq[Category] =
     source map converter
+
+  implicit def fromSnapshot(snapshot: CategorySnapshotDao): CategoryDao = CategoryDao(
+    id = snapshot.id,
+    restaurantId = snapshot.restaurantId,
+    typ = snapshot.typ,
+    isActivity = snapshot.isActivity,
+    activity = snapshot.activity,
+    description = snapshot.description,
+    iconUrl = snapshot.iconUrl,
+    name = snapshot.name,
+    createdAt = snapshot.createdAt
+  )
+
+  implicit def fromSnapshot(source: Seq[CategorySnapshotDao])(implicit converter: CategorySnapshotDao => CategoryDao): Seq[CategoryDao] =
+    source map converter
 }

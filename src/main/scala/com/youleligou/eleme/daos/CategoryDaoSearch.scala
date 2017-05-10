@@ -47,4 +47,21 @@ object CategoryDaoSearch {
   implicit def toDao(source: Seq[CategoryDaoSearch])(implicit converter: CategoryDaoSearch => CategoryDao): Seq[CategoryDao] =
     source map converter
 
+
+  implicit def fromSnapshotDao(snapshot: CategorySnapshotDao): CategoryDaoSearch =
+    CategoryDaoSearch(
+      id = snapshot.id,
+      restaurantId = snapshot.restaurantId,
+      typ = snapshot.typ,
+      isActivity = snapshot.isActivity,
+      activity = snapshot.activity,
+      description = snapshot.description,
+      iconUrl = snapshot.iconUrl,
+      name = snapshot.name,
+      createdAt = snapshot.createdAt
+    )
+  implicit def fromSnapshotDao(source: Seq[CategorySnapshotDao])(
+      implicit converter: CategorySnapshotDao => CategoryDaoSearch): Seq[CategoryDaoSearch] =
+    source map converter
+
 }

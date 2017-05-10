@@ -537,7 +537,7 @@ PUT meituan-spu
                         "wmPoiViewId": {
                             "type": "long"
                         },
-                        "createdDate": {
+                        "createdAt": {
                             "type": "date"
                         }
                     }
@@ -571,7 +571,7 @@ PUT meituan-spu
                         "typ": {
                             "type": "integer"
                         },
-                        "createdDate": {
+                        "createdAt": {
                             "type": "date"
                         }
                     }

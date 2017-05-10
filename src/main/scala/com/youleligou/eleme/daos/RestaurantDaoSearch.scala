@@ -48,4 +48,20 @@ object RestaurantDaoSearch {
   implicit def toDao(source: Seq[RestaurantDaoSearch])(implicit converter: RestaurantDaoSearch => RestaurantDao): Seq[RestaurantDao] =
     source map converter
 
+
+  implicit def fromSnapshotDao(dao: RestaurantSnapshotDao): RestaurantDaoSearch = RestaurantDaoSearch(
+    id = dao.id,
+    address = dao.address,
+    imagePath = dao.imagePath,
+    name = dao.name,
+    location = Map(
+      "lat" -> dao.latitude,
+      "lon" -> dao.longitude
+    ),
+    identification = Some(Identification(dao.licensesNumber, dao.companyName)),
+    createdAt = dao.createdAt
+  )
+  implicit def fromSnapshotDao(source: Seq[RestaurantSnapshotDao])(
+      implicit converter: RestaurantSnapshotDao => RestaurantDaoSearch): Seq[RestaurantDaoSearch] =
+    source map converter
 }

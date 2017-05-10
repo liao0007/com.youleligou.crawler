@@ -1,6 +1,7 @@
 package com.youleligou.meituan.daos
 
 import java.sql.Timestamp
+import java.text.SimpleDateFormat
 import java.time.{LocalDate, LocalDateTime}
 
 import com.youleligou.core.daos.SnapshotDao
@@ -31,9 +32,10 @@ case class PoiSnapshotDaoSearch( // restaurant
     extends SnapshotDao
 
 object PoiSnapshotDaoSearch {
-  implicit def fromDao(dao: PoiSnapshotDao): PoiSnapshotDaoSearch =
+  implicit def fromDao(dao: PoiSnapshotDao): PoiSnapshotDaoSearch = {
+    val formatter = new SimpleDateFormat("yyyy-MM-dd")
     PoiSnapshotDaoSearch(
-      id = s"${dao.id}-${dao.createdDate}",
+      id = s"${dao.id}-${formatter.format(dao.createdDate)}",
       poiId = dao.id,
       mtPoiId = dao.mtPoiId,
       name = dao.name,
@@ -56,6 +58,8 @@ object PoiSnapshotDaoSearch {
       createdDate = dao.createdDate,
       createdAt = dao.createdAt
     )
+  }
+
   implicit def fromDao(source: Seq[PoiSnapshotDao])(implicit converter: PoiSnapshotDao => PoiSnapshotDaoSearch): Seq[PoiSnapshotDaoSearch] =
     source map converter
 

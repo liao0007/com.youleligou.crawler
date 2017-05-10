@@ -6,6 +6,8 @@ import java.time.{LocalDate, LocalDateTime}
 import com.youleligou.core.daos.SnapshotDao
 import com.youleligou.meituan.modals.Sku
 
+import scala.util.Try
+
 /**
   * Created by liangliao on 8/5/17.
   */
@@ -34,7 +36,7 @@ case class SpuSnapshotDaoSearch( // food
 object SpuSnapshotDaoSearch {
   implicit def fromDao(
       dao: SpuSnapshotDao)(implicit pioDaoSearch: PoiDaoSearch, tagDaoSearch: FoodTagDaoSearch, skus: Seq[Sku]): SpuSnapshotDaoSearch = {
-    val balancedPrice = skus.map(_.price).sum / skus.length
+    val balancedPrice: Float = Try(skus.map(_.price).sum / skus.length).getOrElse(0f)
     SpuSnapshotDaoSearch(
       id = s"${dao.id}-${dao.createdDate}",
       spuId = dao.id,

@@ -60,4 +60,20 @@ object RestaurantDao {
   )
   implicit def toModel(source: Seq[RestaurantDao])(implicit converter: RestaurantDao => Restaurant): Seq[Restaurant] =
     source map converter
+
+
+  implicit def fromSnapshot(snapshot: RestaurantSnapshotDao): RestaurantDao = RestaurantDao(
+    id = snapshot.id,
+    name = snapshot.name,
+    address = snapshot.address,
+    imagePath = snapshot.imagePath,
+    latitude = snapshot.latitude,
+    longitude = snapshot.longitude,
+    licensesNumber = snapshot.licensesNumber,
+    companyName = snapshot.companyName,
+    createdAt = snapshot.createdAt
+  )
+  implicit def fromSnapshot(source: Seq[RestaurantSnapshotDao])(implicit converter: RestaurantSnapshotDao => RestaurantDao): Seq[RestaurantDao] =
+    source map converter
+
 }

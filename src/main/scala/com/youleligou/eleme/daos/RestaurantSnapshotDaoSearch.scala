@@ -1,6 +1,7 @@
 package com.youleligou.eleme.daos
 
 import java.sql.Timestamp
+import java.text.SimpleDateFormat
 import java.time.{LocalDate, LocalDateTime}
 
 import com.youleligou.core.daos.SnapshotDao
@@ -32,32 +33,35 @@ case class RestaurantSnapshotDaoSearch(
 
 object RestaurantSnapshotDaoSearch {
 
-  implicit def fromDao(dao: RestaurantSnapshotDao): RestaurantSnapshotDaoSearch = RestaurantSnapshotDaoSearch(
-    id = s"${dao.id}-${dao.createdDate}",
-    restaurantId = dao.id,
-    address = dao.address,
-    averageCost = dao.averageCost,
-    description = dao.description,
-    deliveryFee = dao.deliveryFee,
-    minimumOrderAmount = dao.minimumOrderAmount,
-    imagePath = dao.imagePath,
-    isNew = dao.isNew,
-    isPremium = dao.isPremium,
-    name = dao.name,
-    phone = dao.phone,
-    promotionInfo = dao.promotionInfo,
-    rating = dao.rating,
-    ratingCount = dao.ratingCount,
-    recentOrderNum = dao.recentOrderNum,
-    status = dao.status,
-    location = Map(
-      "lat" -> dao.latitude,
-      "lon" -> dao.longitude
-    ),
-    identification = Some(Identification(dao.licensesNumber, dao.companyName)),
-    createdDate = dao.createdDate,
-    createdAt = dao.createdAt
-  )
+  implicit def fromDao(dao: RestaurantSnapshotDao): RestaurantSnapshotDaoSearch = {
+    val formatter = new SimpleDateFormat("yyyy-MM-dd")
+    RestaurantSnapshotDaoSearch(
+      id = s"${dao.id}-${formatter.format(dao.createdDate)}",
+      restaurantId = dao.id,
+      address = dao.address,
+      averageCost = dao.averageCost,
+      description = dao.description,
+      deliveryFee = dao.deliveryFee,
+      minimumOrderAmount = dao.minimumOrderAmount,
+      imagePath = dao.imagePath,
+      isNew = dao.isNew,
+      isPremium = dao.isPremium,
+      name = dao.name,
+      phone = dao.phone,
+      promotionInfo = dao.promotionInfo,
+      rating = dao.rating,
+      ratingCount = dao.ratingCount,
+      recentOrderNum = dao.recentOrderNum,
+      status = dao.status,
+      location = Map(
+        "lat" -> dao.latitude,
+        "lon" -> dao.longitude
+      ),
+      identification = Some(Identification(dao.licensesNumber, dao.companyName)),
+      createdDate = dao.createdDate,
+      createdAt = dao.createdAt
+    )
+  }
   implicit def fromDao(source: Seq[RestaurantSnapshotDao])(
       implicit converter: RestaurantSnapshotDao => RestaurantSnapshotDaoSearch): Seq[RestaurantSnapshotDaoSearch] =
     source map converter
