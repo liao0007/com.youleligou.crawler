@@ -19,7 +19,7 @@ object FoodTag {
     (JsPath \ "tag").read[String].map(_.toLong) and
       (JsPath \ "name").read[String] and
       (JsPath \ "icon").read[String] and
-      (JsPath \ "typ").read[Int] and
+      (JsPath \ "type").read[Int] and
       (JsPath \ "spus").read[Seq[Spu]]
   )(FoodTag.apply _)
 }

@@ -355,7 +355,7 @@ PUT eleme-food
 
 meituan
 ```
-get meituan-poi
+PUT meituan-poi
 {
     "mappings": {
         "snapshot": {
@@ -419,6 +419,230 @@ get meituan-poi
                 },
                 "createdAt": {
                     "type": "date"
+                }
+            }
+        }
+    },
+    "settings": {
+        "index": {
+            "number_of_shards": "3",
+            "number_of_replicas": "1"
+        }
+    }
+}
+
+PUT meituan-spu
+{
+    "mappings": {
+        "snapshot": {
+            "properties": {
+                "id": {
+                    "type": "text",
+                    "fields": {
+                        "keyword": {
+                            "type": "keyword",
+                            "ignore_above": 256
+                        }
+                    }
+                },
+                "spuId": {
+                    "type": "long"
+                },
+                "name": {
+                    "type": "text",
+                    "fields": {
+                        "keyword": {
+                            "type": "keyword",
+                            "ignore_above": 256
+                        }
+                    }
+                },
+                "minPrice": {
+                    "type": "float"
+                },
+                "priseNum": {
+                    "type": "integer"
+                },
+                "treadNum": {
+                    "type": "integer"
+                },
+                "priseNumNew": {
+                    "type": "integer"
+                },
+                "description": {
+                    "type": "text",
+                    "fields": {
+                        "keyword": {
+                            "type": "keyword",
+                            "ignore_above": 256
+                        }
+                    }
+                },
+                "picture": {
+                    "type": "text",
+                    "fields": {
+                        "keyword": {
+                            "type": "keyword",
+                            "ignore_above": 256
+                        }
+                    }
+                },
+                "monthSaled": {
+                    "type": "integer"
+                },
+                "balancedPrice": {
+                    "type": "float"
+                },
+                "status": {
+                    "type": "integer"
+                },
+                "tag": {
+                    "type": "long"
+                },
+                "poi": {
+                    "properties": {
+                        "id": {
+                            "type": "long"
+                        },
+                        "mtPoiId": {
+                            "type": "long"
+                        },
+                        "name": {
+                            "type": "text",
+                            "fields": {
+                                "keyword": {
+                                    "type": "keyword",
+                                    "ignore_above": 256
+                                }
+                            }
+                        },
+                        "status": {
+                            "type": "integer"
+                        },
+                        "picUrl": {
+                            "type": "text"
+                        },
+                        "brandType": {
+                            "type": "integer"
+                        },
+                        "location": {
+                            "type": "geo_point"
+                        },
+                        "wmPoiViewId": {
+                            "type": "long"
+                        },
+                        "createdDate": {
+                            "type": "date"
+                        }
+                    }
+                },
+                "foodTag": {
+                    "properties": {
+                        "tag": {
+                            "type": "long"
+                        },
+                        "poiId": {
+                            "type": "long"
+                        },
+                        "name": {
+                            "type": "text",
+                            "fields": {
+                                "keyword": {
+                                    "type": "keyword",
+                                    "ignore_above": 256
+                                }
+                            }
+                        },
+                        "icon": {
+                            "type": "text",
+                            "fields": {
+                                "keyword": {
+                                    "type": "keyword",
+                                    "ignore_above": 256
+                                }
+                            }
+                        },
+                        "typ": {
+                            "type": "integer"
+                        },
+                        "createdDate": {
+                            "type": "date"
+                        }
+                    }
+                },
+                "createdAt": {
+                    "type": "date"
+                },
+                "createdDate": {
+                    "type": "date"
+                },
+                "skus": {
+                    "type": "nested",
+                    "properties": {
+                        "id": {
+                            "type": "long"
+                        },
+                        "spec": {
+                            "type": "text",
+                            "fields": {
+                                "keyword": {
+                                    "type": "keyword",
+                                    "ignore_above": 256
+                                }
+                            }
+                        },
+                        "description": {
+                            "type": "text",
+                            "fields": {
+                                "keyword": {
+                                    "type": "keyword",
+                                    "ignore_above": 256
+                                }
+                            }
+                        },
+                        "picture": {
+                            "type": "text"
+                        },
+                        "price": {
+                            "type": "float"
+                        },
+                        "originPrice": {
+                            "type": "float"
+                        },
+                        "boxNum": {
+                            "type": "float"
+                        },
+                        "boxPrice": {
+                            "type": "float"
+                        },
+                        "minOrderCount": {
+                            "type": "integer"
+                        },
+                        "status": {
+                            "type": "integer"
+                        },
+                        "stock": {
+                            "type": "integer"
+                        },
+                        "realStock": {
+                            "type": "integer"
+                        },
+                        "activityStock": {
+                            "type": "integer"
+                        },
+                        "restrict": {
+                            "type": "integer"
+                        },
+                        "promotionInfo": {
+                            "type": "text",
+                            "fields": {
+                                "keyword": {
+                                    "type": "keyword",
+                                    "ignore_above": 256
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }

@@ -52,23 +52,32 @@ class PoiFoodParseService @Inject()(restaurantRepo: PoiRepo,
     * 解析具体实现
     */
   override def parse(fetchResponse: FetchResponse): ParseResult = {
-    val categories: Seq[FoodTag] = Json.parse(fetchResponse.content) match {
-      case JsArray(value) =>
-        value flatMap { item =>
-          item
-            .validate[FoodTag]
-            .fold({ reason =>
-              logger.warn("parse menu failed, {}", reason.toString)
-              None
-            }, { category =>
-              Some(category)
-            })
-        }
-      case _ => Seq.empty[FoodTag]
-    }
+    val result = Json.parse(fetchResponse.content)
 
-    if (categories.nonEmpty)
-      persist(categories, fetchResponse)
+    result \ "msg" toOption match {
+      case Some(JsString("成功")) =>
+        val foodSpuTags: Seq[FoodTag] = result \ "data" \ "food_spu_tags" toOption match {
+          case Some(JsArray(foodSpuTagValues)) =>
+            foodSpuTagValues.flatMap { foodSpuTagValue =>
+              foodSpuTagValue.validate[FoodTag] match {
+                case foodTag: JsSuccess[FoodTag] =>
+                  Some(foodTag.value)
+                case error: JsError =>
+                  logger.warn("parse food spu tags failed, {}", error.errors.toString())
+                  None
+              }
+            }
+          case _ =>
+            logger.warn("parse food spu tags failed, url {}", fetchResponse.fetchRequest.urlInfo)
+            Seq.empty[FoodTag]
+        }
+
+        if (foodSpuTags.nonEmpty)
+          persist(foodSpuTags, fetchResponse)
+
+      case _ =>
+        logger.warn("parse food spu tags failed, {}", result.toString())
+    }
 
     ParseResult(
       fetchResponse = fetchResponse,

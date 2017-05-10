@@ -74,6 +74,8 @@ object Main extends App {
   if (args.contains("meituan/menu/start"))
     injector.instance[MeituanCrawlerBootstrap].startMenu()
 
+  injector.instance[MeituanCrawlerBootstrap].cleanMenu()
+  injector.instance[MeituanCrawlerBootstrap].startMenu()
   if (args.contains("meituan/menu/clean"))
     injector.instance[MeituanCrawlerBootstrap].cleanMenu()
 

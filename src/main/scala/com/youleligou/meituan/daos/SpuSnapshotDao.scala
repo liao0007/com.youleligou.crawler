@@ -10,19 +10,19 @@ import com.youleligou.meituan.modals.{Sku, Spu}
   * Created by liangliao on 8/5/17.
   */
 case class SpuSnapshotDao( // food
-                          id: Long,
-                          name: String,
-                          minPrice: Float,
-                          priseNum: Int,
-                          treadNum: Int,
-                          priseNumNew: Int,
-                          description: Option[String],
-                          picture: String,
-                          monthSaled: Int,
-                          status: Int,
-                          tag: Long,
-                          createdDate: java.util.Date = java.sql.Date.valueOf(LocalDate.now()),
-                          createdAt: java.util.Date = Timestamp.valueOf(LocalDateTime.now()))
+                           id: Long,
+                           name: String,
+                           minPrice: Float,
+                           praiseNum: Int,
+                           treadNum: Int,
+                           praiseNumNew: Int,
+                           description: Option[String],
+                           picture: String,
+                           monthSaled: Int,
+                           status: Int,
+                           tag: Long,
+                           createdDate: java.util.Date = java.sql.Date.valueOf(LocalDate.now()),
+                           createdAt: java.util.Date = Timestamp.valueOf(LocalDateTime.now()))
     extends SnapshotDao
 
 object SpuSnapshotDao {
@@ -31,9 +31,9 @@ object SpuSnapshotDao {
     id = model.id,
     name = model.name,
     minPrice = model.minPrice,
-    priseNum = model.priseNum,
+    praiseNum = model.praiseNum,
     treadNum = model.treadNum,
-    priseNumNew = model.priseNumNew,
+    praiseNumNew = model.praiseNumNew,
     description = model.description,
     picture = model.picture,
     monthSaled = model.monthSaled,
@@ -47,9 +47,9 @@ object SpuSnapshotDao {
     id = dao.id,
     name = dao.name,
     minPrice = dao.minPrice,
-    priseNum = dao.priseNum,
+    praiseNum = dao.praiseNum,
     treadNum = dao.treadNum,
-    priseNumNew = dao.priseNumNew,
+    praiseNumNew = dao.praiseNumNew,
     description = dao.description,
     picture = dao.picture,
     monthSaled = dao.monthSaled,
