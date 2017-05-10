@@ -1,13 +1,8 @@
 package com.youleligou.processors
 
-import com.datastax.spark.connector._
 import com.google.inject.Inject
 import com.typesafe.scalalogging.LazyLogging
-import com.youleligou.eleme.daos.{FoodSnapshotDaoSearch, _}
-import com.youleligou.eleme.models.FoodSku
 import org.apache.spark.SparkContext
-import org.apache.spark.rdd.RDD
-import org.joda.time.LocalDate
 
 /**
   * Created by liangliao on 4/5/17.
@@ -37,13 +32,13 @@ class MenuProcessor @Inject()(sparkContext: SparkContext, foodSnapshotSearchRepo
 
 
   def reindex(): Unit = {
-    import java.text.SimpleDateFormat
-    val formatter = new SimpleDateFormat("yyyy-MM-dd")
-    case class Day(created_date: java.util.Date)
-    val days    = Seq("2017-05-06", "2017-05-07", "2017-05-08", "2017-05-09", "2017-05-10").map(formatter.parse).map(Day)
-    val daysRdd = sparkContext.parallelize(days)
-    val count   = daysRdd.joinWithCassandraTable("eleme", "restaurant_snapshots").on(SomeColumns("created_date")).count()
-    println(s"count is $count")
+//    import java.text.SimpleDateFormat
+//    val formatter = new SimpleDateFormat("yyyy-MM-dd")
+//    case class Day(created_date: java.util.Date)
+//    val days    = Seq("2017-05-06", "2017-05-07", "2017-05-08", "2017-05-09", "2017-05-10").map(formatter.parse).map(Day)
+//    val daysRdd = sparkContext.parallelize(days)
+//    val count   = daysRdd.joinWithCassandraTable("eleme", "restaurant_snapshots").on(SomeColumns("created_date")).count()
+//    println(s"count is $count")
   }
 
 }

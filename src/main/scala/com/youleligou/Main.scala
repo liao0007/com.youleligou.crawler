@@ -7,7 +7,6 @@ import com.youleligou.meituan.MeituanModule
 import com.youleligou.processors.MenuProcessor
 import com.youleligou.proxyHunters.xicidaili.XiCiDaiLiModule
 import com.youleligou.proxyHunters.youdaili.YouDaiLiModule
-import org.apache.spark.SparkContext
 
 /**
   * Created by liangliao on 31/3/17.

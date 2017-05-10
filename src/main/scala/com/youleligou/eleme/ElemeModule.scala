@@ -3,7 +3,6 @@ package com.youleligou.eleme
 import com.google.inject._
 import com.youleligou.core.modules.GuiceAkkaActorRefProvider
 import com.youleligou.core.reps.{CassandraRepo, ElasticSearchRepo}
-import com.youleligou.crawler.modules.{DaoModule, _}
 import com.youleligou.crawler.services.{FetchService, ParseService}
 import com.youleligou.eleme.daos.{FoodSnapshotDaoSearch, _}
 import com.youleligou.eleme.services._

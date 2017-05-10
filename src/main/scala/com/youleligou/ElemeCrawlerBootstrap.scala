@@ -32,6 +32,7 @@ class ElemeCrawlerBootstrap @Inject()(config: Config,
 
   import system.dispatcher
 
+  val boostrapDelay        = config.getInt("crawler.boostrapDelay")
   val restaurantsJobConfig = config.getConfig("crawler.eleme.job.restaurants")
   val menuJobConfig        = config.getConfig("crawler.eleme.job.menu")
 
@@ -58,7 +59,7 @@ class ElemeCrawlerBootstrap @Inject()(config: Config,
                                   force = true)
     }
 
-    system.scheduler.schedule(60.seconds, FiniteDuration(restaurantsJobConfig.getInt("interval"), MILLISECONDS), injectors, Tick(restaurantsJobType))
+    system.scheduler.schedule(FiniteDuration(boostrapDelay, MILLISECONDS), FiniteDuration(restaurantsJobConfig.getInt("interval"), MILLISECONDS), injectors, Tick(restaurantsJobType))
   }
 
   def cleanMenu(): Unit = {
@@ -73,7 +74,7 @@ class ElemeCrawlerBootstrap @Inject()(config: Config,
 
   def startMenu(): Unit = {
     val menuJobType = menuJobConfig.getString("jobType")
-    restaurantRepo.allIds() foreach { id =>
+    restaurantRepo.allRestaurantIds() foreach { id =>
       injectors ! Injector.Inject(
         FetchRequest(
           urlInfo = UrlInfo(
@@ -91,7 +92,7 @@ class ElemeCrawlerBootstrap @Inject()(config: Config,
       )
 
     }
-    system.scheduler.schedule(60.seconds, FiniteDuration(menuJobConfig.getInt("interval"), MILLISECONDS), injectors, Tick(menuJobType))
+    system.scheduler.schedule(FiniteDuration(boostrapDelay, MILLISECONDS), FiniteDuration(menuJobConfig.getInt("interval"), MILLISECONDS), injectors, Tick(menuJobType))
   }
 
 }

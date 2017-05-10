@@ -10,7 +10,6 @@ import com.youleligou.crawler.services.filter.DefaultFilterService
 import com.youleligou.crawler.services.hash.Md5HashService
 import com.youleligou.crawler.services.index.ElasticIndexService
 import net.codingwell.scalaguice.ScalaModule
-import org.apache.spark.serializer.KryoSerializer
 import org.apache.spark.{SparkConf, SparkContext}
 import play.api.libs.ws.ahc.StandaloneAhcWSClient
 import redis.RedisClient

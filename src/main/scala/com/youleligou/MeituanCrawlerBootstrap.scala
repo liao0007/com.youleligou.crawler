@@ -32,6 +32,7 @@ class MeituanCrawlerBootstrap @Inject()(config: Config,
 
   import system.dispatcher
 
+  val boostrapDelay              = config.getInt("crawler.boostrapDelay")
   val restaurantsFilterJobConfig = config.getConfig("crawler.meituan.job.poiFilter")
   val menuJobConfig              = config.getConfig("crawler.meituan.job.poiFood")
 
@@ -58,10 +59,12 @@ class MeituanCrawlerBootstrap @Inject()(config: Config,
                                   force = true)
     }
 
-    system.scheduler.schedule(60.seconds,
-                              FiniteDuration(restaurantsFilterJobConfig.getInt("interval"), MILLISECONDS),
-                              injectors,
-                              Tick(restaurantsJobType))
+    system.scheduler.schedule(
+      FiniteDuration(boostrapDelay, MILLISECONDS),
+      FiniteDuration(restaurantsFilterJobConfig.getInt("interval"), MILLISECONDS),
+      injectors,
+      Tick(restaurantsJobType)
+    )
   }
 
   def cleanMenu(): Unit = {
@@ -96,7 +99,10 @@ class MeituanCrawlerBootstrap @Inject()(config: Config,
       )
 
     }
-    system.scheduler.schedule(60.seconds, FiniteDuration(menuJobConfig.getInt("interval"), MILLISECONDS), injectors, Tick(menuJobType))
+    system.scheduler.schedule(FiniteDuration(boostrapDelay, MILLISECONDS),
+                              FiniteDuration(menuJobConfig.getInt("interval"), MILLISECONDS),
+                              injectors,
+                              Tick(menuJobType))
   }
 
 }

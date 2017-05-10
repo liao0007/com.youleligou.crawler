@@ -24,13 +24,24 @@ class MenuParseService @Inject()(restaurantRepo: RestaurantRepo,
       restaurantRepo.findById(restaurantId) foreach { implicit restaurantDao =>
         categoryRepo.save(categories)
         categorySnapshotRepo.save(categories)
-        foodSnapshotRepo.save(categories.flatMap(_.foods))
-        foodSkuSnapshotRepo.save(categories.flatMap(_.foods).flatMap(_.specFoods))
+
+        foodSnapshotRepo.save(categories flatMap { category =>
+          implicit val categoryDao: CategoryDao = category
+          implicitly[Seq[FoodSnapshotDao]](category.foods)
+        })
+
+        foodSkuSnapshotRepo.save(categories.flatMap { category =>
+          category.foods.map(food => food -> category)
+        } flatMap {
+          case (food, category) =>
+            implicit val categoryDao: CategoryDao         = category
+            implicit val foodSnapshotDao: FoodSnapshotDao = food
+            implicitly[Seq[FoodSkuSnapshotDao]](food.specFoods)
+        })
 
         implicit val restaurantDaoSearch: RestaurantDaoSearch = restaurantDao
-
         val foodSnapshotDaoSearches: Seq[FoodSnapshotDaoSearch] = categories flatMap { category =>
-          val categoryDao: CategoryDao                      = category
+          implicit val categoryDao: CategoryDao             = category
           implicit val categoryDaoSearch: CategoryDaoSearch = categoryDao
 
           category.foods map { food =>

@@ -4,7 +4,7 @@ import java.sql.Timestamp
 import java.time.{LocalDate, LocalDateTime}
 
 import com.youleligou.core.daos.SnapshotDao
-import com.youleligou.eleme.models.{Food, FoodSku}
+import com.youleligou.eleme.models.FoodSku
 
 case class FoodSkuSnapshotDao(
     createdDate: java.util.Date = java.sql.Date.valueOf(LocalDate.now()),
@@ -30,9 +30,9 @@ case class FoodSkuSnapshotDao(
 
 object FoodSkuSnapshotDao {
 
-  implicit def fromModel(model: FoodSku)(implicit foodModel: Food): FoodSkuSnapshotDao = FoodSkuSnapshotDao(
-    restaurantId = foodModel.restaurantId,
-    categoryId = foodModel.categoryId,
+  implicit def fromModel(model: FoodSku)(implicit foodSnapshotDao: FoodSnapshotDao): FoodSkuSnapshotDao = FoodSkuSnapshotDao(
+    restaurantId = foodSnapshotDao.restaurantId,
+    categoryId = foodSnapshotDao.categoryId,
     itemId = model.itemId,
     skuId = model.skuId,
     originalPrice = model.originalPrice,
@@ -48,7 +48,8 @@ object FoodSkuSnapshotDao {
     checkoutMode = model.checkoutMode,
     stock = model.stock
   )
-  implicit def fromModel(source: Seq[FoodSku])(implicit converter: FoodSku => FoodSkuSnapshotDao, foodModel: Food): Seq[FoodSkuSnapshotDao] =
+  implicit def fromModel(source: Seq[FoodSku])(implicit converter: FoodSku => FoodSkuSnapshotDao,
+                                               foodSnapshotDao: FoodSnapshotDao): Seq[FoodSkuSnapshotDao] =
     source map converter
 
   implicit def toModel(dao: FoodSkuSnapshotDao): FoodSku = FoodSku(

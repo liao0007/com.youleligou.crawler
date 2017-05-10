@@ -12,9 +12,6 @@ import com.youleligou.crawler.actors.Parser.Parse
 import com.youleligou.crawler.models.{FetchRequest, FetchResponse}
 import com.youleligou.crawler.services.FetchService
 
-import scala.concurrent.Future
-import scala.util.Random
-
 /**
   * Created by young.yang on 2016/8/28.
   * 网页抓取任务,采用Actor实现

@@ -2,7 +2,6 @@ package com.youleligou.proxyHunters.youdaili
 
 import com.google.inject._
 import com.youleligou.core.modules.GuiceAkkaActorRefProvider
-import com.youleligou.crawler.modules.{DaoModule, _}
 import com.youleligou.crawler.services.ParseService
 import com.youleligou.proxyHunters.youdaili.services.parse
 import net.codingwell.scalaguice.ScalaModule
