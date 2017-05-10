@@ -10,7 +10,10 @@ import com.youleligou.meituan.modals.Sku
   * Created by liangliao on 8/5/17.
   */
 case class SkuSnapshotDao(
-    id: Long,
+    poiId: Long,
+    tagId: Long,
+    spuId: Long,
+    skuId: Long,
     spec: Option[String],
     description: Option[String],
     picture: String,
@@ -31,8 +34,11 @@ case class SkuSnapshotDao(
 
 object SkuSnapshotDao {
 
-  implicit def fromModel(model: Sku): SkuSnapshotDao = SkuSnapshotDao(
-    id = model.id,
+  implicit def fromModel(model: Sku)(implicit spuSnapshotDao: SpuSnapshotDao): SkuSnapshotDao = SkuSnapshotDao(
+    poiId = spuSnapshotDao.poiId,
+    tagId = spuSnapshotDao.tagId,
+    spuId = spuSnapshotDao.spuId,
+    skuId = model.id,
     spec = model.spec,
     description = model.description,
     picture = model.picture,
@@ -48,11 +54,11 @@ object SkuSnapshotDao {
     restrict = model.restrict,
     promotionInfo = model.promotionInfo
   )
-  implicit def fromModel(source: Seq[Sku])(implicit converter: Sku => SkuSnapshotDao): Seq[SkuSnapshotDao] =
+  implicit def fromModel(source: Seq[Sku])(implicit converter: Sku => SkuSnapshotDao, spuSnapshotDao: SpuSnapshotDao): Seq[SkuSnapshotDao] =
     source map converter
 
   implicit def toModel(dao: SkuSnapshotDao): Sku = Sku(
-    id = dao.id,
+    id = dao.skuId,
     spec = dao.spec,
     description = dao.description,
     picture = dao.picture,

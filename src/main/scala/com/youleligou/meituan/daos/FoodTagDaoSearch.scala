@@ -6,18 +6,18 @@ import java.time.LocalDateTime
 import com.youleligou.core.daos.Dao
 
 case class FoodTagDaoSearch(
-    tag: Long,
-    poiId: Long,
-    name: String,
-    icon: String,
-    typ: Int,
-    createdAt: java.util.Date = Timestamp.valueOf(LocalDateTime.now())
+                             poiId: Long,
+                             tagId: Long,
+                             name: String,
+                             icon: String,
+                             typ: Int,
+                             createdAt: java.util.Date = Timestamp.valueOf(LocalDateTime.now())
 ) extends Dao
 
 object FoodTagDaoSearch {
   implicit def fromDao(dao: FoodTagDao): FoodTagDaoSearch =
     FoodTagDaoSearch(
-      tag = dao.tag,
+      tagId = dao.tagId,
       poiId = dao.poiId,
       name = dao.name,
       icon = dao.icon,
@@ -28,7 +28,7 @@ object FoodTagDaoSearch {
     source map converter
 
   implicit def toDao(search: FoodTagDaoSearch): FoodTagDao = FoodTagDao(
-    tag = search.tag,
+    tagId = search.tagId,
     poiId = search.poiId,
     name = search.name,
     icon = search.icon,

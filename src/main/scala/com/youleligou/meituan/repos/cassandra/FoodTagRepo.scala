@@ -13,5 +13,5 @@ class FoodTagRepo @Inject()(val sparkContext: SparkContext) extends CassandraRep
   val keyspace: String = "meituan"
   val table: String    = "food_tags"
 
-  def findById(id: Long): Option[FoodTagDao] = sparkContext.cassandraTable[FoodTagDao](keyspace, table).where("id = ?", id).collect().headOption
+  def findById(tagId: Long): Option[FoodTagDao] = sparkContext.cassandraTable[FoodTagDao](keyspace, table).where("tag_id = ?", tagId).collect().headOption
 }

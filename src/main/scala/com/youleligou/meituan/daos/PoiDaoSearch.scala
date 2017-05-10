@@ -9,21 +9,21 @@ import com.youleligou.core.daos.Dao
   * Created by liangliao on 8/5/17.
   */
 case class PoiDaoSearch( // restaurant
-                        id: Long,
-                        mtPoiId: Long,
-                        name: String,
-                        status: Int,
-                        picUrl: String,
-                        brandType: Int,
-                        location: Map[String, Float],
-                        wmPoiViewId: Long,
-                        createdAt: java.util.Date = Timestamp.valueOf(LocalDateTime.now()))
+                         poiId: Long,
+                         mtPoiId: Long,
+                         name: String,
+                         status: Int,
+                         picUrl: String,
+                         brandType: Int,
+                         location: Map[String, Float],
+                         wmPoiViewId: Long,
+                         createdAt: java.util.Date = Timestamp.valueOf(LocalDateTime.now()))
     extends Dao
 
 object PoiDaoSearch {
 
   implicit def fromDao(dao: PoiDao): PoiDaoSearch = PoiDaoSearch(
-    id = dao.id,
+    poiId = dao.poiId,
     mtPoiId = dao.mtPoiId,
     name = dao.name,
     status = dao.status,
@@ -40,7 +40,7 @@ object PoiDaoSearch {
     source map converter
 
   implicit def toDao(search: PoiDaoSearch): PoiDao = PoiDao(
-    id = search.id,
+    poiId = search.poiId,
     mtPoiId = search.mtPoiId,
     name = search.name,
     status = search.status,

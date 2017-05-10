@@ -18,20 +18,32 @@ class PoiFoodParseService @Inject()(restaurantRepo: PoiRepo,
                                     spuSnapshotSearchRepo: ElasticSearchRepo[SpuSnapshotDaoSearch])
     extends com.youleligou.crawler.services.ParseService {
 
-  private def persist(categories: Seq[FoodTag], fetchResponse: FetchResponse) =
+  private def persist(foodTags: Seq[FoodTag], fetchResponse: FetchResponse) =
     try {
       val wmPoiId = fetchResponse.fetchRequest.urlInfo.bodyParameters("wm_poi_id").toLong
 
       restaurantRepo.findByWmPoiViewId(wmPoiId) foreach { implicit restaurantDao =>
-        categoryRepo.save(categories)
-        categorySnapshotRepo.save(categories)
-        spuSnapshotRepo.save(categories.flatMap(_.spus))
-        skuSnapshotRepo.save(categories.flatMap(_.spus).flatMap(_.skus))
+        categoryRepo.save(foodTags)
+        categorySnapshotRepo.save(foodTags)
+
+        spuSnapshotRepo.save(foodTags flatMap { foodTag =>
+          implicit val foodTagDao: FoodTagDao = foodTag
+          implicitly[Seq[SpuSnapshotDao]](foodTag.spus)
+        })
+
+        skuSnapshotRepo.save(foodTags.flatMap { foodTag =>
+          foodTag.spus.map(spu => spu -> foodTag)
+        } flatMap {
+          case (spu, foodTag) =>
+            implicit val foodTagDao: FoodTagDao         = foodTag
+            implicit val spuSnapshotDao: SpuSnapshotDao = spu
+            implicitly[Seq[SkuSnapshotDao]](spu.skus)
+        })
 
         implicit val restaurantDaoSearch: PoiDaoSearch = restaurantDao
 
-        val foodSnapshotDaoSearches: Seq[SpuSnapshotDaoSearch] = categories flatMap { category =>
-          val categoryDao: FoodTagDao                      = category
+        val foodSnapshotDaoSearches: Seq[SpuSnapshotDaoSearch] = foodTags flatMap { category =>
+          implicit val categoryDao: FoodTagDao             = category
           implicit val categoryDaoSearch: FoodTagDaoSearch = categoryDao
 
           category.spus map { food =>

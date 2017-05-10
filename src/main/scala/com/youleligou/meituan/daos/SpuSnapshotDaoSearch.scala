@@ -12,34 +12,37 @@ import scala.util.Try
   * Created by liangliao on 8/5/17.
   */
 case class SpuSnapshotDaoSearch( // food
-                                id: String,
-                                spuId: Long,
-                                name: String,
-                                minPrice: Float,
-                                praiseNum: Int,
-                                treadNum: Int,
-                                praiseNumNew: Int,
-                                description: Option[String],
-                                picture: String,
-                                monthRevenue: Float,
-                                monthSaled: Int,
-                                balancedPrice: Float,
-                                status: Int,
-                                tag: Long,
-                                poi: PoiDaoSearch,
-                                foodTag: FoodTagDaoSearch,
-                                skus: Seq[Sku],
-                                createdDate: java.util.Date = java.sql.Date.valueOf(LocalDate.now()),
-                                createdAt: java.util.Date = Timestamp.valueOf(LocalDateTime.now()))
+                                 id: String,
+                                 poiId: Long,
+                                 tagId: Long,
+                                 spuId: Long,
+                                 name: String,
+                                 minPrice: Float,
+                                 praiseNum: Int,
+                                 treadNum: Int,
+                                 praiseNumNew: Int,
+                                 description: Option[String],
+                                 picture: String,
+                                 monthRevenue: Float,
+                                 monthSaled: Int,
+                                 balancedPrice: Float,
+                                 status: Int,
+                                 poi: PoiDaoSearch,
+                                 foodTag: FoodTagDaoSearch,
+                                 skus: Seq[Sku],
+                                 createdDate: java.util.Date = java.sql.Date.valueOf(LocalDate.now()),
+                                 createdAt: java.util.Date = Timestamp.valueOf(LocalDateTime.now()))
     extends SnapshotDao
 
 object SpuSnapshotDaoSearch {
   implicit def fromDao(
-      dao: SpuSnapshotDao)(implicit pioDaoSearch: PoiDaoSearch, tagDaoSearch: FoodTagDaoSearch, skus: Seq[Sku]): SpuSnapshotDaoSearch = {
+      dao: SpuSnapshotDao)(implicit poiDaoSearch: PoiDaoSearch, tagDaoSearch: FoodTagDaoSearch, skus: Seq[Sku]): SpuSnapshotDaoSearch = {
     val balancedPrice: Float = Try(skus.map(_.price).sum / skus.length).getOrElse(0f)
     SpuSnapshotDaoSearch(
-      id = s"${dao.id}-${dao.createdDate}",
-      spuId = dao.id,
+      id = s"${dao.spuId}-${dao.createdDate}",
+      poiId = poiDaoSearch.poiId,
+      tagId = tagDaoSearch.tagId,
+      spuId = dao.spuId,
       name = dao.name,
       minPrice = dao.minPrice,
       praiseNum = dao.praiseNum,
@@ -51,8 +54,7 @@ object SpuSnapshotDaoSearch {
       monthSaled = dao.monthSaled,
       balancedPrice = balancedPrice,
       status = dao.status,
-      tag = dao.tag,
-      poi = pioDaoSearch,
+      poi = poiDaoSearch,
       foodTag = tagDaoSearch,
       skus = skus,
       createdDate = dao.createdDate,
@@ -61,7 +63,9 @@ object SpuSnapshotDaoSearch {
   }
 
   implicit def toDao(search: SpuSnapshotDaoSearch): SpuSnapshotDao = SpuSnapshotDao(
-    id = search.spuId,
+    poiId = search.poiId,
+    tagId = search.tagId,
+    spuId = search.spuId,
     name = search.name,
     minPrice = search.minPrice,
     praiseNum = search.praiseNum,
@@ -71,7 +75,6 @@ object SpuSnapshotDaoSearch {
     picture = search.picture,
     monthSaled = search.monthSaled,
     status = search.status,
-    tag = search.tag,
     createdDate = search.createdDate,
     createdAt = search.createdAt
   )

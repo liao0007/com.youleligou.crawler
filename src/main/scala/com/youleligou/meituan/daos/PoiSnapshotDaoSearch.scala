@@ -35,8 +35,8 @@ object PoiSnapshotDaoSearch {
   implicit def fromDao(dao: PoiSnapshotDao): PoiSnapshotDaoSearch = {
     val formatter = new SimpleDateFormat("yyyy-MM-dd")
     PoiSnapshotDaoSearch(
-      id = s"${dao.id}-${formatter.format(dao.createdDate)}",
-      poiId = dao.id,
+      id = s"${dao.poiId}-${formatter.format(dao.createdDate)}",
+      poiId = dao.poiId,
       mtPoiId = dao.mtPoiId,
       name = dao.name,
       status = dao.status,
@@ -64,7 +64,7 @@ object PoiSnapshotDaoSearch {
     source map converter
 
   implicit def toDao(search: PoiSnapshotDaoSearch): PoiSnapshotDao = PoiSnapshotDao(
-    id = search.poiId,
+    poiId = search.poiId,
     mtPoiId = search.mtPoiId,
     name = search.name,
     status = search.status,

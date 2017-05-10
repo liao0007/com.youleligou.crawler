@@ -10,19 +10,19 @@ import com.youleligou.meituan.modals.{FoodTag, Spu}
   * Created by liangliao on 8/5/17.
   */
 case class FoodTagSnapshotDao( // category
-                              tag: Long,
-                              poiId: Long,
-                              name: String,
-                              icon: String,
-                              typ: Int,
-                              createdDate: java.util.Date = java.sql.Date.valueOf(LocalDate.now()),
-                              createdAt: java.util.Date = Timestamp.valueOf(LocalDateTime.now()))
+                               tagId: Long,
+                               poiId: Long,
+                               name: String,
+                               icon: String,
+                               typ: Int,
+                               createdDate: java.util.Date = java.sql.Date.valueOf(LocalDate.now()),
+                               createdAt: java.util.Date = Timestamp.valueOf(LocalDateTime.now()))
     extends SnapshotDao
 
 object FoodTagSnapshotDao {
   implicit def fromModel(model: FoodTag)(implicit poiDao: PoiDao): FoodTagSnapshotDao = FoodTagSnapshotDao(
-    tag = model.tag,
-    poiId = poiDao.id,
+    tagId = model.tag,
+    poiId = poiDao.poiId,
     name = model.name,
     icon = model.icon,
     typ = model.typ
@@ -31,7 +31,7 @@ object FoodTagSnapshotDao {
     source map converter
 
   implicit def toModel(dao: FoodTagSnapshotDao): FoodTag = FoodTag(
-    tag = dao.tag,
+    tag = dao.tagId,
     name = dao.name,
     icon = dao.icon,
     typ = dao.typ,

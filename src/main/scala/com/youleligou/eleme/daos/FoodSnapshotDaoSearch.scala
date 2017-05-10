@@ -33,8 +33,9 @@ case class FoodSnapshotDaoSearch(
 ) extends SnapshotDao
 
 object FoodSnapshotDaoSearch {
-  implicit def fromDao(
-      dao: FoodSnapshotDao)(implicit restaurantDaoSearch: RestaurantDaoSearch, categoryDaoSearch: CategoryDaoSearch, foodSkus: Seq[FoodSku]): FoodSnapshotDaoSearch = {
+  implicit def fromDao(dao: FoodSnapshotDao)(implicit restaurantDaoSearch: RestaurantDaoSearch,
+                                             categoryDaoSearch: CategoryDaoSearch,
+                                             foodSkus: Seq[FoodSku]): FoodSnapshotDaoSearch = {
     val balancedPrice: Float =
       Try(foodSkus.map(foodSku => foodSku.price * foodSku.recentPopularity).sum / foodSkus.map(_.recentPopularity).sum).getOrElse(0f)
     val formatter = new SimpleDateFormat("yyyy-MM-dd")
@@ -62,10 +63,10 @@ object FoodSnapshotDaoSearch {
   }
 
   implicit def toDao(search: FoodSnapshotDaoSearch): FoodSnapshotDao = FoodSnapshotDao(
+    restaurantId = search.restaurantId,
+    categoryId = search.categoryId,
     itemId = search.itemId,
     name = search.name,
-    restaurantId = search.restaurant.restaurantId,
-    categoryId = search.category.categoryId,
     description = search.description,
     monthSales = search.monthSales,
     rating = search.rating,

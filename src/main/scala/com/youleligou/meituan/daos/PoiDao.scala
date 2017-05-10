@@ -10,16 +10,16 @@ import com.youleligou.meituan.modals.Poi
   * Created by liangliao on 8/5/17.
   */
 case class PoiDao( // restaurant
-                  id: Long,
-                  mtPoiId: Long,
-                  name: String,
-                  status: Int,
-                  picUrl: String,
-                  brandType: Int,
-                  latitude: Float,
-                  longitude: Float,
-                  wmPoiViewId: Long,
-                  createdAt: java.util.Date = Timestamp.valueOf(LocalDateTime.now()))
+                   poiId: Long,
+                   mtPoiId: Long,
+                   name: String,
+                   status: Int,
+                   picUrl: String,
+                   brandType: Int,
+                   latitude: Float,
+                   longitude: Float,
+                   wmPoiViewId: Long,
+                   createdAt: java.util.Date = Timestamp.valueOf(LocalDateTime.now()))
     extends Dao
 
 object PoiDao {
@@ -28,7 +28,7 @@ object PoiDao {
   model <-> dao
    */
   implicit def fromModel(model: Poi): PoiDao = PoiDao(
-    id = model.id,
+    poiId = model.id,
     mtPoiId = model.mtPoiId,
     name = model.name,
     status = model.status,
@@ -42,7 +42,7 @@ object PoiDao {
     source map converter
 
   implicit def toModel(dao: PoiDao): Poi = Poi(
-    id = dao.id,
+    id = dao.poiId,
     mtPoiId = dao.mtPoiId,
     name = dao.name,
     status = dao.status,

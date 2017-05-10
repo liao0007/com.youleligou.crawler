@@ -13,7 +13,7 @@ class PoiRepo @Inject()(val sparkContext: SparkContext) extends CassandraRepo[Po
   val keyspace: String = "meituan"
   val table: String    = "pois"
 
-  def findByWmPoiViewId(id: Long): Option[PoiDao] =
-    sparkContext.cassandraTable[PoiDao](keyspace, table).where("wm_poi_view_id = ?", id).collect.headOption
+  def findByWmPoiViewId(wmPoiViewId: Long): Option[PoiDao] =
+    sparkContext.cassandraTable[PoiDao](keyspace, table).where("wm_poi_view_id = ?", wmPoiViewId).collect.headOption
   def allWmPoiViewIds(): Seq[Long] = sparkContext.cassandraTable[Long](keyspace, table).select("wm_poi_view_id").collect().toSeq
 }

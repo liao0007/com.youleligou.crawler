@@ -10,25 +10,27 @@ import com.youleligou.meituan.modals.{Sku, Spu}
   * Created by liangliao on 8/5/17.
   */
 case class SpuSnapshotDao( // food
-                           id: Long,
-                           name: String,
-                           minPrice: Float,
-                           praiseNum: Int,
-                           treadNum: Int,
-                           praiseNumNew: Int,
-                           description: Option[String],
-                           picture: String,
-                           monthSaled: Int,
-                           status: Int,
-                           tag: Long,
-                           createdDate: java.util.Date = java.sql.Date.valueOf(LocalDate.now()),
-                           createdAt: java.util.Date = Timestamp.valueOf(LocalDateTime.now()))
+                          poiId: Long,
+                          tagId: Long,
+                          spuId: Long,
+                          name: String,
+                          minPrice: Float,
+                          praiseNum: Int,
+                          treadNum: Int,
+                          praiseNumNew: Int,
+                          description: Option[String],
+                          picture: String,
+                          monthSaled: Int,
+                          status: Int,
+                          createdDate: java.util.Date = java.sql.Date.valueOf(LocalDate.now()),
+                          createdAt: java.util.Date = Timestamp.valueOf(LocalDateTime.now()))
     extends SnapshotDao
 
 object SpuSnapshotDao {
 
-  implicit def fromModel(model: Spu): SpuSnapshotDao = SpuSnapshotDao(
-    id = model.id,
+  implicit def fromModel(model: Spu)(implicit foodTagDao: FoodTagDao): SpuSnapshotDao = SpuSnapshotDao(
+    poiId = foodTagDao.poiId,
+    spuId = model.id,
     name = model.name,
     minPrice = model.minPrice,
     praiseNum = model.praiseNum,
@@ -38,13 +40,13 @@ object SpuSnapshotDao {
     picture = model.picture,
     monthSaled = model.monthSaled,
     status = model.status,
-    tag = model.tag
+    tagId = model.tag
   )
-  implicit def fromModel(source: Seq[Spu])(implicit converter: Spu => SpuSnapshotDao): Seq[SpuSnapshotDao] =
+  implicit def fromModel(source: Seq[Spu])(implicit converter: Spu => SpuSnapshotDao, foodTagDao: FoodTagDao): Seq[SpuSnapshotDao] =
     source map converter
 
   implicit def toModel(dao: SpuSnapshotDao): Spu = Spu(
-    id = dao.id,
+    id = dao.spuId,
     name = dao.name,
     minPrice = dao.minPrice,
     praiseNum = dao.praiseNum,
@@ -54,7 +56,7 @@ object SpuSnapshotDao {
     picture = dao.picture,
     monthSaled = dao.monthSaled,
     status = dao.status,
-    tag = dao.tag,
+    tag = dao.tagId,
     skus = Seq.empty[Sku]
   )
   implicit def toModel(source: Seq[SpuSnapshotDao])(implicit converter: SpuSnapshotDao => Spu): Seq[Spu] =

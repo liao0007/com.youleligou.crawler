@@ -10,30 +10,30 @@ import com.youleligou.meituan.modals.Poi
   * Created by liangliao on 8/5/17.
   */
 case class PoiSnapshotDao( // restaurant
-                          id: Long,
-                          mtPoiId: Long,
-                          name: String,
-                          status: Int,
-                          picUrl: String,
-                          avgDeliveryTime: Int,
-                          shippingFee: Float,
-                          minPrice: Float,
-                          monthSaleNum: Int,
-                          brandType: Int,
-                          sales: Int,
-                          wmPoiOpeningDays: Int,
-                          latitude: Float,
-                          longitude: Float,
-                          shippingFeeTip: String,
-                          minPriceTip: String,
-                          wmPoiViewId: Long,
-                          createdDate: java.util.Date = java.sql.Date.valueOf(LocalDate.now()),
-                          createdAt: java.util.Date = Timestamp.valueOf(LocalDateTime.now()))
+                           poiId: Long,
+                           mtPoiId: Long,
+                           name: String,
+                           status: Int,
+                           picUrl: String,
+                           avgDeliveryTime: Int,
+                           shippingFee: Float,
+                           minPrice: Float,
+                           monthSaleNum: Int,
+                           brandType: Int,
+                           sales: Int,
+                           wmPoiOpeningDays: Int,
+                           latitude: Float,
+                           longitude: Float,
+                           shippingFeeTip: String,
+                           minPriceTip: String,
+                           wmPoiViewId: Long,
+                           createdDate: java.util.Date = java.sql.Date.valueOf(LocalDate.now()),
+                           createdAt: java.util.Date = Timestamp.valueOf(LocalDateTime.now()))
     extends SnapshotDao
 
 object PoiSnapshotDao {
   implicit def fromModel(model: Poi): PoiSnapshotDao = PoiSnapshotDao(
-    id = model.id,
+    poiId = model.id,
     mtPoiId = model.mtPoiId,
     name = model.name,
     status = model.status,
@@ -55,7 +55,7 @@ object PoiSnapshotDao {
     source map converter
 
   implicit def toModel(dao: PoiSnapshotDao): Poi = Poi(
-    id = dao.id,
+    id = dao.poiId,
     mtPoiId = dao.mtPoiId,
     name = dao.name,
     status = dao.status,
