@@ -11,6 +11,7 @@ case class FoodSnapshotDaoSearch(
     itemId: Long,
     name: String,
     description: String,
+    monthRevenue: Float,
     monthSales: Int,
     balancedPrice: Float,
     rating: Float,
@@ -26,14 +27,16 @@ case class FoodSnapshotDaoSearch(
 
 object FoodSnapshotDaoSearch {
   implicit def fromDao(
-      dao: FoodSnapshotDao)(implicit restaurant: RestaurantDaoSearch, category: CategoryDaoSearch, foodSkus: Seq[FoodSku]): FoodSnapshotDaoSearch =
+      dao: FoodSnapshotDao)(implicit restaurant: RestaurantDaoSearch, category: CategoryDaoSearch, foodSkus: Seq[FoodSku]): FoodSnapshotDaoSearch = {
+    val balancedPrice = foodSkus.map(foodSku => foodSku.price * foodSku.recentPopularity).sum / foodSkus.map(_.recentPopularity).sum
     FoodSnapshotDaoSearch(
       id = s"${dao.itemId}-${dao.createdDate}",
       itemId = dao.itemId,
       name = dao.name,
       description = dao.description,
+      monthRevenue = dao.monthSales * balancedPrice,
       monthSales = dao.monthSales,
-      balancedPrice = foodSkus.map(foodSku => foodSku.price * foodSku.recentPopularity).sum / foodSkus.map(_.recentPopularity).sum,
+      balancedPrice = balancedPrice,
       rating = dao.rating,
       ratingCount = dao.ratingCount,
       satisfyCount = dao.satisfyCount,
@@ -44,6 +47,7 @@ object FoodSnapshotDaoSearch {
       createdDate = dao.createdDate,
       createdAt = dao.createdAt
     )
+  }
 
   implicit def toDao(search: FoodSnapshotDaoSearch): FoodSnapshotDao = FoodSnapshotDao(
     itemId = search.itemId,

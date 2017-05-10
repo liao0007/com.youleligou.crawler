@@ -10,29 +10,31 @@ import com.youleligou.meituan.modals.Sku
   * Created by liangliao on 8/5/17.
   */
 case class SpuSnapshotDaoSearch( // food
-                                 id: String,
-                                 spuId: Long,
-                                 name: String,
-                                 minPrice: Float,
-                                 praiseNum: Int,
-                                 treadNum: Int,
-                                 praiseNumNew: Int,
-                                 description: Option[String],
-                                 picture: String,
-                                 monthSaled: Int,
-                                 balancedPrice: Float,
-                                 status: Int,
-                                 tag: Long,
-                                 poi: PoiDaoSearch,
-                                 foodTag: FoodTagDaoSearch,
-                                 skus: Seq[Sku],
-                                 createdDate: java.util.Date = java.sql.Date.valueOf(LocalDate.now()),
-                                 createdAt: java.util.Date = Timestamp.valueOf(LocalDateTime.now()))
+                                id: String,
+                                spuId: Long,
+                                name: String,
+                                minPrice: Float,
+                                praiseNum: Int,
+                                treadNum: Int,
+                                praiseNumNew: Int,
+                                description: Option[String],
+                                picture: String,
+                                monthRevenue: Float,
+                                monthSaled: Int,
+                                balancedPrice: Float,
+                                status: Int,
+                                tag: Long,
+                                poi: PoiDaoSearch,
+                                foodTag: FoodTagDaoSearch,
+                                skus: Seq[Sku],
+                                createdDate: java.util.Date = java.sql.Date.valueOf(LocalDate.now()),
+                                createdAt: java.util.Date = Timestamp.valueOf(LocalDateTime.now()))
     extends SnapshotDao
 
 object SpuSnapshotDaoSearch {
   implicit def fromDao(
-      dao: SpuSnapshotDao)(implicit pioDaoSearch: PoiDaoSearch, tagDaoSearch: FoodTagDaoSearch, skus: Seq[Sku]): SpuSnapshotDaoSearch =
+      dao: SpuSnapshotDao)(implicit pioDaoSearch: PoiDaoSearch, tagDaoSearch: FoodTagDaoSearch, skus: Seq[Sku]): SpuSnapshotDaoSearch = {
+    val balancedPrice = skus.map(_.price).sum / skus.length
     SpuSnapshotDaoSearch(
       id = s"${dao.id}-${dao.createdDate}",
       spuId = dao.id,
@@ -43,8 +45,9 @@ object SpuSnapshotDaoSearch {
       praiseNumNew = dao.praiseNumNew,
       description = dao.description,
       picture = dao.picture,
+      monthRevenue = dao.monthSaled * balancedPrice,
       monthSaled = dao.monthSaled,
-      balancedPrice = skus.map(_.price).sum / skus.length,
+      balancedPrice = balancedPrice,
       status = dao.status,
       tag = dao.tag,
       poi = pioDaoSearch,
@@ -53,6 +56,7 @@ object SpuSnapshotDaoSearch {
       createdDate = dao.createdDate,
       createdAt = dao.createdAt
     )
+  }
 
   implicit def toDao(search: SpuSnapshotDaoSearch): SpuSnapshotDao = SpuSnapshotDao(
     id = search.spuId,

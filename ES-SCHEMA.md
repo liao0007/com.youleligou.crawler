@@ -255,6 +255,9 @@ PUT eleme-food
                 "itemId": {
                     "type": "long"
                 },
+                "monthRevenue": {
+                    "type": "float"
+                },
                 "monthSales": {
                     "type": "integer"
                 },
@@ -486,6 +489,9 @@ PUT meituan-spu
                             "ignore_above": 256
                         }
                     }
+                },
+                "monthRevenue": {
+                    "type": "float"
                 },
                 "monthSaled": {
                     "type": "integer"
