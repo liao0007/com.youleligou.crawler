@@ -30,7 +30,7 @@ object CategoryDao {
     iconUrl = model.iconUrl,
     name = model.name
   )
-  implicit def fromModel(source: Seq[Category])(implicit converter: Category => CategoryDao): Seq[CategoryDao] =
+  implicit def fromModel(source: Seq[Category])(implicit converter: Category => CategoryDao, restaurantDao: RestaurantDao): Seq[CategoryDao] =
     source map converter
 
   implicit def toModel(dao: CategoryDao): Category = Category(

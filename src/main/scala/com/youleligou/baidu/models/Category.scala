@@ -12,7 +12,7 @@ import play.api.libs.json.{JsPath, Reads}
 case class Category(
     categoryId: Long,
     catalog: String,
-    foods: Seq[Dish]
+    dishes: Seq[Dish]
 )
 
 

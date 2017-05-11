@@ -10,12 +10,12 @@ import com.youleligou.meituan.modals.{FoodTag, Spu}
   * Created by liangliao on 8/5/17.
   */
 case class FoodTagDao( // category
-                       poiId: Long,
-                       tagId: Long,
-                       name: String,
-                       icon: String,
-                       typ: Int,
-                       createdAt: java.util.Date = Timestamp.valueOf(LocalDateTime.now()))
+                      poiId: Long,
+                      tagId: Long,
+                      name: String,
+                      icon: String,
+                      typ: Int,
+                      createdAt: java.util.Date = Timestamp.valueOf(LocalDateTime.now()))
     extends Dao
 
 object FoodTagDao {
@@ -26,7 +26,7 @@ object FoodTagDao {
     icon = model.icon,
     typ = model.typ
   )
-  implicit def fromModel(source: Seq[FoodTag])(implicit converter: FoodTag => FoodTagDao): Seq[FoodTagDao] =
+  implicit def fromModel(source: Seq[FoodTag])(implicit converter: FoodTag => FoodTagDao, poiDao: PoiDao): Seq[FoodTagDao] =
     source map converter
 
   implicit def toModel(dao: FoodTagDao): FoodTag = FoodTag(
