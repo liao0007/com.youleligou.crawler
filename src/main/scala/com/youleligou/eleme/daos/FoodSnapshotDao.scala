@@ -14,6 +14,7 @@ case class FoodSnapshotDao(
     //PK
     name: String,
     description: String,
+    imagePath: String,
     monthSales: Int,
     rating: Float,
     ratingCount: Int,
@@ -30,6 +31,7 @@ object FoodSnapshotDao {
     itemId = model.itemId,
     name = model.name,
     description = model.description,
+    imagePath = model.imagePath,
     monthSales = model.monthSales,
     rating = model.rating,
     ratingCount = model.ratingCount,
@@ -45,6 +47,7 @@ object FoodSnapshotDao {
     categoryId = dao.categoryId,
     name = dao.name,
     description = dao.description,
+    imagePath = dao.imagePath,
     monthSales = dao.monthSales,
     rating = dao.rating,
     ratingCount = dao.ratingCount,

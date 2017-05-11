@@ -19,6 +19,7 @@ case class FoodSnapshotDaoSearch(
     //search PK
     name: String,
     description: String,
+    imagePath: String,
     monthRevenue: Float,
     monthSales: Int,
     balancedPrice: Float,
@@ -47,6 +48,7 @@ object FoodSnapshotDaoSearch {
       itemId = dao.itemId,
       name = dao.name,
       description = dao.description,
+      imagePath = dao.imagePath,
       monthRevenue = dao.monthSales * balancedPrice,
       monthSales = dao.monthSales,
       balancedPrice = balancedPrice,
@@ -68,6 +70,7 @@ object FoodSnapshotDaoSearch {
     itemId = search.itemId,
     name = search.name,
     description = search.description,
+    imagePath = search.imagePath,
     monthSales = search.monthSales,
     rating = search.rating,
     ratingCount = search.ratingCount,

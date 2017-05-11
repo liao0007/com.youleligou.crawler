@@ -151,6 +151,9 @@ PUT eleme-food
                   }
                 }
               },
+              "imagePath": {
+                "type": "text"
+              },
               "iconUrl": {
                 "type": "text",
                 "fields": {

@@ -13,6 +13,7 @@ case class Food(
     categoryId: Long,
     name: String,
     description: String,
+    imagePath: String,
     monthSales: Int,
     rating: Float,
     ratingCount: Int,
@@ -28,6 +29,7 @@ object Food {
       (JsPath \ "category_id").read[Long] and
       (JsPath \ "name").read[String] and
       (JsPath \ "description").read[String] and
+      (JsPath \ "image_path").read[String] and
       (JsPath \ "month_sales").read[Int] and
       (JsPath \ "rating").read[Float] and
       (JsPath \ "rating_count").read[Int] and
