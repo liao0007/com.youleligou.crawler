@@ -2,8 +2,8 @@ package com.youleligou.meituan.services.fetch
 
 import com.google.inject.Inject
 import com.typesafe.config.Config
-import com.youleligou.core.reps.Repo
-import com.youleligou.crawler.daos.JobDao
+import com.youleligou.core.reps.{ElasticSearchRepo, Repo}
+import com.youleligou.crawler.daos.{JobDao, JobDaoSearch}
 import com.youleligou.crawler.models.{FetchRequest, FetchResponse, UrlInfo}
 import com.youleligou.crawler.services.FetchService
 import com.youleligou.crawler.services.fetch.HttpClientFetchService
@@ -14,8 +14,8 @@ import play.api.libs.ws.{StandaloneWSRequest, StandaloneWSResponse}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class PoiFoodHttpClientFetchService @Inject()(config: Config, jobRepo: Repo[JobDao], standaloneAhcWSClient: StandaloneAhcWSClient)
-    extends HttpClientFetchService(config, jobRepo, standaloneAhcWSClient)
+class PoiFoodHttpClientFetchService @Inject()(config: Config, jobSearchRepo: Repo[JobDaoSearch], standaloneAhcWSClient: StandaloneAhcWSClient)
+    extends HttpClientFetchService(config, jobSearchRepo, standaloneAhcWSClient)
     with Deflatable {
 
   override def fetch(fetchRequest: FetchRequest)(implicit executor: ExecutionContext): Future[FetchResponse] = {

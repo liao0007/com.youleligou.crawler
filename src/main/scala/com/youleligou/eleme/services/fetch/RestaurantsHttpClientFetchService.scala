@@ -2,9 +2,9 @@ package com.youleligou.eleme.services.fetch
 
 import com.google.inject.Inject
 import com.typesafe.config.Config
-import com.youleligou.core.reps.Repo
+import com.youleligou.core.reps.{ElasticSearchRepo, Repo}
 import com.youleligou.core.services.GeoHash
-import com.youleligou.crawler.daos.JobDao
+import com.youleligou.crawler.daos.{JobDao, JobDaoSearch}
 import com.youleligou.crawler.models.{FetchRequest, FetchResponse, UrlInfo}
 import play.api.libs.ws.ahc.StandaloneAhcWSClient
 import play.api.libs.ws.{StandaloneWSRequest, StandaloneWSResponse}
@@ -16,10 +16,10 @@ import scala.concurrent.{ExecutionContext, Future}
   * 采用HttpClient实现的爬取器
   */
 class RestaurantsHttpClientFetchService @Inject()(config: Config,
-                                                  jobRepo: Repo[JobDao],
+                                                  jobSearchRepo: Repo[JobDaoSearch],
                                                   standaloneAhcWSClient: StandaloneAhcWSClient,
                                                   geoHash: GeoHash)
-    extends com.youleligou.crawler.services.fetch.HttpClientFetchService(config, jobRepo, standaloneAhcWSClient) {
+    extends com.youleligou.crawler.services.fetch.HttpClientFetchService(config, jobSearchRepo, standaloneAhcWSClient) {
 
   override def fetch(fetchRequest: FetchRequest)(implicit executor: ExecutionContext): Future[FetchResponse] = {
     val urlInfo: UrlInfo = fetchRequest.urlInfo

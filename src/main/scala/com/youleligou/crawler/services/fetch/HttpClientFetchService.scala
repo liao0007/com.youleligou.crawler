@@ -5,8 +5,8 @@ import java.time.LocalDateTime
 
 import com.google.inject.Inject
 import com.typesafe.config.Config
-import com.youleligou.core.reps.Repo
-import com.youleligou.crawler.daos.JobDao
+import com.youleligou.core.reps.{ElasticSearchRepo, Repo}
+import com.youleligou.crawler.daos.JobDaoSearch
 import com.youleligou.crawler.models.{FetchRequest, FetchResponse, Job}
 import com.youleligou.crawler.services.FetchService
 import play.api.libs.ws.ahc.StandaloneAhcWSClient
@@ -22,7 +22,8 @@ import scala.util.control.NonFatal
   * Created by young.yang on 2016/8/28.
   * 采用HttpClient实现的爬取器
   */
-class HttpClientFetchService @Inject()(config: Config, jobRepo: Repo[JobDao], standaloneAhcWSClient: StandaloneAhcWSClient) extends FetchService {
+class HttpClientFetchService @Inject()(config: Config, jobSearchRepo: Repo[JobDaoSearch], standaloneAhcWSClient: StandaloneAhcWSClient)
+    extends FetchService {
   val rand = new Random(System.currentTimeMillis())
 
   import com.github.andr83.scalaconfig._
@@ -107,7 +108,7 @@ class HttpClientFetchService @Inject()(config: Config, jobRepo: Repo[JobDao], st
 
     futureResponse
       .map { response =>
-        jobRepo.save(
+        jobSearchRepo.save(
           crawlerJob.copy(statusCode = Some(response.status),
                           statusMessage = Some(response.statusText),
                           completedAt = Some(Timestamp.valueOf(LocalDateTime.now()))))
@@ -115,7 +116,7 @@ class HttpClientFetchService @Inject()(config: Config, jobRepo: Repo[JobDao], st
       } recover {
       case NonFatal(x) =>
         logger.warn(x.getMessage)
-        jobRepo.save(crawlerJob.copy(statusCode = Some(999), statusMessage = Some(x.getMessage)))
+        jobSearchRepo.save(crawlerJob.copy(statusCode = Some(999), statusMessage = Some(x.getMessage)))
         x.getMessage match {
           case "Remotely closed" =>
             FetchResponse(FetchService.RemoteClosed, "", x.getMessage, fetchRequest)
