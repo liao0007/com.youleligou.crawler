@@ -11,7 +11,7 @@ import com.youleligou.crawler.models.Job
   * Created by liangliao on 18/4/17.
   */
 case class JobDaoSearch(
-    id: UUID,
+    id: String,
     jobType: String,
     jobName: String,
     url: String,
@@ -26,7 +26,7 @@ case class JobDaoSearch(
 object JobDaoSearch {
   implicit def fromDao(dao: JobDao): JobDaoSearch =
     JobDaoSearch(
-      id = dao.id,
+      id = dao.id.toString,
       jobType = dao.jobType,
       jobName = dao.jobName,
       url = dao.url,
@@ -43,7 +43,7 @@ object JobDaoSearch {
 
 
   implicit def fromModel(model: Job): JobDaoSearch = JobDaoSearch(
-    id = model.id,
+    id = model.id.toString,
     jobType = model.jobType,
     jobName = model.jobName,
     url = model.url,

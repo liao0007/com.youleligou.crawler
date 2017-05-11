@@ -698,3 +698,55 @@ PUT meituan-spu
     }
 }
 ```
+
+crawler
+```
+PUT crawler
+{
+    "mappings": {
+        "job": {
+            "properties": {
+          "completedAt": {
+            "type": "date"
+          },
+          "createdAt": {
+            "type": "date"
+          },
+          "id": {
+            "type": "text"
+          },
+          "jobName": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            }
+          },
+          "jobType": {
+            "type": "text"
+          },
+          "statusCode": {
+            "type": "long"
+          },
+          "statusMessage": {
+            "type": "text"
+          },
+          "url": {
+            "type": "text"
+          },
+          "useProxy": {
+            "type": "boolean"
+          }
+        }
+        }
+    },
+    "settings": {
+        "index": {
+            "number_of_shards": "3",
+            "number_of_replicas": "1"
+        }
+    }
+}
+```
