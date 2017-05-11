@@ -78,6 +78,27 @@ object Main extends App {
     injector.instance[MeituanCrawlerBootstrap].cleanMenu()
 
   /*
+ baidu
+  */
+  /*
+ restaurant
+   */
+  if (args.contains("baidu/restaurants/start"))
+    injector.instance[BaiduCrawlerBootstrap].startRestaurants()
+
+  if (args.contains("baidu/restaurants/clean"))
+    injector.instance[BaiduCrawlerBootstrap].cleanRestaurants()
+
+  /*
+  menu
+   */
+  if (args.contains("baidu/menu/start"))
+    injector.instance[BaiduCrawlerBootstrap].startMenu()
+
+  if (args.contains("baidu/menu/clean"))
+    injector.instance[BaiduCrawlerBootstrap].cleanMenu()
+
+  /*
   proxy
    */
   if (args.contains("proxy/assistant"))

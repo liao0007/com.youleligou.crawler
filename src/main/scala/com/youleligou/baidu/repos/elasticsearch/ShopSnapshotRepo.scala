@@ -1,8 +1,8 @@
 package com.youleligou.baidu.repos.elasticsearch
 
 import com.google.inject.Inject
+import com.youleligou.baidu.daos.ShopSnapshotDaoSearch
 import com.youleligou.core.reps.ElasticSearchRepo
-import com.youleligou.eleme.daos.RestaurantSnapshotDaoSearch
 import org.apache.spark.SparkContext
 import org.apache.spark.rdd.RDD
 import org.elasticsearch.spark.rdd.EsSpark
@@ -14,11 +14,11 @@ import scala.util.control.NonFatal
 /**
   * Created by liangliao on 25/4/17.
   */
-class RestaurantSnapshotRepo @Inject()(val sparkContext: SparkContext) extends ElasticSearchRepo[RestaurantSnapshotDaoSearch] {
-  override val index: String = "eleme-restaurant"
+class ShopSnapshotRepo @Inject()(val sparkContext: SparkContext) extends ElasticSearchRepo[ShopSnapshotDaoSearch] {
+  override val index: String = "baidu-shop"
   override val typ: String   = "snapshot"
 
-  override def save(rdd: RDD[RestaurantSnapshotDaoSearch]): Future[Any] =
+  override def save(rdd: RDD[ShopSnapshotDaoSearch]): Future[Any] =
     Future {
       EsSpark.saveToEs(rdd, s"$index/$typ", Map("es.mapping.id" -> "id"))
     } recover {
