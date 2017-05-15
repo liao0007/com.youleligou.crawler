@@ -1,65 +1,64 @@
 package com.youleligou.baidu.services.parse
 
 import com.google.inject.Inject
+import com.youleligou.baidu.daos._
+import com.youleligou.baidu.models.Shop
 import com.youleligou.core.reps.{CassandraRepo, ElasticSearchRepo}
 import com.youleligou.crawler.models.{FetchResponse, ParseResult, UrlInfo}
-import com.youleligou.meituan.daos.{PoiDao, PoiSnapshotDao, PoiSnapshotDaoSearch}
-import com.youleligou.meituan.modals.Poi
 import play.api.libs.json._
 
 import scala.concurrent.Future
 
-class ShopParseService @Inject()(poiSnapshotRepo: CassandraRepo[PoiSnapshotDao],
-                                 poiRepo: CassandraRepo[PoiDao],
-                                 poiSnapshotSearchRepo: ElasticSearchRepo[PoiSnapshotDaoSearch])
+class ShopParseService @Inject()(shopSnapshotRepo: CassandraRepo[ShopSnapshotDao],
+                                 shopRepo: CassandraRepo[ShopDao],
+                                 shopSnapshotSearchRepo: ElasticSearchRepo[ShopSnapshotDaoSearch])
     extends com.youleligou.crawler.services.ParseService {
 
   final val Step: Int        = 1
   final val Precision: Float = 100F
   final val LatitudeKey      = "lat"
   final val LongitudeKey     = "lng"
-  final val OffsetKey        = "page_index"
-  final val LimitKey         = "apage"
+  final val OffsetKey        = "page"
+  final val LimitKey         = "count"
 
   private def rounding(number: Float) = (Math.round(number * Precision) / Precision).toString
 
   private def getChildLinksByLocation(fetchResponse: FetchResponse): Seq[UrlInfo] = {
-    val queryParameters   = fetchResponse.fetchRequest.urlInfo.queryParameters
-    val bodyParameters    = fetchResponse.fetchRequest.urlInfo.bodyParameters
-    val deep              = fetchResponse.fetchRequest.urlInfo.deep
-    val originalLatitude  = queryParameters.getOrElse(LatitudeKey, "39").toFloat
-    val originalLongitude = queryParameters.getOrElse(LongitudeKey, "116").toFloat
+    val queryParameters: Map[String, String] = fetchResponse.fetchRequest.urlInfo.queryParameters
+    val bodyParameters: Map[String, String]  = fetchResponse.fetchRequest.urlInfo.bodyParameters
+    val deep: Int                            = fetchResponse.fetchRequest.urlInfo.deep
+    val originalLatitude: Float              = queryParameters.getOrElse(LatitudeKey, "39").toFloat
+    val originalLongitude: Float             = queryParameters.getOrElse(LongitudeKey, "116").toFloat
 
     for {
-      latitudeSteps  <- -Step to Step if latitudeSteps != 0; latitudeDelta   = latitudeSteps / Precision
-      longitudeSteps <- -Step to Step if longitudeSteps != 0; longitudeDelta = longitudeSteps / Precision
+      latitudeSteps  <- -Step to Step if latitudeSteps != 0; latitudeDelta   = latitudeSteps / Precision * 100000  //baidu * 10e5
+      longitudeSteps <- -Step to Step if longitudeSteps != 0; longitudeDelta = longitudeSteps / Precision * 100000 //baidu * 10e5
     } yield {
       val updatedQueryParameters = queryParameters + (LatitudeKey -> rounding(originalLatitude + latitudeDelta)) + (LongitudeKey -> rounding(
-        originalLongitude + longitudeDelta))
-      val updatedBodyParameters = bodyParameters + (OffsetKey -> "0")
-      fetchResponse.fetchRequest.urlInfo.copy(queryParameters = updatedQueryParameters, bodyParameters = updatedBodyParameters, deep = deep + 1)
+        originalLongitude + longitudeDelta)) + (OffsetKey -> "1")
+      fetchResponse.fetchRequest.urlInfo.copy(queryParameters = updatedQueryParameters, deep = deep + 1)
     }
   }
 
   private def getChildLinksByOffset(fetchResponse: FetchResponse): Seq[UrlInfo] = {
     val urlInfo = fetchResponse.fetchRequest.urlInfo
-    val offset  = urlInfo.bodyParameters.getOrElse(OffsetKey, "0").toInt
-    val limit   = urlInfo.bodyParameters.getOrElse(LimitKey, "1").toInt
-    Seq(urlInfo.copy(bodyParameters = urlInfo.bodyParameters + (OffsetKey -> (offset + limit).toString)))
+    val offset  = urlInfo.queryParameters.getOrElse(OffsetKey, "1").toInt
+    val limit   = urlInfo.queryParameters.getOrElse(LimitKey, "20").toInt
+    Seq(urlInfo.copy(queryParameters = urlInfo.queryParameters + (OffsetKey -> (offset + limit).toString)))
   }
 
-  private def persist(pois: Seq[Poi]): Future[Any] = {
+  private def persist(shops: Seq[Shop]): Future[Any] = {
 //    implicit converts
-    val poiDaos: Seq[PoiDao]                              = pois
-    val poiSnapshotDaos: Seq[PoiSnapshotDao]              = pois
-    val poiSnapshotDaoSearches: Seq[PoiSnapshotDaoSearch] = poiSnapshotDaos
+    val shopDaos: Seq[ShopDao]                              = shops
+    val shopSnapshotDaos: Seq[ShopSnapshotDao]              = shops
+    val shopSnapshotDaoSearches: Seq[ShopSnapshotDaoSearch] = shopSnapshotDaos
 
     //cassandra
-    poiRepo.save(poiDaos)
-    poiSnapshotRepo.save(poiSnapshotDaos)
+    shopRepo.save(shopDaos)
+    shopSnapshotRepo.save(shopSnapshotDaos)
 
     //es
-    poiSnapshotSearchRepo.save(poiSnapshotDaoSearches)
+    shopSnapshotSearchRepo.save(shopSnapshotDaoSearches)
     Future.successful(true)
   }
 
@@ -69,32 +68,34 @@ class ShopParseService @Inject()(poiSnapshotRepo: CassandraRepo[PoiSnapshotDao],
   override def parse(fetchResponse: FetchResponse): ParseResult = {
     val result = Json.parse(fetchResponse.content)
 
-    result \ "msg" toOption match {
-      case Some(JsString("成功")) =>
-        val pois: Seq[Poi] = result \ "data" \ "poilist" toOption match {
-          case Some(JsArray(poiJsValues)) =>
-            poiJsValues.flatMap { poiJsValue =>
-              poiJsValue.validate[Poi] match {
-                case poi: JsSuccess[Poi] =>
-                  Some(poi.value)
+    val shops: Seq[Shop] = result \ "error_msg" toOption match {
+      case Some(JsString("")) =>
+        val shops: Seq[Shop] = result \ "result" \ "shop_info" toOption match {
+          case Some(JsArray(shopJsValues)) =>
+            shopJsValues.flatMap { shopJsValue =>
+              shopJsValue.validate[Shop] match {
+                case shop: JsSuccess[Shop] =>
+                  Some(shop.value)
                 case error: JsError =>
-                  logger.warn("parse poi failed, {}", error.errors.toString())
+                  logger.warn("parse shop failed, {}", error.errors.toString())
                   None
               }
             }
           case _ =>
-            logger.warn("parse poi failed, url {}", fetchResponse.fetchRequest.urlInfo)
-            Seq.empty[Poi]
+            logger.warn("parse shop failed, url {}", fetchResponse.fetchRequest.urlInfo)
+            Seq.empty[Shop]
         }
 
-        if (pois.nonEmpty)
-          persist(pois)
+        if (shops.nonEmpty)
+          persist(shops)
+        shops
 
       case _ =>
-        logger.warn("parse poi failed, {}", result.toString())
+        logger.warn("parse shop failed, {}", result.toString())
+        Seq.empty[Shop]
     }
 
-    val hasNextPage: Boolean = (result \ "data" \ "poi_has_next_page" toOption).contains(JsBoolean(true))
+    val hasNextPage: Boolean = shops.nonEmpty
     ParseResult(
       fetchResponse = fetchResponse,
       childLink = if (!hasNextPage) getChildLinksByLocation(fetchResponse) else getChildLinksByOffset(fetchResponse)

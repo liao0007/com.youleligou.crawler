@@ -1,6 +1,7 @@
 package com.youleligou
 
 import com.google.inject.Guice
+import com.youleligou.baidu.BaiduModule
 import com.youleligou.crawler.modules.DaoModule
 import com.youleligou.eleme.ElemeModule
 import com.youleligou.meituan.MeituanModule
@@ -22,6 +23,7 @@ object Main extends App {
     new DaoModule,
     new ElemeModule,
     new MeituanModule,
+    new BaiduModule,
     new XiCiDaiLiModule,
     new YouDaiLiModule
   )
