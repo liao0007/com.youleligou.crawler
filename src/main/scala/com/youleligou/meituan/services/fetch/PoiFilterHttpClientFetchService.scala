@@ -40,10 +40,7 @@ class PoiFilterHttpClientFetchService @Inject()(config: Config, jobSearchRepo: R
       )
     )
 
-    val getParameter: Seq[(String, String)] = locationSeq :+ ("_token", token)
-    val url: String = urlInfo.domain + urlInfo.path + getParameter
-      .map { case (key, value) => s"$key=$value" }
-      .mkString("&")
+    val url: String = urlInfo.url + s"&_token=$token"
     val body = urlInfo.bodyParameters
       .map { case (key, value) => s"$key=$value" }
       .mkString("&")

@@ -33,10 +33,7 @@ class PoiFoodHttpClientFetchService @Inject()(config: Config, jobSearchRepo: Rep
       )
     )
 
-    val getParameter: Seq[(String, String)] = Seq("_token" -> token)
-    val url: String = urlInfo.domain + urlInfo.path + getParameter
-      .map { case (key, value) => s"$key=$value" }
-      .mkString("&")
+    val url: String = urlInfo.url + s"&_token=$token"
     val body = urlInfo.bodyParameters
       .map { case (key, value) => s"$key=$value" }
       .mkString("&")

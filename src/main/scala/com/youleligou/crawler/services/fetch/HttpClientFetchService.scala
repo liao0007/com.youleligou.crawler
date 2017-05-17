@@ -48,7 +48,8 @@ class HttpClientFetchService @Inject()(config: Config, jobSearchRepo: Repo[JobDa
       "Upgrade-Insecure-Requests" -> "1",
       "Accept-Language"           -> "zh-CN",
       "Accept-Encoding"           -> "gzip, deflate",
-      "Connection"                -> "keep-alive"
+      "Connection"                -> "keep-alive",
+      "Cache-Control"             -> "max-age=0"
     )
 
     val clientWithUrl =
