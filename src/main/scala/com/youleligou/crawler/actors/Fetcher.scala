@@ -37,29 +37,41 @@ class Fetcher @Inject()(config: Config, injector: com.google.inject.Injector, @N
   }
 
   def fetching(injector: ActorRef): Receive = {
+      //success
     case Fetcher.Fetched(fetchResponse @ FetchResponse(FetchService.Ok, _, _, _)) =>
       log.debug("{} fetch succeed", self.path)
       parsers ! Parse(fetchResponse)
       injector ! Fetcher.WorkFinished
       context unbecome ()
 
+      //halt
     case Fetcher.Fetched(FetchResponse(statusCode @ FetchService.PaymentRequired, _, message, _)) =>
       log.warning("{} fetch failed {} {}", self.path, statusCode, message)
       injector ! Fetcher.WorkFinished
       context.system.terminate()
 
+      //remote closed
     case Fetcher.Fetched(FetchResponse(statusCode @ FetchService.RemoteClosed, _, message, fetchRequest)) if fetchRequest.retry < MaxRetry =>
       log.debug("{} fetch failed {} {}, retry without incr", self.path, statusCode, message)
       injectors ! Injector.Inject(fetchRequest, force = true)
       injector ! Fetcher.WorkFinished
       context unbecome ()
 
+      //too many
+    case Fetcher.Fetched(FetchResponse(statusCode @ FetchService.TooManyRequest, _, message, fetchRequest)) if fetchRequest.retry < MaxRetry =>
+      log.debug("{} fetch failed {} {}, retry without incr", self.path, statusCode, message)
+      injectors ! Injector.Inject(fetchRequest, force = true)
+      injector ! Fetcher.WorkFinished
+      context unbecome ()
+
+      //misc
     case Fetcher.Fetched(FetchResponse(statusCode @ _, _, message, fetchRequest)) if fetchRequest.retry < MaxRetry =>
       log.debug("{} fetch failed {} {}, retry", self.path, statusCode, message)
       injectors ! Injector.Inject(fetchRequest.copy(retry = fetchRequest.retry + 1), force = true)
       injector ! Fetcher.WorkFinished
       context unbecome ()
 
+      //limit exceeded
     case Fetcher.Fetched(FetchResponse(statusCode @ _, _, message, fetchRequest)) if fetchRequest.retry >= MaxRetry =>
       log.warning("{} fetch failed {} {}, retry limit reached, give up", self.path, statusCode, message)
       injector ! Fetcher.WorkFinished
