@@ -79,26 +79,26 @@ class MeituanCrawlerBootstrap @Inject()(config: Config,
 
   def startMenu(): Unit = {
     val menuJobType = menuJobConfig.getString("jobType")
-    poiRepo.allWmPoiViewIds() foreach { id =>
-      injectors ! Injector.Inject(
-        FetchRequest(
-          urlInfo = UrlInfo(
-            domain = "http://i.waimai.meituan.com",
-            path = s"/ajax/v8/poi/food?",
-            bodyParameters = Map(
-              "wm_poi_id" -> id.toString
-            ),
-            jobType = menuJobType,
-            services = Map(
-              "ParseService" -> classOf[PoiFoodParseService].getName,
-              "FetchService" -> classOf[PoiFoodHttpClientFetchService].getName
-            )
-          )
-        ),
-        force = true
-      )
-
-    }
+//    poiRepo.allWmPoiViewIds() foreach { id =>
+//      injectors ! Injector.Inject(
+//        FetchRequest(
+//          urlInfo = UrlInfo(
+//            domain = "http://i.waimai.meituan.com",
+//            path = s"/ajax/v8/poi/food?",
+//            bodyParameters = Map(
+//              "wm_poi_id" -> id.toString
+//            ),
+//            jobType = menuJobType,
+//            services = Map(
+//              "ParseService" -> classOf[PoiFoodParseService].getName,
+//              "FetchService" -> classOf[PoiFoodHttpClientFetchService].getName
+//            )
+//          )
+//        ),
+//        force = true
+//      )
+//
+//    }
     system.scheduler.schedule(FiniteDuration(boostrapDelay, MILLISECONDS),
                               FiniteDuration(menuJobConfig.getInt("interval"), MILLISECONDS),
                               injectors,

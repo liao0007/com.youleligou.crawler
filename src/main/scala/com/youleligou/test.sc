@@ -1,18 +1,4 @@
-val domain = "http://i.waimai.meituan.com"
-val path = "/ajax/v6/poi/filter"
-val queryParameters = Map(
-  "lat" -> 31.23,
-  "lng" -> 121.47
-)
+import com.youleligou.core.services.GeoHash
 
-
-
-val url: String = {
-  val parameterString =
-    if (queryParameters.nonEmpty)
-      queryParameters
-        .map(parameter => parameter._1 + "=" + parameter._2)
-        .mkString(if (path.contains("?")) "&" else "?", "&", "")
-    else ""
-  domain + path + parameterString
-}
+val geo = new GeoHash
+geo.encode(39.89f, 116.46f, 12)

@@ -1,19 +1,27 @@
 package com.youleligou.meituan.services.parse
 
+import akka.actor.ActorRef
 import com.google.inject.Inject
+import com.google.inject.name.Named
+import com.typesafe.config.Config
 import com.youleligou.core.reps.{CassandraRepo, ElasticSearchRepo}
-import com.youleligou.crawler.models.{FetchResponse, ParseResult, UrlInfo}
+import com.youleligou.crawler.actors.Injector
+import com.youleligou.crawler.models.{FetchRequest, FetchResponse, ParseResult, UrlInfo}
 import com.youleligou.meituan.daos.{PoiDao, PoiSnapshotDao, PoiSnapshotDaoSearch}
 import com.youleligou.meituan.modals.Poi
+import com.youleligou.meituan.services.fetch.PoiFoodHttpClientFetchService
 import play.api.libs.json._
 
 import scala.concurrent.Future
 
-class PoiFilterParseService @Inject()(poiSnapshotRepo: CassandraRepo[PoiSnapshotDao],
+class PoiFilterParseService @Inject()(config: Config,
+                                      @Named(Injector.PoolName) injectors: ActorRef,
+                                      poiSnapshotRepo: CassandraRepo[PoiSnapshotDao],
                                       poiRepo: CassandraRepo[PoiDao],
                                       poiSnapshotSearchRepo: ElasticSearchRepo[PoiSnapshotDaoSearch])
     extends com.youleligou.crawler.services.ParseService {
 
+  val menuJobType            = config.getString("crawler.meituan.job.poiFood.jobType")
   final val Step: Int        = 1
   final val Precision: Float = 100F
   final val LatitudeKey      = "lat"
@@ -87,8 +95,29 @@ class PoiFilterParseService @Inject()(poiSnapshotRepo: CassandraRepo[PoiSnapshot
             Seq.empty[Poi]
         }
 
-        if (pois.nonEmpty)
+        if (pois.nonEmpty) {
           persist(pois)
+
+          pois.foreach { poi =>
+            injectors ! Injector.Inject(
+              FetchRequest(
+                urlInfo = UrlInfo(
+                  domain = "http://i.waimai.meituan.com",
+                  path = s"/ajax/v8/poi/food?",
+                  bodyParameters = Map(
+                    "wm_poi_id" -> poi.wmPoiViewId.toString
+                  ),
+                  jobType = menuJobType,
+                  services = Map(
+                    "ParseService" -> classOf[PoiFoodParseService].getName,
+                    "FetchService" -> classOf[PoiFoodHttpClientFetchService].getName
+                  )
+                )
+              ),
+              force = true
+            )
+          }
+        }
 
       case _ =>
         logger.warn("parse poi failed, {}", result.toString())

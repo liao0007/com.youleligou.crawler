@@ -14,7 +14,7 @@ case class FoodSnapshotDao(
     //PK
     name: String,
     description: String,
-    imagePath: String,
+    imagePath: Option[String],
     monthSales: Int,
     rating: Float,
     ratingCount: Int,

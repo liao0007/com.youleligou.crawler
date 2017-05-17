@@ -19,7 +19,7 @@ case class FoodSnapshotDaoSearch(
     //search PK
     name: String,
     description: String,
-    imagePath: String,
+    imagePath: Option[String],
     monthRevenue: Float,
     monthSales: Int,
     balancedPrice: Float,
