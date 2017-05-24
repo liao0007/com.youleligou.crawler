@@ -4,6 +4,7 @@ import java.sql.Timestamp
 import java.text.SimpleDateFormat
 import java.time.{LocalDate, LocalDateTime}
 
+import com.typesafe.scalalogging.LazyLogging
 import com.youleligou.core.daos.SnapshotDao
 import com.youleligou.eleme.models.FoodSku
 
@@ -33,12 +34,17 @@ case class FoodSnapshotDaoSearch(
     createdAt: java.util.Date = Timestamp.valueOf(LocalDateTime.now())
 ) extends SnapshotDao
 
-object FoodSnapshotDaoSearch {
+object FoodSnapshotDaoSearch extends LazyLogging{
   implicit def fromDao(dao: FoodSnapshotDao)(implicit restaurantDaoSearch: RestaurantDaoSearch,
                                              categoryDaoSearch: CategoryDaoSearch,
                                              foodSkus: Seq[FoodSku]): FoodSnapshotDaoSearch = {
     val balancedPrice: Float =
       Try(foodSkus.map(foodSku => foodSku.price * foodSku.recentPopularity).sum / foodSkus.map(_.recentPopularity).sum).getOrElse(0f)
+
+    if(!(balancedPrice > 0)) {
+      logger.warn("balanced price = {}", balancedPrice)
+    }
+
     val formatter = new SimpleDateFormat("yyyy-MM-dd")
 
     FoodSnapshotDaoSearch(
