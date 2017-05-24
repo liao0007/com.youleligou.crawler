@@ -44,8 +44,10 @@ object DishSnapshotDaoSearch {
                                              dishAttributes: Seq[DishAttribute]): DishSnapshotDaoSearch = {
     val balancedPrice: Float =
       if (dao.haveAttr)
-        Try(dishAttributes.map(_.price).sum / dishAttributes.length)
-          .getOrElse(0f)
+        Try(dishAttributes.map(_.price).sum / dishAttributes.length match {
+          case x: Float if x.isNaN => 0f
+          case f                   => f
+        }).getOrElse(0f)
       else dao.currentPrice
     val formatter = new SimpleDateFormat("yyyy-MM-dd")
 
